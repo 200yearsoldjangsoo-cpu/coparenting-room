@@ -396,7 +396,7 @@ function onPeers(list){peers=list||[];
  if(!me.room){renderGate();updateTop();return}
  const here=new Set();
  others().forEach(p=>{const s=p.state;if(s.room!==me.room||!s.kind)return;const id=s.id||p.id;here.add(id);ensure(id,s,false);
-  if(s.patTo===myId&&s.patAt&&seenPat[id]!==s.patAt){if(seenPat[id]!==undefined||Date.now()-s.patAt<8000){fx(id,'쓰담 ♥');toast(s.nick+'가 나를 쓰담했어');gotPat()}seenPat[id]=s.patAt}
+  if(s.patTo===myId&&s.patAt&&seenPat[id]!==s.patAt){if(seenPat[id]!==undefined||Date.now()-s.patAt<8000){const fd=me.st=='feed'||me.st=='bottle';fx(myId,fd?'토닥 ♥':'쓰담 ♥');toast(s.nick+(fd?'가 수유 중인 나를 토닥토닥했어':'가 나를 쓰담했어'));gotPat()}seenPat[id]=s.patAt}
   else if(seenPat[id]===undefined)seenPat[id]=s.patAt});
  Object.keys(AV).forEach(id=>{if(id!==myId&&!here.has(id))drop(id)});
  updateTop();renderCard()}
@@ -434,8 +434,14 @@ let pendSeat=-1;
 function seatTaken(i){return others().some(p=>p.state.room===me.room&&p.state.sit===i+1)}
 function standUp(){if(me.sit){if(me.st=='bottle'){me.st='';me.fm=0;toast('수유 끝')}else if(me.fm==6)me.fm=5;const s=SEATS[me.sit-1];me.sit=0;const p=clampXZ(s.x+Math.sin(s.ry)*.8,s.z+Math.cos(s.ry)*.8);me.x=p[0];me.z=p[1];pushP()}}
 document.querySelectorAll('#zoom button').forEach(b=>b.onclick=()=>{zoomK=Math.max(.45,Math.min(3.1,zoomK+(+b.dataset.z)*.3))});
-function openMenu(id){const o=AV[id];closeMenu();menuEl=document.createElement('div');menuEl.className='menu';menuEl.innerHTML='<button>쓰담</button><button class="w">미니홈피</button>';app.appendChild(menuEl);menuEl.dataset.id=id;
- const [b1,b2]=menuEl.querySelectorAll('button');b1.onclick=()=>{me.patTo=id;me.patAt=Date.now();pushP();fx(id,'쓰담 ♥');toast(o.st.nick+'에게 쓰담 보냄');closeMenu()};b2.onclick=()=>{closeMenu();openHome(id,o.st.nick)}}
+function openMenu(id){const o=AV[id];closeMenu();menuEl=document.createElement('div');menuEl.className='menu';const fdg=o.st&&(o.st.st=='feed'||o.st.st=='bottle');menuEl.innerHTML='<button>'+(fdg?'토닥':'쓰담')+'</button><button class="w">미니홈피</button>';app.appendChild(menuEl);menuEl.dataset.id=id;
+ const [b1,b2]=menuEl.querySelectorAll('button');b1.onclick=()=>{sendPat(id);closeMenu()};b2.onclick=()=>{closeMenu();openHome(id,o.st.nick)}}
+function sendPat(id){const o=AV[id];if(!o)return;const fdg=o.st&&(o.st.st=='feed'||o.st.st=='bottle');me.patTo=id;me.patAt=Date.now();pushP();fx(id,fdg?'토닥 ♥':'쓰담 ♥');toast(o.st.nick+(fdg?' 토닥토닥 보냄':'에게 쓰담 보냄'))}
+function feedersHTML(){const fs=others().filter(p=>p.state.room===me.room&&(p.state.st=='feed'||p.state.st=='bottle'));if(!fs.length)return'';
+ return '<div style="margin:6px 0 2px;max-height:110px;overflow-y:auto">'+fs.map(p=>{const s=p.state,id=s.id||p.id;return '<div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin:3px 0"><span>'+esc(s.nick)+' <small style="color:#8a7a68">'+Math.max(1,Math.round((Date.now()-s.stAt)/60000))+'분</small></span><button data-pat="'+esc(id)+'" style="padding:3px 10px;min-height:30px">토닥</button></div>'}).join('')+'</div>'}
+function bindPats(c){c.querySelectorAll('[data-pat]').forEach(b=>b.onclick=()=>{sendPat(b.dataset.pat);b.textContent='♥';b.disabled=true})}
+function babyPat(){const a=AV[myId];if(a)a.a.tap=1.2;fx(myId,'토닥토닥');babyPats++;if(babyPats%5==0)toast('끄억~ 트림 나왔다')}
+let babyPats=0;
 function closeMenu(){if(menuEl){menuEl.remove();menuEl=null}}
 function fx(id,txt){const o=AV[id];if(!o)return;const e=document.createElement('div');e.className='fx';e.textContent=txt;app.appendChild(e);e._o=o;fxs.push(e);setTimeout(()=>{e.remove();fxs.splice(fxs.indexOf(e),1)},1800)}
 const fxs=[];
@@ -448,7 +454,7 @@ document.querySelectorAll('#dock button').forEach(b=>b.onclick=()=>{if(!me.room)
 const FM=[['분유포트에 물 끓이기','끓인 물을 70도 정도로 식혀요'],['젖병에 분유 넣기','스푼 깎아서 정량대로 (탭 3번)'],['물 붓기','눈금까지 물 맞추기'],['젖병 흔들기','뭉치지 않게 흔들흔들 (탭 6번)'],['수유의자로 가기','손목 안쪽에 한 방울 떨어뜨려 온도 확인'],['아기한테 젖병 물리기','아기 고개를 살짝 들고 천천히']];
 let fmTap=0,boilT=0,boilAt=0,stuckT=0;
 function renderFormula(c){const done=me.fm;
- if(me.st=='bottle'){const mins=Math.floor((Date.now()-me.stAt)/60000);c.innerHTML='<b>분유 먹이는 중</b>'+mins+'분째 · 꿀꺽꿀꺽<div class="bar"><i style="width:'+Math.min(100,mins/20*100)+'%"></i></div>다 먹으면 트림 꼭!<br><button id="cb">트림시키고 끝내기</button>';$('cb').onclick=()=>{me.st='';me.fm=0;pushP();toast('트림 성공! 수고했어');renderCard()};return}
+ if(me.st=='bottle'){const mins=Math.floor((Date.now()-me.stAt)/60000);c.innerHTML='<b>분유 먹이는 중</b>'+mins+'분째 · 꿀꺽꿀꺽<div class="bar"><i style="width:'+Math.min(100,mins/20*100)+'%"></i></div>다 먹으면 트림 꼭!'+feedersHTML()+'<br><button id="bp">아기 토닥</button> <button id="cb">트림시키고 끝내기</button>';bindPats(c);$('bp').onclick=babyPat;$('cb').onclick=()=>{me.st='';me.fm=0;pushP();toast('트림 성공! 수고했어');renderCard()};return}
  const i=Math.min(done,5);const step=done==0?0:done==1?0:done-1;
  c.innerHTML='<b>분유 타기</b>'+FM.map((s,k)=>'<div style="opacity:'+(k<step?'.45':k==step?'1':'.7')+'">'+(k<step?'✔ ':(k+1)+'. ')+(k==step?'<b style="display:inline">'+s[0]+'</b>':s[0])+'</div>').join('')+
   '<small style="color:#8a7a68">'+FM[step][1]+'</small><div class="bar"><i id="fbar" style="width:'+(me.fm==1?Math.min(100,boilT/5*100):fmTap/(step==1?3:step==3?6:1)*100)+'%"></i></div>'+
@@ -466,7 +472,7 @@ function renderCard(){const c=$('card');if(!me.room){c.style.display='none';retu
  if(me.zone=='formula'||me.fm>0||me.st=='bottle'){renderFormula(c);return}
  const here=others().filter(p=>p.state.room===me.room);
  if(tab=='feed'){const n=here.filter(p=>p.state.st=='feed').length+(me.st=='feed'?1:0);const mins=me.st=='feed'?Math.floor((Date.now()-me.stAt)/60000):0;
-  c.innerHTML='<b>새벽수유 같이 하기</b>'+(me.st=='feed'?'나 · '+mins+'분째 수유 중':'수유 시작하면 같은 방 엄마들한테 보여')+'<div class="bar"><i style="width:'+Math.min(100,mins/30*100)+'%"></i></div>지금 같이 수유 중 '+n+'명<br><button id="cb">'+(me.st=='feed'?'수유 끝':'수유 시작')+'</button>';
+  c.innerHTML='<b>새벽수유 같이 하기</b>'+(me.st=='feed'?'나 · '+mins+'분째 수유 중':'수유 시작하면 같은 방 엄마들한테 보여')+'<div class="bar"><i style="width:'+Math.min(100,mins/30*100)+'%"></i></div>지금 같이 수유 중 '+n+'명'+feedersHTML()+'<button id="cb">'+(me.st=='feed'?'수유 끝':'수유 시작')+'</button>'+(me.st=='feed'?' <button id="bp">아기 토닥</button>':'');bindPats(c);if($('bp'))$('bp').onclick=babyPat;
   $('cb').onclick=()=>{if(me.st=='feed'){me.st='';toast('수고했어. 오늘 '+mins+'분')}else{me.st='feed';me.stAt=Date.now()}pushP();ensure(myId,meState(),true);renderCard()}}
  else{const n=here.filter(p=>p.state.st=='dunga').length+(me.st=='dunga'?1:0);
   if(me.kind=='preg'){c.innerHTML='<b>애기 재우기</b>임신 중엔 같이 산책만 해. 아기 태어나면 열려!';return}
@@ -596,6 +602,7 @@ function loop(){requestAnimationFrame(loop);const dt=Math.min(.1,clk.getDelta())
  const occ={};
  Object.entries(AV).forEach(([id,o])=>{if(id!==myId){const dx=o.tx-o.x,dz=o.tz-o.z,d=Math.hypot(dx,dz);if(d>.02){const s=Math.min(d,Math.max(2,d*3)*dt);o.x+=dx/d*s;o.z+=dz/d*s;o.a.root.rotation.y=Math.atan2(dx,dz);o.a.walk=Math.min(1,o.a.walk+dt*6)}else o.a.walk=Math.max(0,o.a.walk-dt*6)}
   {const fm=o.st&&o.st.fm||0,bt=o.st&&o.st.st=='bottle';o.a.bottle.visible=bt||fm>=4;o.a.babyF.visible=bt;if(bt){o.a.bottle.position.set(.05,.78,.42);o.a.bottle.rotation.set(1.1,0,0)}else{o.a.bottle.position.set(.4,.5,.15);o.a.bottle.rotation.set(0,0,0)}
+   if(o.a.tap>0){if(!o.a.arm0)o.a.arm0=o.a.arms[0].position.clone();o.a.tap-=dt;o.a.arms[0].position.set(-.18,.66+Math.abs(Math.sin(o.a.t*14))*.08,.38)}else if(o.a.arm0){o.a.arms[0].position.copy(o.a.arm0);o.a.arm0=null}
    if(o.a.shake>0){o.a.shake-=dt;o.a.bottle.position.y+=Math.sin(o.a.t*40)*.06;o.a.arms[1].position.y=.58+Math.sin(o.a.t*40)*.05}}
   const sit=o.st&&o.st.sit?SEATS[o.st.sit-1]:null;o.a.sit=sit?1:0;if(sit&&id!==myId){o.a.root.rotation.y=sit.ry}
   const zb=o.st&&o.st.zone&&o.st.zone[0]=='b'?o.st.zone:'';if(zb)occ[zb]=1;const hid=zb&&id!==myId;o.a.root.visible=!hid;o.e.style.display=hid?'none':'';
