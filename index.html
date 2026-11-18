@@ -579,9 +579,35 @@ const LAW=[['임신 중',[['임신기 근로시간 단축','12주 이내·32주 
  ['돈 손해 체크',[['연차','출산휴가·육아휴직 기간은 출근한 걸로 봐','근로기준법 제60조 제6항'],['퇴직금','출산휴가·육아휴직 기간은 평균임금 계산에서 빠져','근로기준법 시행령 제2조 제1항'],['복지포인트','임금 아님 → 휴직 때 깎는지는 회사 규정','대법원 2019. 8. 22. 선고 2016다48785 전원합의체']]]];
 const SIDO=['서울','부산','대구','인천','광주','대전','울산','세종','경기','강원','충북','충남','전북','전남','경북','경남','제주'];
 let aTab='diag';
+/* 지역 지원금 (울산: 울산광역시청 2026 출산지원금 표 / 그 밖: 맘자람 2026.11.7 정리, 원자료 복지로·보건복지부) */
+const SIDO_INFO={서울:'산후조리경비 바우처 첫째 100만·둘째 120만·셋째 이상 150만 원 (2026.7월부터 서울 90일 이상 거주)',부산:'출산지원금 둘째부터 아이당 100만 원 한 번에 (출생 후 3개월 안 신청)',대구:'대구시 출산축하금 둘째 100만·셋째 200만 원 (구·군 축하금에 더해서)',인천:'천사지원금 1~7세 매년 120만 원 인천e음 포인트 (모두 840만 원)',광주:'시 단위 현금 지원은 아직 못 찾았어 · 구 지원 확인 중',대전:'0~2세 월 15만 원 (출생 때 대전 6개월 이상 거주)',울산:'시 출산지원금은 없고 구·군이 줘 (아래 표)',세종:'시 단위 현금 지원은 아직 못 찾았어',경기:'산후조리비 아이당 50만 원 지역화폐 + 시·군 출산지원금 따로',강원:'육아기본수당 월령별 월 10만~50만 원, 95개월까지 (도내 1년 이상 거주)',충북:'도 단위 현금 지원은 아직 못 찾았어 · 시·군 지원 확인',충남:'24~36개월 월 10만 원',전북:'도 단위 현금 지원은 아직 못 찾았어 · 시·군 지원 확인',전남:'출생기본소득 2024년 이후 출생아 월 20만 원 (도 10만 + 시·군 10만)',경북:'도 단위 현금 지원은 아직 못 찾았어 · 시·군 지원 확인',경남:'도 단위 현금 지원은 아직 못 찾았어 · 시·군 지원 확인',제주:'육아지원금 첫째 500만 원(5년 분할) · 둘째 이상 1,000만 원(9년 분할)'};
+const SGG={울산:[['중구','첫째 70만 · 둘째 이상 100만 원','052-290-4905'],['남구','첫째 60만 · 둘째 이상 100만 원','052-226-6946'],['동구','첫째 60만 · 둘째 이상 100만 원','052-209-3915'],['북구','첫째 60만 · 둘째 이상 100만 원','052-241-7675'],['울주군','첫째 70만 · 둘째 250만(5회 분할) · 셋째 이상 500만 원(분할)','']],
+ 서울:[['강남구','첫째·둘째 200만 · 셋째 300만 원','']],경기:[['고양시','첫째 100만 · 둘째 200만 · 셋째 300만 원','']],경남:[['하동군','아이당 최대 4,520만 원 (축하금 200만 + 12~83개월 월 60만)','']],경북:[['의성군','첫째·둘째 각 1,900만 원 (축하금 100만 + 60개월 월 30만)','']],충북:[['괴산군','첫째 800만 · 둘째 1,700만 · 셋째 3,700만 원 (0~6세 분할)','']],전북:[['김제시','첫째 800만 · 둘째 1,300만 · 셋째 1,500만 원 (3년 분할)','']],전남:[['순천시','첫째 500만 · 둘째 1,000만 · 셋째 1,500만 원 (분할)',''],['여수시','첫째 500만 · 둘째 1,000만 · 셋째 1,500만 원 (분할)','']],충남:[['보령시','첫째 500만 · 둘째 1,000만 · 셋째 1,500만 원 (분할)',''],['서천군','첫째 500만 · 둘째 1,000만 · 셋째 1,500만 원 (분할)','']]};
+let RGN='울산';try{RGN=localStorage.getItem('cp_rg')||'울산'}catch(e){}
+function regionHTML(){const sg=SGG[RGN]||[];
+ return '<div class="box law"><div class="t">전국 공통 <small>2026.11 법제처 확인</small></div><ul style="padding-left:18px;margin:0"><li><b>첫만남이용권</b> · 첫째 200만 · 둘째부터 300만 원<br><small>아동수당법 시행령 제10조의3</small></li><li><b>부모급여</b> · 0세 월 100만 · 1세 월 50만 원<br><small>아동수당법 제4조 제5항, 시행령 제2조 제1항</small></li><li><b>아동수당</b> · 9세 미만 월 10만 원 + 비수도권 월 5천 원(인구감소지역 1만~2만 원)<br><small>아동수당법 제4조, 시행령 제2조 제2항</small></li></ul></div>'+
+ '<div class="box"><div class="t">우리 동네</div><select id="rsd">'+SIDO.map(s=>'<option'+(s==RGN?' selected':'')+'>'+s+'</option>').join('')+'</select>'+
+ '<div style="margin:10px 0 4px;font-size:14px"><b>'+RGN+' 전체</b> · '+esc(SIDO_INFO[RGN]||'')+'</div>'+
+ (sg.length?'<div class="calc"><table><tr><th>구·군</th><th>출산지원금</th></tr>'+sg.map(r=>'<tr><td>'+r[0]+'</td><td style="text-align:left">'+r[1]+(r[2]?'<br><a href="tel:'+r[2]+'" style="color:#c27a00">'+r[2]+'</a>':'')+'</td></tr>').join('')+'</table></div>':'')+
+ '<p class="note">'+(RGN=='울산'?'출처 · 울산광역시청 복지 2026 출산지원금 (출생일 1개월 전부터 울산 거주)':'출처 · 복지로·보건복지부 자료를 모은 맘자람 정리(2026.11.7). 여기 없는 구·군은 공공데이터 연결하면 바로 채워져.')+'</p></div>'}
+function bindRegion(){$('rsd').onchange=e=>{RGN=e.target.value;try{localStorage.setItem('cp_rg',RGN)}catch(x){}openAide()}}
+/* 예방접종·영유아검진 (질병관리청 표준예방접종일정, 국민건강보험공단 영유아 건강검진 8차) */
+const VAX=[[0,0,'B형간염 1차'],[0,1,'BCG(결핵) · 생후 4주 안'],[1,1,'B형간염 2차'],[2,2,'DTaP·IPV·Hib·폐렴구균·로타 1차'],[4,4,'DTaP·IPV·Hib·폐렴구균·로타 2차'],[6,6,'DTaP·IPV·Hib·폐렴구균 3차 · B형간염 3차 · 로타 3차(5가만)'],[6,6,'인플루엔자 (6개월부터 매년, 가을)'],[12,15,'Hib·폐렴구균 4차 · MMR 1차 · 수두'],[12,23,'A형간염 1·2차 · 일본뇌염 1·2차'],[15,18,'DTaP 4차'],[24,35,'일본뇌염 3차(불활성화) 또는 2차(생백신)'],[48,72,'DTaP 5차 · IPV 4차 · MMR 2차'],[72,83,'일본뇌염 4차(불활성화)']];
+const CHK=[[0.5,1.15,'영유아검진 1차 (생후 14~35일)'],[4,6,'영유아검진 2차'],[9,12,'영유아검진 3차'],[18,24,'영유아검진 4차 · 구강검진 1차(18~29개월)'],[30,36,'영유아검진 5차 · 구강검진 2차(30~41개월)'],[42,48,'영유아검진 6차 · 구강검진 3차(42~53개월)'],[54,60,'영유아검진 7차 · 구강검진 4차(54~65개월)'],[66,71,'영유아검진 8차']];
+let BABY={bd:'',done:{}};try{BABY=Object.assign(BABY,JSON.parse(localStorage.getItem('cp_baby')||'{}'))}catch(e){}
+function babyHTML(){let h='<div class="box"><div class="t">우리 아기 생일</div><input id="bbd" type="date" value="'+esc(BABY.bd)+'"></div>';
+ if(!BABY.bd)return h+'<p class="note">생일 넣으면 지금 맞을 접종이랑 받을 검진만 골라서 보여줘.</p>';
+ const m=(Date.now()-new Date(BABY.bd))/2629800000;const row=(k,a,b,n)=>{const st=BABY.done[k]?'done':m>b+1?'late':m>=a?'now':'soon';if(st=='soon'&&a-m>6)return'';
+  return '<label style="display:flex;gap:8px;align-items:flex-start;margin:6px 0;font-size:14px;opacity:'+(st=='done'?.45:1)+'"><input type="checkbox" data-k="'+k+'" '+(st=='done'?'checked':'')+' style="width:22px;min-height:22px;flex:none"><span><b>'+n+'</b><br><small style="color:'+(st=='late'?'#b07a3a':st=='now'?'#2e7d4f':'#8a7a68')+'">'+(a==b?a+'개월':a+'~'+b+'개월')+' · '+(st=='late'?'지난 시기 · 맞았으면 체크, 못 맞았으면 남은 차수만 이어서':st=='now'?'지금 받을 때':st=='done'?'완료':'곧')+'</small></span></label>'};
+ h+='<div class="box"><div class="t">예방접종 <small>'+Math.floor(m)+'개월 기준 · 무료</small></div>'+VAX.map((v,i)=>row('v'+i,v[0],v[1],v[2])).join('')+'<small style="color:#8a7a68">근거 · 질병관리청 표준예방접종일정(국가예방접종 12세 이하 무료, 전국 위탁의료기관)</small></div>';
+ h+='<div class="box"><div class="t">영유아 건강검진 <small>본인부담 없음</small></div>'+CHK.map((v,i)=>row('c'+i,v[0],v[1],v[2])).join('')+'<small style="color:#8a7a68">근거 · 국민건강보험공단 영유아 건강검진(8차·구강 4차), 차수 기간 지나면 그 차수는 못 받아</small></div>';
+ h+='<div class="box"><div class="t">가까운 병원 <small>'+esc(RGN)+'</small></div><p class="note" style="margin:0">예방접종 위탁의료기관·영유아검진 기관 목록이랑 전화번호는 공공데이터(건강보험심사평가원 병원정보) 연결하면 여기 바로 떠. 지금 연결 준비 중이야.</p></div>';
+ return h}
+function bindBaby(){$('bbd').onchange=e=>{BABY.bd=e.target.value;try{localStorage.setItem('cp_baby',JSON.stringify(BABY))}catch(x){}openAide()};
+ sb.querySelectorAll('[data-k]').forEach(c=>c.onchange=()=>{BABY.done[c.dataset.k]=c.checked;try{localStorage.setItem('cp_baby',JSON.stringify(BABY))}catch(x){}const y=sb.scrollTop;openAide();sb.scrollTop=y})}
 /* ---------- 내 맞춤 진단 (판정표: claude/maternity-case-matrix.md, 2026.11.12 법제처 확인) ---------- */
 const WT=[['emp','회사원','주 15시간 이상'],['short','주 15시간 미만','초단시간'],['day','일용직',''],['fixed','계약직·파견',''],['art','예술인','예술인 고용보험'],['plat','노무제공자','배달·대리·학습지 등'],['self','자영업자','사업자등록'],['free','프리랜서','3.3% 사업소득'],['pub','공무원·교원',''],['none','지금 일 안 함','']];
-let DG={wt:'',ins:'yes',big:'no',w:300,six:false,m:12,child:0,first:true};
+let DG={wt:'',auto:true,ins:'yes',big:'no',w:300,six:false,m:12,child:0,first:true};
 try{const s=JSON.parse(localStorage.getItem('cp_diag')||'null');if(s)DG=Object.assign(DG,s)}catch(e){}
 const saveDG=()=>{try{localStorage.setItem('cp_diag',JSON.stringify(DG))}catch(e){}};
 const won=v=>Math.round(v).toLocaleString()+'만 원';
@@ -590,21 +616,24 @@ function judge(){const R=[],N=[];const w=Math.max(0,+DG.w||0),wt=DG.wt,emp=['emp
  if(emp){if(ok){const c=Math.min(w,220);R.push(['출산전후휴가 급여',DG.big=='yes'?'회사가 60일분 통상임금, 고용보험이 마지막 30일분 약 '+won(c):'고용보험 90일분 약 '+won(c*3)+' (월 상한 220만)','고용보험법 제75조·제76조, 상한액 고시 제2026-67호']);
    const [r,tot]=leaveCalc(w,DG.m,DG.six);R.push(['육아휴직 급여',DG.m+'개월 약 '+won(tot)+(DG.six?' (6+6 적용)':''),'고용보험법 제70조, 시행령 제95조'+(DG.six?'·제95조의3':'')]);
    R.push(['육아기 근로시간 단축 급여','주 15~35시간으로 줄이면 줄인 시간만큼 급여','고용보험법 시행령 제104조의2'])}
-  else N.push(['출산휴가·육아휴직 급여','고용보험 가입 180일이 안 되면 급여는 못 받아(휴가·휴직 자체는 가능)','고용보험법 제70조·제75조']);
+  else{N.push(['출산휴가·육아휴직 급여','고용보험 가입 180일이 안 되면 급여는 못 받아(휴가·휴직 자체는 가능)','고용보험법 제70조·제75조']);R.push(['고용보험 미적용자 출산급여','출산휴가 급여를 못 받는 소득활동 여성 150만 원 (출산일부터 1년 안 고용24 신청)','고용노동부 고용보험 미적용자 출산급여 지원사업(2026)'])}
   R.push(['육아휴직','만 8세·초2 이하, 1년 · 부모 각각 3개월 넘게 쓰면 6개월 더'+(wt=='fixed'?' · 휴직 기간은 계약 기간에서 빠져':''),'남녀고용평등법 제19조'+(wt=='fixed'?' 제5항':'')]);
-  if(wt=='day')R.push(['참고','일용직은 실제 휴직이 어려울 수 있어. 급여 요건은 상담으로 확인','[확인 필요]'])}
- if(wt=='short'){N.push(['육아휴직 급여','3개월 미만 초단시간은 고용보험 적용 제외','고용보험법 제10조 제1항 제2호']);R.push(['고용보험 미적용자 출산급여','150만 원 (고용24 신청)','고용24 안내'])}
- if(wt=='art'){R.push(['예술인 출산전후급여','90일, 월평균보수 기준 약 '+won(Math.min(Math.max(w,60),220)*3)+' (단위기간 3개월 이상)','고용보험법 제77조의4, 시행령 제104조의9 · 상·하한 금액 [확인 필요]']);N.push(['육아휴직 급여','예술인은 대상 아님(근로자 피보험자 제도)','고용보험법 제70조'])}
- if(wt=='plat'){R.push(['노무제공자 출산전후급여','90일, 월평균보수 기준 약 '+won(Math.min(Math.max(w,60),220)*3),'고용보험법 제77조의9, 시행령 제104조의16 · 상·하한 금액 [확인 필요]']);N.push(['육아휴직 급여','노무제공자는 대상 아님(근로자 피보험자 제도)','고용보험법 제70조'])}
- if(wt=='self'||wt=='free'){R.push(['고용보험 미적용자 출산급여','150만 원 (고용24 신청, 소득활동 확인)','고용24 안내']);N.push(['출산휴가·육아휴직 급여',wt=='self'?'자영업자는 근로자 제도 대상 아님':'3.3% 프리랜서는 근로자 제도 대상 아님','근로기준법 제74조 · 고용보험법 제70조'])}
+  if(wt=='day')R.push(['참고','일용직도 고용보험 적용 대상이라 180일 채우면 급여 요건 돼','고용보험법 시행령 제3조 제2항'])}
+ if(wt=='short'){N.push(['육아휴직 급여','3개월 미만 초단시간은 고용보험 적용 제외','고용보험법 제10조 제1항 제2호']);R.push(['고용보험 미적용자 출산급여','150만 원 (출산일부터 1년 안 고용24 신청)','고용노동부 고용보험 미적용자 출산급여 지원사업(2026)'])}
+ if(wt=='art'){R.push(['예술인 출산전후급여','90일, 월평균보수 기준 약 '+won(Math.min(Math.max(w,60),220)*3)+' (피보험 단위기간 3개월 이상, 출산일부터 12개월 안 신청)','고용보험법 제77조의4, 시행령 제104조의9 · 예술인 출산전후급여등 상한액 및 하한액 고시(30일 220만·60만, 2026.12.31까지)']);N.push(['육아휴직 급여','예술인은 대상 아님(근로자 피보험자 제도)','고용보험법 제70조'])}
+ if(wt=='plat'){R.push(['노무제공자 출산전후급여','90일, 월평균보수 기준 약 '+won(Math.min(Math.max(w,80),220)*3),'고용보험법 제77조의9, 시행령 제104조의16 · 노무제공자 출산전후급여등 상한액 및 하한액 고시(30일 220만·80만, 2026.12.31까지)']);N.push(['육아휴직 급여','노무제공자는 대상 아님(근로자 피보험자 제도)','고용보험법 제70조'])}
+ if(wt=='self'||wt=='free'){R.push(['고용보험 미적용자 출산급여','150만 원 (소득활동 증빙, 출산일부터 1년 안 고용24 신청)','고용노동부 고용보험 미적용자 출산급여 지원사업(2026)']);N.push(['출산휴가·육아휴직 급여',wt=='self'?'자영업자는 근로자 제도 대상 아님':'3.3% 프리랜서는 근로자 제도 대상 아님','근로기준법 제74조 · 고용보험법 제70조'])}
  if(wt=='pub')R.push(['공무원·교원 육아휴직','소속 법령(공무원 수당 규정 등)으로 따로 받아. 고용보험 적용 제외','고용보험법 제10조 제1항 제3호·제4호']);
  if(wt=='none')N.push(['출산휴가·육아휴직 급여','지금 일하지 않으면 대상 아님','']);
- R.push(['부모급여',DG.child==0?'0세 월 100만 원':'1세 월 50만 원','보건복지부 2026 안내 · 복지로 [확인 필요]']);
- R.push(['첫만남이용권',DG.first?'첫째 200만 원':'둘째부터 300만 원','보건복지부 2026 안내 · 복지로 [확인 필요]']);
+ R.push(['부모급여',DG.child==0?'0세 월 100만 원 (어린이집 다니면 보육료 빼고 차액)':'1세 월 50만 원','아동수당법 제4조 제5항, 시행령 제2조 제1항']);
+ R.push(['아동수당','9세 미만 월 10만 원 (2026년 기준, 비수도권 월 5천 원·인구감소지역 1만~2만 원 추가)','아동수당법 제4조 제1항·제6항, 부칙(2026.3.20) 제2조, 시행령 제2조 제2항']);
+ R.push(['첫만남이용권',(DG.first?'첫째 200만 원':'둘째부터 300만 원')+' 바우처, 출생일부터 2년 안에 사용','아동수당법 시행령 제10조의3']);
  return [R,N]}
-function diagHTML(){
- let h='<div class="box"><div class="t">내 맞춤 진단 <small>일하는 형태부터 골라줘</small></div><div class="kpick" id="dwt">'+WT.map(([k,n,s])=>'<button data-w="'+k+'" class="'+(DG.wt==k?'on':'')+'">'+n+'</button>').join('')+'</div>'+
-  '<div class="lk" style="margin-top:8px"><a id="dfetch"><b>내 정보 자동으로 불러오기</b> · 간편인증 한 번이면 고용보험·건강보험 기록으로 일하는 형태와 월급을 찬이가 채워줘 <small style="display:block;color:#8a7a68">정식 오픈 준비 중 · 지금은 직접 골라줘</small></a></div></div>';
+function autoWT(){if(DG.wt)return DG.wt;return me.kind=='home'?'none':'emp'}
+function diagHTML(){if(!DG.wt){DG.wt=autoWT();DG.auto=true}
+ const wn=WT.find(x=>x[0]==DG.wt)[1];
+ let h='<div class="box"><div class="t">내 맞춤 진단 <small>'+esc(KINDS[me.kind].label)+' 기준으로 미리 채웠어</small></div><div style="font-size:14px">지금 <b>'+esc(wn)+'</b>으로 봤어. <a id="dchg" style="color:#c27a00;text-decoration:underline">아니면 바꾸기</a></div><div class="kpick" id="dwt" style="display:none;margin-top:8px">'+WT.map(([k,n,s])=>'<button data-w="'+k+'" class="'+(DG.wt==k?'on':'')+'">'+n+'</button>').join('')+'</div>'+
+  '<div class="lk" style="margin-top:8px"><a id="dfetch"><b>내 정보 자동으로 불러오기</b> · 간편인증 한 번이면 고용보험·건강보험 기록으로 찬이가 채워줘 <small style="display:block;color:#8a7a68">정식 오픈 준비 중</small></a></div></div>';
  if(!DG.wt)return h;
  const emp=['emp','day','fixed'].includes(DG.wt);
  h+='<div class="box calc"><div class="t">조금만 더</div>'+
@@ -615,10 +644,11 @@ function diagHTML(){
  const [R,N]=judge();
  h+='<div class="box law" id="dres"><div class="t">받을 수 있는 것 '+R.length+'개 <small>'+esc(WT.find(x=>x[0]==DG.wt)[1])+' 기준</small></div><ul style="padding-left:18px;margin:0">'+R.map(i=>'<li><b>'+i[0]+'</b> · '+esc(i[1])+'<br><small>근거 · '+i[2]+'</small></li>').join('')+'</ul>'+
   (N.length?'<h5 style="color:#8a7a68">해당 안 되는 것</h5><ul style="padding-left:18px;margin:0;color:#8a7a68">'+N.map(i=>'<li>'+i[0]+' · '+esc(i[1])+(i[2]?'<br><small>'+i[2]+'</small>':'')+'</li>').join('')+'</ul>':'')+
-  '<p class="note">입력한 정보로 계산한 예상치야. 확인 필요 표시는 공식 고시·안내를 한 번 더 보고 확정할게.</p><button class="btn" id="dreq" style="width:100%">노무사 엄마한테 신청 맡기기</button></div>';
+  '<p class="note">입력한 정보로 계산한 예상치야. 근거는 2026.11.18 법제처·고용노동부 고시로 확인했어.</p><button class="btn" id="dreq" style="width:100%">노무사 엄마한테 신청 맡기기</button></div>';
  return h}
 function bindDiag(){const re=()=>{saveDG();const y=sb.scrollTop;openAide();sb.scrollTop=y};
- sb.querySelectorAll('#dwt button').forEach(b=>b.onclick=()=>{DG.wt=b.dataset.w;re()});
+ sb.querySelectorAll('#dwt button').forEach(b=>b.onclick=()=>{DG.wt=b.dataset.w;DG.auto=false;re()});
+ const dc=$('dchg');if(dc)dc.onclick=()=>{const w=$('dwt');w.style.display=w.style.display=='none'?'flex':'none'};
  [['dins','ins'],['dbig','big']].forEach(([id,k])=>{const e=$(id);if(e)e.querySelectorAll('button').forEach(b=>b.onclick=()=>{DG[k]=b.dataset.v;re()})});
  const ch=$('dch');if(ch)ch.querySelectorAll('button').forEach(b=>b.onclick=()=>{DG.child=+b.dataset.v;re()});
  const fi=$('dfi');if(fi)fi.querySelectorAll('button').forEach(b=>b.onclick=()=>{DG.first=b.dataset.v=='1';re()});
@@ -627,7 +657,7 @@ function bindDiag(){const re=()=>{saveDG();const y=sb.scrollTop;openAide();sb.sc
  $('dfetch').onclick=()=>toast('간편인증 불러오기는 곧 열려 · 지금은 직접 골라줘');
  const q=$('dreq');if(q)q.onclick=openReq}
 function openReq(){const [R]=judge();openSheet('신청 맡기기');
- sb.innerHTML='<div class="box"><div class="t">노무사 엄마가 대신 해줄게</div><div style="font-size:14px;line-height:1.6">진단 결과를 보고 노무사가 연락해서 서류를 같이 챙기고, 고용보험 급여처럼 노무사가 대신 낼 수 있는 신청은 대신 내줘.<br><small style="color:#8a7a68">대행 범위 · 공인노무사법 제2조 제1항 (부모급여·첫만남이용권처럼 노동관계법이 아닌 신청은 같이 준비만 해줄 수 있어) [확인 필요]</small></div>'+
+ sb.innerHTML='<div class="box"><div class="t">노무사 엄마가 대신 해줄게</div><div style="font-size:14px;line-height:1.6">진단 결과를 보고 노무사가 연락해서 서류를 같이 챙기고, 고용보험 급여처럼 노무사가 대신 낼 수 있는 신청은 대신 내줘.<br><small style="color:#8a7a68">출산휴가·육아휴직 급여는 고용보험법 신청이라 노무사 직무(공인노무사법 제2조 제1항 제1호, 시행령 별표 1). 첫만남이용권은 위임장 받아 대리 신청할 수 있어(아동수당법 시행령 제10조의3 제2항).</small></div>'+
  '<label>이름 또는 별명</label><input id="rq_n" maxlength="20" value="'+esc(me.nick)+'"><label>연락받을 곳 (카톡 아이디나 휴대폰)</label><input id="rq_c" maxlength="40" autocapitalize="off"><label>하고 싶은 말 (선택)</label><textarea id="rq_m" maxlength="300"></textarea>'+
  '<label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--ink);margin:10px 0"><input type="checkbox" id="rq_ok" style="width:22px;min-height:22px;flex:none"> 상담·신청 대행을 위해 이름·연락처·진단 결과를 수집하는 데 동의해. 상담이 끝나면 지워줘.</label><button class="btn" id="rq_s" style="width:100%">맡기기</button></div>';
  $('rq_s').onclick=async()=>{const c=$('rq_c').value.trim();if(!c){toast('연락받을 곳을 적어줘');return}if(!$('rq_ok').checked){toast('동의에 체크해줘');return}
@@ -637,21 +667,23 @@ function openReq(){const [R]=judge();openSheet('신청 맡기기');
   sb.innerHTML='<div class="box"><div class="t">접수됐어</div>노무사 엄마가 곧 연락할게. 급하면 카톡으로 바로 말해줘.<a class="kakao" href="http://pf.kakao.com/_xmxmxjxeX" target="_blank" rel="noopener">카톡으로 노무사 상담</a></div>'}}
 function leaveCalc(w,n,six){const r=[];let tot=0;const cap6=[250,250,300,350,400,450];for(let k=1;k<=n;k++){let v;if(k<=6&&six)v=Math.min(w,cap6[k-1]);else if(k<=3)v=Math.min(w,250);else if(k<=6)v=Math.min(w,200);else v=Math.min(Math.round(w*.8*10)/10,160);v=Math.max(v,Math.min(70,w));r.push([k,v]);tot+=v}return[r,Math.round(tot*10)/10]}
 function openAide(){openSheet('육아비서 찬이');const t=TODO[me.kind]||TODO.carrier;
- const tabs=[['todo','내 시기 할 일'],['law','모성보호 전체'],['diag','내 맞춤 진단'],['region','지역 지원금'],['ask','찬이에게 묻기']];
+ const tabs=[['todo','내 시기 할 일'],['law','모성보호 전체'],['diag','내 맞춤 진단'],['region','지역 지원금'],['baby','예방접종·검진'],['ask','노동법 상담소']];
  let body='';
  if(aTab=='todo')body='<div class="box"><div class="t">지금 시기에 챙길 것 <small>'+esc(KINDS[me.kind].label)+' 기준</small></div>'+t.map(x=>'<div class="todo"><span class="dd">'+x[0]+'</span><div><b>'+x[1]+'</b><small>'+x[2]+'</small></div></div>').join('')+'<p class="note">시기는 미니홈피 꾸미기에서 바꿀 수 있어.</p></div>';
  if(aTab=='law')body='<div class="box law"><div class="t">임신부터 초6까지 모성보호 <small>2026.11 법제처 확인</small></div>'+LAW.map(([g,items])=>'<h5>'+g+'</h5><ul style="padding-left:18px;margin:0">'+items.map(i=>'<li><b>'+i[0]+'</b> · '+i[1]+'<br><small>근거 · '+i[2]+'</small></li>').join('')+'</ul>').join('')+'<p class="note">회사 규정·개별 사정에 따라 다를 수 있어. 내 상황 판단은 상담으로.</p></div>';
  if(aTab=='diag')body=diagHTML();
- if(aTab=='region')body='<div class="box"><div class="t">우리 동네 출산·육아 지원금</div><div class="row" style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><div><label>시·도</label><select id="rsd">'+SIDO.map(s=>'<option'+(s=='울산'?' selected':'')+'>'+s+'</option>').join('')+'</select></div><div><label>시·군·구</label><input id="rsg" placeholder="예) 남구"></div></div><div class="lk" id="rlk"></div><p class="note">지금은 공식 사이트로 바로 이어줘. 우리 동네 지원금을 이 화면에 바로 띄우는 건 공공데이터 연결(대한민국 공공서비스 정보) 붙이면 열려.</p></div>';
- if(aTab=='ask')body='<div class="box chat"><div class="t">찬이한테 묻기 <small>'+(SAMPLE?'AI 답변 · 근거 조문 포함':'자주 묻는 질문부터')+'</small></div><div id="log">'+(chat.length?chat.map(m=>m.role=='user'?'<div class="q"><span>'+esc(m.content)+'</span></div>':'<div class="a"><span>'+esc(m.content)+'</span></div>').join(''):'<div class="a"><span>안녕, 노무사엄마가 만든 육아비서 찬이야. 회사·제도 뭐든 물어봐.</span></div>')+'</div>'+
+ if(aTab=='region')body=regionHTML();
+ if(aTab=='baby')body=babyHTML();
+ if(aTab=='ask')body='<div class="box chat"><div class="t">노동법 상담소 <small>'+(SAMPLE?'AI 답변 · 근거 조문 포함':'자주 묻는 질문부터')+'</small></div><div id="log">'+(chat.length?chat.map(m=>m.role=='user'?'<div class="q"><span>'+esc(m.content)+'</span></div>':'<div class="a"><span>'+esc(m.content)+'</span></div>').join(''):'<div class="a"><span>안녕, 노무사엄마가 만든 육아비서 찬이야. 회사·제도 뭐든 물어봐.</span></div>')+'</div>'+
  '<div class="chips">'+['육아휴직 회사가 거절할 수 있어?','복직하는데 다른 부서로 가래','단축근무하면 월급 깎여?'].map(q=>'<button>'+q+'</button>').join('')+'</div><div class="ask"><input id="aq" placeholder="찬이한테 물어보기" maxlength="300"><button class="btn k" id="asend">보내기</button></div>'+
  '<a class="kakao" href="http://pf.kakao.com/_xmxmxjxeX" target="_blank" rel="noopener">카톡으로 노무사 상담</a><p class="note">찬이 답변은 참고용이야. 내 사건에 맞는 판단은 노무사 상담으로.</p></div>';
  sb.innerHTML='<div class="atabs">'+tabs.map(([k,n])=>'<button data-a="'+k+'" class="'+(aTab==k?'on':'')+'">'+n+'</button>').join('')+'</div>'+body;sb.scrollTop=0;
  sb.querySelectorAll('.atabs button').forEach(b=>b.onclick=()=>{aTab=b.dataset.a;openAide()});
  if(aTab=='diag')bindDiag();
- if(aTab=='region'){const f=()=>{const r=$('rsd').value+' '+($('rsg').value||'').trim();const q=encodeURIComponent(r.trim()+' 출산지원금 2026');$('rlk').innerHTML='<a href="https://www.gov.kr/portal/rcvfvrSvc/main" target="_blank" rel="noopener"><b>보조금24</b> · 로그인하면 내가 받을 수 있는 혜택 한 번에</a><a href="https://www.bokjiro.go.kr" target="_blank" rel="noopener"><b>복지로</b> · 지역 복지서비스 찾기</a><a href="https://search.naver.com/search.naver?query='+q+'" target="_blank" rel="noopener"><b>'+esc(r.trim())+'</b> 출산지원금 검색 결과 보기</a>'};$('rsd').onchange=f;$('rsg').oninput=f;f()}
+ if(aTab=='region')bindRegion();
+ if(aTab=='baby')bindBaby();
  if(aTab=='ask'){sb.querySelectorAll('.chips button').forEach(b=>b.onclick=()=>ask(b.textContent));$('asend').onclick=()=>ask($('aq').value);$('aq').onkeydown=e=>{if(e.key=='Enter')ask($('aq').value)}}}
-const FAQ={'육아휴직 회사가 거절할 수 있어?':'요건을 갖춘 근로자가 신청하면 회사는 허용해야 해. 거절하면 벌칙 대상이야. 회사가 미루거나 눈치 주면 신청서를 서면으로 남겨두고 노무사랑 상의해.\n근거 · 남녀고용평등법 제19조①','복직하는데 다른 부서로 가래':'휴직 전과 같은 업무 또는 같은 수준 임금을 받는 직무로 복귀시키는 게 원칙이야. 휴직했다는 이유로 불리하게 대하면 안 돼. 발령 문서를 받아두고 바로 상담해.\n근거 · 남녀고용평등법 제19조③④','단축근무하면 월급 깎여?':'임신기 근로시간 단축은 임금을 깎을 수 없어. 육아기 근로시간 단축은 줄어든 시간만큼 임금이 조정될 수 있지만, 단축했다는 이유로 불리하게 대하면 안 돼.\n근거 · 근로기준법 제74조⑧ · 남녀고용평등법 제19조의2 (세부 조문은 확인 필요)'};
+const FAQ={'육아휴직 회사가 거절할 수 있어?':'요건을 갖춘 근로자가 신청하면 회사는 허용해야 해. 거절하면 벌칙 대상이야. 회사가 미루거나 눈치 주면 신청서를 서면으로 남겨두고 노무사랑 상의해.\n근거 · 남녀고용평등법 제19조①','복직하는데 다른 부서로 가래':'휴직 전과 같은 업무 또는 같은 수준 임금을 받는 직무로 복귀시키는 게 원칙이야. 휴직했다는 이유로 불리하게 대하면 안 돼. 발령 문서를 받아두고 바로 상담해.\n근거 · 남녀고용평등법 제19조③④','단축근무하면 월급 깎여?':'임신기 근로시간 단축은 임금을 깎을 수 없어. 육아기 근로시간 단축은 줄어든 시간에 비례해서만 임금이 줄 수 있고, 그 밖에 단축을 이유로 근로조건을 불리하게 하면 안 돼.\n근거 · 근로기준법 제74조 제8항 · 남녀고용평등법 제19조의3 제1항'};
 async function ask(q){q=(q||'').trim();if(!q||busy)return;if(!SAMPLE){chat.push({role:'user',content:q});chat.push({role:'assistant',content:FAQ[q]||'이 질문은 아직 찬이가 바로 답을 못 해. AI 답변은 곧 열려! 급하면 아래 카톡으로 노무사한테 바로 물어봐.'});openAide();return}
  busy=true;chat.push({role:'user',content:q});const log=$('log');log.insertAdjacentHTML('beforeend','<div class="q"><span>'+esc(q)+'</span></div><div class="a"><span id="live">생각 중…</span></div>');$('aq').value='';log.parentElement.scrollIntoView(false);
  const sys='너는 "육아비서 찬이"야. 공인노무사이자 워킹맘이 만든 모성보호 비서. 한국 노동법(근로기준법, 남녀고용평등과 일·가정 양립 지원에 관한 법률, 고용보험법)과 임신·출산·육아 지원제도를 쉽게 설명해. 반말로 다정하게, 4~6문장 안으로 짧게. 확실한 조문만 "근거 · 법령명 제○조"로 끝에 붙이고, 확실하지 않으면 조문 번호를 지어내지 말고 "정확한 조문은 확인 필요"라고 써. 금액·기간 숫자는 확실할 때만 말하고 최신 금액은 정부24·고용24에서 확인하라고 안내해. 분쟁·불이익이 걸린 상황이면 마지막에 노무사 상담을 권해. 사용자 시기: '+KINDS[me.kind].label+'.';
