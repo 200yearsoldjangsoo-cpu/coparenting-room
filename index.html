@@ -43,7 +43,7 @@ html,body{margin:0;height:100%;background:#1b1d38;overflow:hidden;font:15px/1.5 
 .dock button.on{background:var(--y)}
 .dock svg{width:24px;height:24px}
 .toast{position:absolute;left:50%;top:92px;transform:translate(-50%,-260%);background:var(--y);border:2px solid var(--ink);border-radius:999px;padding:4px 14px;font:14px Jua,sans-serif;transition:transform .3s;white-space:nowrap;visibility:hidden;max-width:92%;overflow:hidden;text-overflow:ellipsis}
-.toast.on{transform:translate(-50%,0);visibility:visible}
+.toast{z-index:60;max-width:90vw;text-align:center}.toast.on{transform:translate(-50%,0);visibility:visible}
 /* 시트 */
 .sheet{position:absolute;left:0;right:0;bottom:0;height:88%;background:#fff8ee;border-radius:24px 24px 0 0;box-shadow:0 -8px 24px rgba(0,0,0,.35);transform:translateY(105%);transition:transform .35s cubic-bezier(.2,.9,.3,1.05);display:flex;flex-direction:column;z-index:5}
 .sheet.on{transform:none}
@@ -332,16 +332,18 @@ function sign(txt,x,y,z,ry,w){const tx=ctex(512,128,(g,W,H)=>{g.fillStyle='#fffa
 /* 분유존: 뒷벽 왼쪽 */
 {const z0=-RD/2;S.add(box(3.2,.9,.7,'#f3ead9',-7.05,.45,z0+.38));S.add(box(3.3,.06,.78,'#c98b5a',-7.05,.93,z0+.38));
  S.add(box(.5,.32,.38,'#ffffff',-8.3,1.12,z0+.38));S.add(box(.46,.04,.34,'#9fd3ff',-8.3,1.3,z0+.38));
- KET.g=G(cyl(.15,.17,.3,'#f3f3f3',0,.15,0),cyl(.12,.12,.04,'#bfc5cc',0,.32,0),box(.06,.18,.05,'#555',.18,.18,0),cyl(.025,.035,.16,'#f3f3f3',-.17,.22,0).rotateZ(.9));KET.g.position.set(-7.8,.96,z0+.36);S.add(KET.g);S.add(cyl(.2,.2,.03,'#9aa3ad',-7.8,.975,z0+.36));
+ KET.g=G(cyl(.15,.17,.3,'#f3f3f3',0,.15,0),cyl(.12,.12,.04,'#bfc5cc',0,.32,0),box(.06,.18,.05,'#555',.18,.18,0),cyl(.025,.035,.16,'#f3f3f3',-.17,.22,0).rotateZ(.9));KET.g.position.set(-7.8,.96,z0+.36);S.add(KET.g);S.add(cyl(.2,.2,.03,'#9aa3ad',-7.55,.675,z0+1.7));
   KET.y=1.35;KET.glow=GL('rgba(255,140,90,.9)',.7);KET.glow.position.set(-7.8,1.05,z0+.42);KET.glow.material.opacity=0;S.add(KET.glow);
  for(let i=0;i<3;i++){const s=new T.Sprite(new T.SpriteMaterial({map:ctex(64,64,(g)=>{const gr=g.createRadialGradient(32,32,0,32,32,32);gr.addColorStop(0,'rgba(255,255,255,.9)');gr.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=gr;g.fillRect(0,0,64,64)}),transparent:true,depthWrite:false}));s.scale.set(.35,.35,1);s.position.set(-7.8+(i-1)*.05,1.35,z0+.36);s.visible=false;S.add(s);KET.steam.push(s)}
  [['#9fd3ff',-5.88],['#f6a7b8',-5.61]].forEach(([c,x])=>{S.add(cyl(.11,.11,.24,c,x,1.08,z0+.32));S.add(cyl(.115,.115,.04,'#fff',x,1.22,z0+.32))});
  for(let i=0;i<4;i++){S.add(cyl(.05,.05,.2,'#fffaf0',-7.45+i*.12,1.06,z0+.2,10,{transparent:true,opacity:.85}));S.add(sph(.04,'#f2c48d',-7.45+i*.12,1.2,z0+.2))}
  S.add(box(.45,1.3,.45,'#e9eef5',-8.35,.65,z0+1.25));S.add(box(.2,.1,.05,'#7fb3e8',-8.35,1,z0+1.48));
- S.add(cyl(.45,.45,.06,'#c98b5a',-7.9,.75,z0+2.7));S.add(cyl(.05,.05,.72,'#9a6a46',-7.9,.37,z0+2.7));
+ S.add(box(1.9,.6,.6,'#f3ead9',-7.0,.3,z0+1.78));S.add(box(2.0,.06,.68,'#c98b5a',-7.0,.63,z0+1.78));S.add(box(1.9,.34,.02,'#ffe28a',-7.0,.3,z0+2.09));
+ sign('분유 바',-7.0,.3,z0+2.11,0,.9);
+ S.add(cyl(.45,.45,.06,'#c98b5a',-7.9,.75,z0+3.8));S.add(cyl(.05,.05,.72,'#9a6a46',-7.9,.37,z0+3.8));
  sign('분유존',-7.05,2.4,z0+.03,0,1.6);
- XBLOCK.push([-8.75,z0,-5.4,z0+.8],[-8.65,z0+.95,-8.05,z0+1.55],[-8.4,z0+2.2,-7.4,z0+3.2]);
- for(const a of[0,1.6,3.6]){const x=-7.9+Math.sin(a)*.85,z=z0+2.7+Math.cos(a)*.85;S.add(cyl(.2,.2,.42,'#ffe28a',x,.21,z));addSeat(x,z,Math.atan2(-7.9-x,z0+2.7-z),.28,.5,.5)}}
+ XBLOCK.push([-8.75,z0,-5.4,z0+.8],[-8.65,z0+.95,-8.05,z0+1.55],[-8.0,z0+1.46,-6.0,z0+2.12],[-8.4,z0+3.3,-7.4,z0+4.3]);
+ for(const a of[0,1.6,3.6]){const x=-7.9+Math.sin(a)*.85,z=z0+3.8+Math.cos(a)*.85;S.add(cyl(.2,.2,.42,'#ffe28a',x,.21,z));addSeat(x,z,Math.atan2(-7.9-x,z0+3.8-z),.28,.5,.5)}}
 /* 소파 2개 */
 function sofa(x,z,ry,col,n){const g=new T.Group();const w=n*.75+.3;g.add(box(w,.4,.85,col,0,.2,0),box(w,.6,.2,col,0,.7,-.35),box(.18,.55,.85,col,-w/2+.09,.45,0),box(.18,.55,.85,col,w/2-.09,.45,0));
  for(let i=0;i<n;i++)g.add(box(.68,.12,.6,'#fff3ea',-((n-1)*.75)/2+i*.75,.46,.05));g.position.set(x,0,z);g.rotation.y=ry;S.add(g);
@@ -369,22 +371,22 @@ feedChair(-4.5,-5.2,.25);feedChair(-3.1,-5.2,-.15);
 sign('수유의자',-3.8,2.78,-RD/2+.03,0,1.3);
 
 /* 분유 만들기 소품: 캐릭터 손이 직접 스푼·포트를 잡는다 */
-const FSPOT=[-6.3,-RD/2+1.08];
-const FPROP=(()=>{const z0=-RD/2,bx=-6.72,bz=z0+.6,by=.96;
+const FSPOT=[-7.0,-RD/2+1.12];
+const FPROP=(()=>{const z0=-RD/2,bx=-6.75,bz=z0+1.68,by=.66;
  const milk=cyl(.07,.07,.26,'#eaf4ff',0,.13,0,14);const lv=v=>{milk.scale.y=v;milk.position.y=.13*v};lv(.01);
  const wb=G(cyl(.078,.078,.3,'#ffffff',0,.15,0,14,{transparent:true,opacity:.4}),milk,cyl(.082,.082,.05,'#f6a7b8',0,.32,0,14));wb.position.set(bx,by,bz);wb.visible=false;S.add(wb);
- const can=new T.Vector3(-7.02,1.24,z0+.42);S.add(cyl(.11,.11,.24,'#FFD43B',can.x,1.08,can.z));S.add(cyl(.115,.115,.03,'#fff',can.x,1.21,can.z));
+ const can=new T.Vector3(-7.1,.94,z0+1.75);S.add(cyl(.11,.11,.24,'#FFD43B',can.x,.78,can.z));S.add(cyl(.115,.115,.03,'#fff',can.x,.91,can.z));
  const sc=G(box(.03,.03,.24,'#ffffff',0,0,.12),sph(.055,'#ffffff',0,0,-.02,1,.6,1),sph(.04,'#fff3d6',0,.02,-.02,1,.5,1));sc.position.copy(can).add(new T.Vector3(0,.05,0));S.add(sc);
  const pw=[];for(let i=0;i<6;i++){const p=sph(.02,'#fff3d6',0,0,0);p.visible=false;S.add(p);pw.push(p)}
  const st=cyl(.016,.016,1,'#bfe3ff',0,0,0,8,{transparent:true,opacity:.85});st.visible=false;S.add(st);
- const kHome=new T.Vector3(-7.3,.96,z0+.36);KET.g.position.copy(kHome);
+ const kHome=new T.Vector3(-7.55,.66,z0+1.7);KET.g.position.copy(kHome);
  const scHome=sc.position.clone();
  const SH=new T.Vector3(.26,.62,0),tmp=new T.Vector3();
  let ph=null;
  function hand(a,w,reach){a.root.updateMatrixWorld(true);const loc=a.bod.worldToLocal(w.clone()).sub(SH);if(loc.length()>reach)loc.setLength(reach);a.arms[1].position.copy(SH).add(loc);a.root.updateMatrixWorld(true);return a.arms[1].getWorldPosition(tmp).clone()}
  const lerp=(p,q,u)=>p.clone().lerp(q,Math.max(0,Math.min(1,u)));
  return{reset(){ph=null;wb.visible=false;lv(.01);sc.position.copy(scHome);sc.rotation.set(0,0,0);pw.forEach(p=>p.visible=false);st.visible=false;KET.g.position.copy(kHome);KET.g.rotation.set(0,0,0);this.boil(-1)},
-  boil(f){const on=f>=0&&f<1;KET.glow.material.opacity=on?.9:0;KET.glow.position.set(KET.g.position.x,1.05,KET.g.position.z+.06);KET.steam.forEach((s,i)=>{s.visible=f>=0;if(f>=0){const u=(KET.t+i*.33)%1;s.position.set(KET.g.position.x+(i-1)*.05,1.35+u*.6,KET.g.position.z);s.material.opacity=.5*(1-u)}});KET.t+=.016;if(f>=0)wb.visible=true},
+  boil(f){const on=f>=0&&f<1;KET.glow.material.opacity=on?.9:0;KET.glow.position.set(KET.g.position.x,KET.g.position.y+.09,KET.g.position.z+.06);KET.steam.forEach((s,i)=>{s.visible=f>=0;if(f>=0){const u=(KET.t+i*.33)%1;s.position.set(KET.g.position.x+(i-1)*.05,KET.g.position.y+.39+u*.6,KET.g.position.z);s.material.opacity=.5*(1-u)}});KET.t+=.016;if(f>=0)wb.visible=true},
   set(k,f){ph=k?{k,f}:null;if(!k){pw.forEach(p=>p.visible=false);st.visible=false}},
   pose(a){if(!ph)return;const f=ph.f;wb.visible=true;
    if(ph.k=='scoop'){const n=Math.min(2,Math.floor(f*3)),u=(f*3)-n;const top=new T.Vector3(bx,by+.42,bz);
@@ -392,7 +394,7 @@ const FPROP=(()=>{const z0=-RD/2,bx=-6.72,bz=z0+.6,by=.96;
     const h=hand(a,tgt,.8);sc.position.copy(h);sc.rotation.set(0,Math.PI/2,u>.6&&u<.9?-1.3:0);
     pw.forEach((p,i)=>{const on=u>.62&&u<.9;p.visible=on;if(on){const v=(u-.62)/.28;p.position.set(bx+(i%3-1)*.02,by+.4-v*.32-i*.015,bz+(i%2)*.02)}});lv(Math.max(.01,.07*n+.07*Math.min(1,Math.max(0,(u-.62)/.28))))}
    if(ph.k=='pour'){const grab=KET.g.position.clone();const top=new T.Vector3(bx+.18,by+.55,bz);
-    if(f<.25){hand(a,lerp(new T.Vector3(-6.45,.9,FSPOT[1]-.2),kHome.clone().add(new T.Vector3(.12,.25,0)),f/.25),.8)}
+    if(f<.25){hand(a,lerp(new T.Vector3(FSPOT[0]+.3,.6,FSPOT[1]+.3),kHome.clone().add(new T.Vector3(.12,.25,0)),f/.25),.8)}
     else{const k=lerp(kHome,top,(f-.25)/.25);const h=hand(a,k.clone().add(new T.Vector3(.12,.25,0)),.8);KET.g.position.copy(h).add(new T.Vector3(-.12,-.25,0));KET.g.rotation.z=f>.5?Math.min(.9,(f-.5)*4):0}
     st.visible=f>.55&&f<.92;st.scale.y=.3;st.position.set(bx,by+.48,bz);lv(Math.min(1,.21+Math.max(0,(f-.55)/.37)*.79));milk.material.color.set('#fff6e2')}},
   endPour(){ph=null;st.visible=false;KET.g.position.copy(kHome);KET.g.rotation.set(0,0,0)},
@@ -425,7 +427,7 @@ function ensure(id,st,isMe){let o=AV[id];const sig=(st.carrier?'none':AK(st.kind
  if(!o){const a=makeAv(st);a.root.position.set(st.x||0,0,st.z||0);S.add(a.root);const e=document.createElement('div');e.className='name'+(isMe?' me':'');app.insertBefore(e,$('card'));o=AV[id]={a,e,x:st.x||0,z:st.z||0,tx:st.x||0,tz:st.z||0};}
  o.st=st;o.tx=st.x;o.tz=st.z;return o}
 function drop(id){const o=AV[id];if(!o)return;S.remove(o.a.root);o.e.remove();delete AV[id]}
-function label(st){const k=KINDS[st.kind]?KINDS[st.kind].label:'';const s=st.zone&&st.zone[0]=='b'?'수유실 이용 중':st.st=='bottle'?'분유 먹이는 중 '+Math.max(1,Math.round((Date.now()-st.stAt)/60000))+'분':st.fm>0&&st.fm<6||st.zone=='formula'?'분유 타는 중':st.sit?'앉아서 쉬는 중':st.st=='feed'?'수유 중 '+Math.max(1,Math.round((Date.now()-st.stAt)/60000))+'분':st.st=='dunga'?(st.steps>=100?'아기 꿀잠 zZ':'재우는 중 '+Math.floor(st.steps/34+1)+'바퀴'):k;return esc(st.nick)+' <i>'+esc(s)+'</i>'}
+function label(st){const k=KINDS[st.kind]?KINDS[st.kind].label:'';const s=st.zone&&st.zone[0]=='b'?'수유실 이용 중':st.st=='bottle'?'분유 먹이는 중 '+Math.max(1,Math.round((Date.now()-st.stAt)/60000))+'분':st.fm>0&&st.fm<6?['','분유 바로 가는 중','🔥 물 끓이는 중','🥄 분유 3스푼 넣는 중','💧 물 붓는 중','🍼 쉐킷쉐킷 흔드는 중'][st.fm]:st.zone=='formula'?'분유 바에 있어':st.sit?'앉아서 쉬는 중':st.st=='feed'?'수유 중 '+Math.max(1,Math.round((Date.now()-st.stAt)/60000))+'분':st.st=='dunga'?(st.steps>=100?'아기 꿀잠 zZ':'재우는 중 '+Math.floor(st.steps/34+1)+'바퀴'):k;return esc(st.nick)+' <i>'+esc(s)+'</i>'}
 
 /* ---------- 실시간 ---------- */
 let lastPush=0,pend=false;
@@ -449,7 +451,7 @@ function enter(r){me.room=r;me.wait=0;const p=clampXZ((Math.random()-.5)*6,3+Mat
 const meState=()=>({nick:me.nick,kind:me.kind,x:me.x,z:me.z,st:me.st,stAt:me.stAt,carrier:me.carrier,cc:me.cc,steps:me.steps,zone:me.zone,sit:me.sit,note:me.note,noteAt:me.noteAt,fm:me.fm});
 
 /* ---------- 입력 ---------- */
-const ray=new T.Raycaster(),mv=new T.Vector2();let tgt=null,menuEl=null;
+const ray=new T.Raycaster(),mv=new T.Vector2();let tgt=null,menuEl=null,WP=[];
 const PT=new Map();let ang0=0,yaw0=0,pin0=0,zm0=0,pinched=false,down=null,dragging=false;
 const PAN=new T.Vector3(),FG=new T.Vector3(-CO.x,0,-CO.z).normalize(),RG=new T.Vector3(-FG.z,0,FG.x);
 function camBase(){return me.room&&AV[myId]&&zoomK<1.7?[me.x,me.z]:[0,-.5]}
@@ -463,7 +465,7 @@ cvs.addEventListener('pointermove',e=>{if(!PT.has(e.pointerId))return;const pv=P
 const pUp=e=>{const had=PT.has(e.pointerId);PT.delete(e.pointerId);if(!had)return;if(PT.size==0){if(!pinched&&!dragging&&down&&Math.hypot(e.clientX-down[0],e.clientY-down[1])<14)tapAt(e);dragging=false;down=null;setTimeout(()=>{pinched=false},50)}};
 cvs.addEventListener("pointerup",pUp);cvs.addEventListener('pointercancel',e=>{PT.delete(e.pointerId);down=null});
 cvs.addEventListener('wheel',e=>{e.preventDefault();zoomK=Math.max(.45,Math.min(3.1,zoomK*(1+e.deltaY*.0012)))},{passive:false});
-function tapAt(e){if(!me.room)return;closeMenu();if(me.fm&&me.fm<7){me.fm=0;FPROP.reset();renderCard()}breastPend=false;const r=R.domElement.getBoundingClientRect();mv.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(mv,cam);
+function tapAt(e){if(!me.room)return;closeMenu();WP=[];if(me.fm&&me.fm<7){me.fm=0;FPROP.reset();renderCard()}breastPend=false;const r=R.domElement.getBoundingClientRect();mv.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(mv,cam);
  const ids=Object.keys(AV).filter(id=>id!==myId);let hitId=null,best=1e9;
  for(const id of ids){const h=ray.intersectObject(AV[id].a.root,true);if(h.length&&h[0].distance<best){best=h[0].distance;hitId=id}}
  if(hitId){openMenu(hitId);return}
@@ -535,12 +537,12 @@ document.querySelectorAll('#dock button').forEach(b=>b.onclick=()=>{if(!me.room)
 /* ---------- 분유·모유 자동 진행 ---------- */
 const FSTEP=['분유존으로 가는 중','분유포트에 물 끓이는 중','젖병에 분유 3스푼','물 붓기','젖병 흔들기','수유의자로 가는 중','아기한테 젖병 물리는 중'];
 let fmAt=0,stuckT=0,babyLvl=1;
-function startFormula(){standUp();me.st='';me.fm=1;fmAt=Date.now();pendSeat=-1;PAN.set(0,0,0);tgt=clampXZ(FSPOT[0],FSPOT[1]);pushP();renderCard()}
+function startFormula(){standUp();me.st='';me.fm=1;fmAt=Date.now();pendSeat=-1;PAN.set(0,0,0);const z0=-RD/2;WP=[];if(!(me.z<z0+1.4&&me.x<-5.4)){if(me.x<-5.75)WP.push(clampXZ(-5.6,me.z>z0+2.3?me.z:z0+2.4));WP.push(clampXZ(-5.6,FSPOT[1]))}WP.push(clampXZ(FSPOT[0],FSPOT[1]));tgt=WP.shift();pushP();renderCard()}
 function stopFormula(){me.fm=0;if(me.st=='bottle')me.st='';FPROP.reset();pushP();renderCard()}
 function startBreast(){const i=BOOTHS.findIndex(b=>Math.abs(me.x-b.x)<.75&&me.z<-RD/2+1.95);const bi=i>=0?i:BOOTHS.findIndex(b=>!others().some(p=>p.state.room===me.room&&p.state.zone=='b'+BOOTHS.indexOf(b)));if(bi<0){toast('수유실이 다 찼어. 잠깐만');return}
  standUp();me.fm=0;breastPend=true;const s=SEATS[BOOTHS[bi].seat];pendSeat=BOOTHS[bi].seat;PAN.set(0,0,0);tgt=clampXZ(s.x,s.z+.55);renderCard()}
 let breastPend=false;
-function fmTick(){if(!me.fm||me.fm>=7)return;const el=(Date.now()-fmAt)/1000;if(me.fm>=2&&me.fm<=4&&AV[myId])AV[myId].a.root.rotation.y=-Math.PI/2;if(me.fm==5&&AV[myId])AV[myId].a.root.rotation.y=Math.atan2(camOff().x,camOff().z);
+function fmTick(){if(!me.fm||me.fm>=7)return;const el=(Date.now()-fmAt)/1000;if(me.fm>=2&&me.fm<=5&&AV[myId])AV[myId].a.root.rotation.y=0;
  if(me.fm==1&&!tgt){me.fm=2;fmAt=Date.now();pushP();renderCard();return}
  if(me.fm==2){FPROP.boil(Math.min(1,el/3));if(el>3.2){me.fm=3;fmAt=Date.now();renderCard()}return}
  if(me.fm==3){FPROP.boil(-1);FPROP.set('scoop',el/4.2);if(el>4.2){FPROP.endScoop();me.fm=4;fmAt=Date.now();renderCard()}return}
@@ -673,7 +675,7 @@ for(const k in VADD)HOSP[k]={src:'질병관리청 예방접종도우미 위탁�
 
 let HG='울산 남구';try{HG=localStorage.getItem('cp_hg')||'울산 남구'}catch(e){}
 let BABY={bd:'',done:{}};try{BABY=Object.assign(BABY,JSON.parse(localStorage.getItem('cp_baby')||'{}'))}catch(e){}
-function babyHTML(){let h='<div class="box"><div class="t">우리 아기 생일</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><input id="bbt" inputmode="numeric" maxlength="10" placeholder="20250613" value="'+esc(BABY.bd.replace(/-/g,''))+'"><input id="bbd" type="date" value="'+esc(BABY.bd)+'"></div><small style="color:#8a7a68">숫자 8자리로 쓰거나 오른쪽 칸 아무 데나 눌러 달력에서 골라</small></div>';
+function babyHTML(){let h='<div class="box"><div class="t">우리 아기 생일</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><input id="bbt" inputmode="numeric" maxlength="10" placeholder="250613" value="'+esc(BABY.bd.replace(/-/g,''))+'"><input id="bbd" type="date" value="'+esc(BABY.bd)+'"></div><small style="color:#8a7a68">250613처럼 6자리나 8자리로 쓰거나 오른쪽 칸 아무 데나 눌러 달력에서 골라</small></div>';
  if(!BABY.bd)return h+'<p class="note">생일 넣으면 지금 맞을 접종이랑 받을 검진만 골라서 보여줘.</p>';
  const m=(Date.now()-new Date(BABY.bd))/2629800000;const row=(k,a,b,n)=>{const st=BABY.done[k]?'done':m>b+1?'late':m>=a?'now':'soon';if(st=='soon'&&a-m>6)return'';
   return '<label style="display:flex;gap:8px;align-items:flex-start;margin:6px 0;font-size:14px;opacity:'+(st=='done'?.45:1)+'"><input type="checkbox" data-k="'+k+'" '+(st=='done'?'checked':'')+' style="width:22px;min-height:22px;flex:none"><span><b>'+n+'</b><br><small style="color:'+(st=='late'?'#b07a3a':st=='now'?'#2e7d4f':'#8a7a68')+'">'+(a==b?a+'개월':a+'~'+b+'개월')+' · '+(st=='late'?'지난 시기 · 맞았으면 체크, 못 맞았으면 남은 차수만 이어서':st=='now'?'지금 받을 때':st=='done'?'완료':'곧')+'</small></span></label>'};
@@ -686,7 +688,7 @@ function babyHTML(){let h='<div class="box"><div class="t">우리 아기 생일<
  return h}
 function bindBaby(){const sv=()=>{try{localStorage.setItem('cp_baby',JSON.stringify(BABY))}catch(x){}const y=sb.scrollTop;openAide();sb.scrollTop=y};
  const bd=$('bbd');bd.onchange=e=>{BABY.bd=e.target.value;sv()};bd.onclick=()=>{try{bd.showPicker()}catch(x){}};
- $('bbt').oninput=e=>{const d=e.target.value.replace(/\D/g,'');if(d.length==8){const s=d.slice(0,4)+'-'+d.slice(4,6)+'-'+d.slice(6,8);if(!isNaN(new Date(s))){BABY.bd=s;sv()}}};
+ const bp=(v,six)=>{let d=v.replace(/\D/g,'');if(six&&d.length==6)d='20'+d;if(d.length==8){const s=d.slice(0,4)+'-'+d.slice(4,6)+'-'+d.slice(6,8);if(!isNaN(new Date(s))&&BABY.bd!==s){BABY.bd=s;sv()}}};$('bbt').oninput=e=>bp(e.target.value,false);$('bbt').onchange=e=>bp(e.target.value,true);
  const hs=$('hgs');if(hs)hs.onchange=e=>{HG=e.target.value;try{localStorage.setItem('cp_hg',HG)}catch(x){}sv()};
  sb.querySelectorAll('[data-k]').forEach(c=>c.onchange=()=>{BABY.done[c.dataset.k]=c.checked;try{localStorage.setItem('cp_baby',JSON.stringify(BABY))}catch(x){}const y=sb.scrollTop;openAide();sb.scrollTop=y})}
 /* ---------- 내 맞춤 진단 (판정표: claude/maternity-case-matrix.md, 2026.11.12 법제처 확인) ---------- */
@@ -738,7 +740,7 @@ function bindDiag(){const re=()=>{saveDG();const y=sb.scrollTop;openAide();sb.sc
  const fi=$('dfi');if(fi)fi.querySelectorAll('button').forEach(b=>b.onclick=()=>{DG.first=b.dataset.v=='1';re()});
  const upd=()=>{const r=$('dres');if(!r)return;const tmp=document.createElement('div');tmp.innerHTML=diagHTML();const nr=tmp.querySelector('#dres');if(nr){r.innerHTML=nr.innerHTML;const q=$('dreq');if(q)q.onclick=openReq}saveDG()};
  if($('dw'))$('dw').oninput=e=>{DG.w=+e.target.value||0;upd()};if($('dm'))$('dm').oninput=e=>{DG.m=Math.max(1,Math.min(18,+e.target.value||1));upd()};if($('dsix'))$('dsix').onchange=e=>{DG.six=e.target.checked;upd()};
- $('dfetch').onclick=()=>toast('간편인증 불러오기는 곧 열려 · 지금은 직접 골라줘');
+ $('dfetch').onclick=()=>{const a=$('dfetch');if(a.dataset.o)return;a.dataset.o=1;a.insertAdjacentHTML('afterend','<div class="box" style="margin-top:6px;background:#fff7d6">간편인증으로 고용24·건강보험 기록을 불러오는 기능은 지금 만드는 중이야. 열리면 버튼 한 번에 채워질 거야. 그 전까지는 위 칸이 시기에 맞춰 자동으로 채워져 있으니 다른 것만 바꿔줘.</div>')};
  const q=$('dreq');if(q)q.onclick=openReq}
 function openReq(){const [R]=judge();openSheet('신청 맡기기');
  sb.innerHTML='<div class="box"><div class="t">노무사 엄마가 대신 해줄게</div><div style="font-size:14px;line-height:1.6">진단 결과를 보고 노무사가 연락해서 서류를 같이 챙기고, 고용보험 급여처럼 노무사가 대신 낼 수 있는 신청은 대신 내줘.<br><small style="color:#8a7a68">출산휴가·육아휴직 급여는 고용보험법 신청이라 노무사 직무(공인노무사법 제2조 제1항 제1호, 시행령 별표 1). 첫만남이용권은 위임장 받아 대리 신청할 수 있어(아동수당법 시행령 제10조의3 제2항).</small></div>'+
@@ -782,8 +784,8 @@ const V=new T.Vector3(),clk=new T.Clock();
 function place(e,x,y,z){V.set(x,y,z);V.project(cam);e.style.left=((V.x+1)/2*app.clientWidth)+'px';e.style.top=((1-V.y)/2*app.clientHeight)+'px'}
 function loop(){requestAnimationFrame(loop);const dt=Math.min(.1,clk.getDelta());
  if(me.room&&AV[myId]){const o=AV[myId];
-  if(tgt){const dx=tgt[0]-me.x,dz=tgt[1]-me.z,d=Math.hypot(dx,dz);if(d<.05){tgt=null;if(pendSeat>=0){const s=SEATS[pendSeat];me.sit=pendSeat+1;me.x=s.x;me.z=s.z;if(breastPend){breastPend=false;me.st='feed';me.stAt=Date.now();toast('모유수유 시작 · 커튼 쳤어');renderCard()}pendSeat=-1;pushP()}}else{const s=Math.min(d,2.6*dt);const ux=dx/d*s,uz=dz/d*s;let p=clampXZ(me.x+ux,me.z+uz);
-    if(Math.hypot(p[0]-me.x,p[1]-me.z)<s*.4){const px=clampXZ(me.x+(ux>=0?1:-1)*s,me.z),pz=clampXZ(me.x,me.z+(uz>=0?1:-1)*s);const gx=Math.hypot(px[0]-me.x,px[1]-me.z),gz=Math.hypot(pz[0]-me.x,pz[1]-me.z);p=Math.abs(ux)>=Math.abs(uz)?(gx>s*.4?px:pz):(gz>s*.4?pz:px);stuckT+=dt;if(stuckT>2.5){stuckT=0;tgt=null;pendSeat=-1}}else stuckT=0;
+  if(tgt){const dx=tgt[0]-me.x,dz=tgt[1]-me.z,d=Math.hypot(dx,dz);if(d<.05&&WP.length){tgt=WP.shift();}else if(d<.05){tgt=null;if(pendSeat>=0){const s=SEATS[pendSeat];me.sit=pendSeat+1;me.x=s.x;me.z=s.z;if(breastPend){breastPend=false;me.st='feed';me.stAt=Date.now();toast('모유수유 시작 · 커튼 쳤어');renderCard()}pendSeat=-1;pushP()}}else{const s=Math.min(d,2.6*dt);const ux=dx/d*s,uz=dz/d*s;let p=clampXZ(me.x+ux,me.z+uz);
+    if(Math.hypot(p[0]-me.x,p[1]-me.z)<s*.4){const px=clampXZ(me.x+(ux>=0?1:-1)*s,me.z),pz=clampXZ(me.x,me.z+(uz>=0?1:-1)*s);const gx=Math.hypot(px[0]-me.x,px[1]-me.z),gz=Math.hypot(pz[0]-me.x,pz[1]-me.z);p=Math.abs(ux)>=Math.abs(uz)?(gx>s*.4?px:pz):(gz>s*.4?pz:px);stuckT+=dt;if(stuckT>2.5){stuckT=0;if(me.fm==1){const f=clampXZ(FSPOT[0],FSPOT[1]);me.x=f[0];me.z=f[1];WP=[];tgt=null}else{tgt=null;WP=[];pendSeat=-1}}}else stuckT=0;
     me.x=p[0];me.z=p[1];o.a.root.rotation.y=Math.atan2(dx,dz);o.a.walk=Math.min(1,o.a.walk+dt*6);
     if(me.carrier&&me.steps<100){me.steps=Math.min(100,me.steps+s*6);if(me.steps>=100){toast('아기 꿀잠 성공 zZ');fx(myId,'zZ')}if(tab=='dunga')renderCard()}pushP()}}
   else o.a.walk=Math.max(0,o.a.walk-dt*6);
