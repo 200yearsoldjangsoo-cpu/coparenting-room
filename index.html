@@ -33,10 +33,10 @@ html,body{margin:0;height:100%;background:#1b1d38;overflow:hidden;font:15px/1.5 
 .menu{position:absolute;transform:translate(-50%,-100%);display:flex;gap:6px;background:#fff;border-radius:16px;padding:6px;box-shadow:0 4px 14px rgba(0,0,0,.3)}
 .menu button{font:14px Jua,sans-serif;border:2px solid var(--ink);background:var(--y);border-radius:999px;padding:4px 12px;min-height:38px;cursor:pointer}
 .menu button.w{background:#fff}
-.card{position:absolute;right:12px;bottom:96px;width:220px;max-height:58vh;overflow-y:auto;background:rgba(255,255,255,.96);border-radius:16px;padding:10px 12px;box-shadow:0 4px 12px rgba(0,0,0,.3);font-size:12px}
-.card b{font:16px Jua,sans-serif;font-weight:400;display:block}
-.card .bar{height:8px;border-radius:9px;background:#eee;margin:6px 0;overflow:hidden}.card .bar i{display:block;height:100%;background:var(--y);transition:width .3s}
-.card button{font:14px Jua,sans-serif;background:var(--ink);color:var(--y);border:0;border-radius:999px;padding:6px 12px;min-height:36px;margin-top:4px;cursor:pointer}
+.card{position:absolute;right:10px;bottom:92px;width:178px;max-height:38vh;overflow-y:auto;background:rgba(255,255,255,.93);border-radius:14px;padding:7px 9px;box-shadow:0 3px 10px rgba(0,0,0,.25);font-size:11px;line-height:1.35}
+.card b{font:14px Jua,sans-serif;font-weight:400;display:block}
+.card .bar{height:6px;border-radius:9px;background:#eee;margin:4px 0;overflow:hidden}.card .bar i{display:block;height:100%;background:var(--y);transition:width .3s}
+.card button{font:12px Jua,sans-serif;background:var(--ink);color:var(--y);border:0;border-radius:999px;padding:4px 9px;min-height:30px;margin-top:3px;cursor:pointer}
 .sw{display:flex;gap:6px;margin:6px 0}.sw span{width:26px;height:26px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #ccc;cursor:pointer}.sw span.on{box-shadow:0 0 0 2px var(--ink)}
 .dock{position:absolute;left:10px;right:10px;bottom:max(12px,env(safe-area-inset-bottom));background:rgba(255,255,255,.96);border-radius:22px;display:grid;grid-template-columns:repeat(4,1fr);padding:6px;box-shadow:0 6px 18px rgba(0,0,0,.35)}
 .dock button{font:13px Jua,sans-serif;background:none;border:0;color:var(--ink);display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;border-radius:14px;min-height:52px;cursor:pointer}
@@ -253,10 +253,12 @@ function avatar(o){o=Object.assign({hair:'#4a3020',top:'#ff8a8a',kind:'preg',bun
  if(o.kind=='carrier'){extra=G(sph(.2,'#ffe28a',0,.55,.27,1,1,.7),sph(.16,SKIN,0,.8,.32),sph(.165,'#7a5030',0,.86,.3,1,.7,1),sph(.025,'#2B2118',-.05,.79,.46),sph(.025,'#2B2118',.05,.79,.46));bod.add(extra)}
  if(o.kind=='newborn'){extra=G(sph(.22,'#ffffff',0,.6,.32,1.3,.8,.9),sph(.13,SKIN,.12,.7,.42),sph(.135,'#ffffff',.12,.75,.4,1,.6,1));bod.add(extra);arms[0].position.set(-.22,.6,.3);arms[1].position.set(.22,.6,.3)}
  if(o.kind=='work'){extra=G(box(.32,.24,.1,'#8a5a3c',.42,.35,.05),box(.12,.05,.04,'#5a3a20',.42,.49,.05));bod.add(extra)}
+ let cb=(o.kind=='carrier'||o.kind=='newborn')?extra:null;
+ if(o.kind=='work'||o.kind=='home'){const c=o.kind=='work'?'#c9d8f0':'#ffd0dc';cb=G(sph(.19,c,0,.55,.27,1,1,.7),sph(.15,SKIN,0,.79,.32),sph(.155,'#7a5030',0,.85,.3,1,.7,1),sph(.024,'#2B2118',-.05,.78,.45),sph(.024,'#2B2118',.05,.78,.45),box(.05,.3,.04,c,-.17,.72,.18),box(.05,.3,.04,c,.17,.72,.18));bod.add(cb)}
  let stroller=null;if(o.kind=='stroller'){stroller=G(box(.55,.3,.7,'#7fb3e8',0,.55,0),mesh(new T.SphereGeometry(.4,16,10,0,Math.PI*2,0,Math.PI/2),'#5a8fd0',0,.62,-.15),sph(.14,SKIN,0,.8,.1),sph(.145,'#5a4030',0,.85,.08,1,.7,1),cyl(.12,.12,.06,'#2B2118',-.25,.12,.28,12).rotateZ(1.57),cyl(.12,.12,.06,'#2B2118',.25,.12,.28,12).rotateZ(1.57),cyl(.12,.12,.06,'#2B2118',-.25,.12,-.28,12).rotateZ(1.57),cyl(.12,.12,.06,'#2B2118',.25,.12,-.28,12).rotateZ(1.57),box(.5,.04,.04,'#444',0,.95,-.5));stroller.position.z=.75;root.add(stroller);arms[0].position.set(-.24,.6,.28);arms[1].position.set(.24,.6,.28)}
  const milk=cyl(.058,.058,.22,'#fff3d6',0,0,0,12);const bottle=G(cyl(.066,.066,.24,'#9fd3ff',0,0,0,12,{transparent:true,opacity:.55}),milk,cyl(.07,.07,.045,'#ff8fab',0,.13,0,12),sph(.04,'#f2a65a',0,.185,0,1,1.4,1));bottle.visible=false;bottle.position.set(.4,.5,.15);bod.add(bottle);
  const babyF=G(sph(.2,'#ffffff',0,0,0,1.35,.75,.85),sph(.12,SKIN,.18,.07,.06),sph(.125,'#ffffff',.18,.11,.04,1,.6,1),sph(.018,'#2B2118',.25,.08,.15),sph(.018,'#2B2118',.15,.08,.16));babyF.position.set(-.05,.62,.34);babyF.rotation.y=-.2;babyF.visible=false;bod.add(babyF);
- return {root,bod,feet,arms,head,belly,bottle,milk,babyF,shake:0,t:Math.random()*9,walk:0,sit:0,wave:0,o}}
+ return {root,bod,feet,arms,head,belly,bottle,milk,babyF,cb,shake:0,t:Math.random()*9,walk:0,sit:0,wave:0,o}}
 function animA(a,dt){a.t+=dt;const w=a.walk,s=Math.sin(a.t*10);
  a.bod.position.y=a.sit?-.22:Math.abs(s)*.07*w;a.bod.rotation.z=s*.06*w;
  a.feet[0].position.z=.05+s*.14*w;a.feet[1].position.z=.05-s*.14*w;
@@ -452,17 +454,17 @@ const meState=()=>({nick:me.nick,kind:me.kind,x:me.x,z:me.z,st:me.st,stAt:me.stA
 
 /* ---------- 입력 ---------- */
 const ray=new T.Raycaster(),mv=new T.Vector2();let tgt=null,menuEl=null,WP=[];
-const PT=new Map();let ang0=0,yaw0=0,pin0=0,zm0=0,pinched=false,down=null,dragging=false;
+const PT=new Map();let ang0=0,yaw0=0,pin0=0,zm0=0,pinched=false,gestEnd=0,down=null,dragging=false;
 const PAN=new T.Vector3(),FG=new T.Vector3(-CO.x,0,-CO.z).normalize(),RG=new T.Vector3(-FG.z,0,FG.x);
 function camBase(){return me.room&&AV[myId]&&zoomK<1.7?[me.x,me.z]:[0,-.5]}
 const cvs=R.domElement;
-cvs.addEventListener('pointerdown',e=>{PT.set(e.pointerId,[e.clientX,e.clientY]);if(PT.size==2){const [a,b]=[...PT.values()];pin0=Math.hypot(a[0]-b[0],a[1]-b[1]);ang0=Math.atan2(b[1]-a[1],b[0]-a[0]);yaw0=camYaw;zm0=zoomK;pinched=true;down=null}else if(PT.size==1){pinched=false;dragging=false;down=[e.clientX,e.clientY]}});
+cvs.addEventListener('pointerdown',e=>{PT.set(e.pointerId,[e.clientX,e.clientY]);if(PT.size==2){const [a,b]=[...PT.values()];pin0=Math.hypot(a[0]-b[0],a[1]-b[1]);ang0=Math.atan2(b[1]-a[1],b[0]-a[0]);yaw0=camYaw;zm0=zoomK;pinched=true;down=null}else if(PT.size==1){if(Date.now()-gestEnd>400)pinched=false;dragging=false;down=[e.clientX,e.clientY]}});
 cvs.addEventListener('pointermove',e=>{if(!PT.has(e.pointerId))return;const pv=PT.get(e.pointerId);
  if(PT.size==1&&down&&!pinched){if(!dragging&&Math.hypot(e.clientX-down[0],e.clientY-down[1])>12)dragging=true;
   if(dragging){const dx=e.clientX-pv[0],dy=e.clientY-pv[1];const k=CO.length()*zoomK*2*Math.tan(cam.fov*Math.PI/360)/app.clientHeight;
    const co=camOff(),fg=new T.Vector3(-co.x,0,-co.z).normalize(),rg=new T.Vector3(-fg.z,0,fg.x);PAN.x+=(-rg.x*dx+fg.x*dy*1.5)*k;PAN.z+=(-rg.z*dx+fg.z*dy*1.5)*k;PAN.x=Math.max(-RW/2-camBase()[0],Math.min(RW/2-camBase()[0],PAN.x));PAN.z=Math.max(-RD/2-camBase()[1],Math.min(RD/2-camBase()[1],PAN.z))}}
- PT.set(e.pointerId,[e.clientX,e.clientY]);if(PT.size==2&&pin0>0){const [a,b]=[...PT.values()];const d=Math.hypot(a[0]-b[0],a[1]-b[1]);zoomK=Math.max(.45,Math.min(3.1,zm0*pin0/Math.max(20,d)));let da=Math.atan2(b[1]-a[1],b[0]-a[0])-ang0;if(da>Math.PI)da-=2*Math.PI;if(da<-Math.PI)da+=2*Math.PI;camYaw=yaw0-da}});
-const pUp=e=>{const had=PT.has(e.pointerId);PT.delete(e.pointerId);if(!had)return;if(PT.size==0){if(!pinched&&!dragging&&down&&Math.hypot(e.clientX-down[0],e.clientY-down[1])<14)tapAt(e);dragging=false;down=null;setTimeout(()=>{pinched=false},50)}};
+ PT.set(e.pointerId,[e.clientX,e.clientY]);if(PT.size==2&&pin0>0){const [a,b]=[...PT.values()];const d=Math.hypot(a[0]-b[0],a[1]-b[1]);zoomK=Math.max(.45,Math.min(3.1,zm0*pin0/Math.max(20,d)));let da=Math.atan2(b[1]-a[1],b[0]-a[0])-ang0;if(da>Math.PI)da-=2*Math.PI;if(da<-Math.PI)da+=2*Math.PI;camYaw=yaw0+da}});
+const pUp=e=>{const had=PT.has(e.pointerId);PT.delete(e.pointerId);if(!had)return;if(pinched)gestEnd=Date.now();if(PT.size==0){if(!pinched&&Date.now()-gestEnd>400&&!dragging&&down&&Math.hypot(e.clientX-down[0],e.clientY-down[1])<14)tapAt(e);dragging=false;down=null;setTimeout(()=>{pinched=false},50)}};
 cvs.addEventListener("pointerup",pUp);cvs.addEventListener('pointercancel',e=>{PT.delete(e.pointerId);down=null});
 cvs.addEventListener('wheel',e=>{e.preventDefault();zoomK=Math.max(.45,Math.min(3.1,zoomK*(1+e.deltaY*.0012)))},{passive:false});
 function tapAt(e){if(!me.room)return;closeMenu();WP=[];if(me.fm&&me.fm<7){me.fm=0;FPROP.reset();renderCard()}breastPend=false;const r=R.domElement.getBoundingClientRect();mv.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(mv,cam);
@@ -480,7 +482,7 @@ function openMenu(id){const o=AV[id];closeMenu();menuEl=document.createElement('
  const [b1,b2]=menuEl.querySelectorAll('button');b1.onclick=()=>{sendPat(id);closeMenu()};b2.onclick=()=>{closeMenu();openHome(id,o.st.nick)}}
 function sendPat(id){const o=AV[id];if(!o)return;const fdg=o.st&&(o.st.st=='feed'||o.st.st=='bottle');me.patTo=id;me.patAt=Date.now();pushP();fx(id,fdg?'토닥 ♥':'쓰담 ♥');toast(o.st.nick+(fdg?' 토닥토닥 보냄':'에게 쓰담 보냄'))}
 function feedersHTML(){const fs=others().filter(p=>p.state.room===me.room&&(p.state.st=='feed'||p.state.st=='bottle'));if(!fs.length)return'';
- return '<div style="margin:6px 0 2px;max-height:110px;overflow-y:auto">'+fs.map(p=>{const s=p.state,id=s.id||p.id;return '<div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin:3px 0"><span>'+esc(s.nick)+' <small style="color:#8a7a68">'+Math.max(1,Math.round((Date.now()-s.stAt)/60000))+'분</small></span><button data-pat="'+esc(id)+'" style="padding:3px 10px;min-height:30px">토닥</button></div>'}).join('')+'</div>'}
+ return '<div style="margin:6px 0 2px;max-height:66px;overflow-y:auto">'+fs.map(p=>{const s=p.state,id=s.id||p.id;return '<div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin:3px 0"><span>'+esc(s.nick)+' <small style="color:#8a7a68">'+Math.max(1,Math.round((Date.now()-s.stAt)/60000))+'분</small></span><button data-pat="'+esc(id)+'" style="padding:2px 8px;min-height:24px;margin:0">토닥</button></div>'}).join('')+'</div>'}
 function bindPats(c){c.querySelectorAll('[data-pat]').forEach(b=>b.onclick=()=>{sendPat(b.dataset.pat);b.textContent='♥';b.disabled=true})}
 function babyPat(){const a=AV[myId];if(a)a.a.tap=1.2;fx(myId,'토닥토닥');babyPats++;if(babyPats%5==0)toast('끄억~ 트림 나왔다')}
 let babyPats=0;
@@ -552,10 +554,10 @@ function fmTick(){if(!me.fm||me.fm>=7)return;const el=(Date.now()-fmAt)/1000;if(
 function renderFormula(c){
  if(me.st=='bottle'){const mins=Math.floor((Date.now()-me.stAt)/60000);c.innerHTML='<b>분유 먹이는 중</b>'+mins+'분째 · 꿀꺽꿀꺽<div class="bar"><i style="width:'+Math.round((1-babyLvl)*100)+'%"></i></div>다 먹으면 트림 꼭!'+feedersHTML()+'<br><button id="bp">아기 토닥</button> <button id="cb">트림시키고 끝내기</button>';bindPats(c);$('bp').onclick=babyPat;$('cb').onclick=()=>{toast('트림 성공! 수고했어');standUp();stopFormula()};return}
  if(!me.fm){c.innerHTML='<b>분유존</b>포트·분유·젖병 다 있어. 누르면 물 끓이기부터 수유의자까지 알아서 해줘.<br><button id="cb">분유 수유 시작</button>';$('cb').onclick=startFormula;return}
- const k=me.fm-1;c.innerHTML='<b>분유 타는 중</b>'+FSTEP.map((s,i)=>'<div style="opacity:'+(i<k?'.45':i==k?'1':'.6')+'">'+(i<k?'✔ ':i==k?'▶ ':'· ')+(i==k?'<b style="display:inline">'+s+'</b>':s)+'</div>').join('')+(me.fm==5?'<small style="color:#8a7a68">손목 안쪽에 한 방울, 미지근하면 OK</small>':'')+'<br><button id="cx" style="background:#eee;color:#2B2118">그만</button>';$('cx').onclick=()=>{standUp();stopFormula()}}
+ const k=me.fm-1;c.innerHTML='<b>분유 타는 중 '+(k+1)+'/'+FSTEP.length+'</b>▶ '+FSTEP[k]+'<div class="bar"><i style="width:'+Math.round((k+1)/FSTEP.length*100)+'%"></i></div>'+(me.fm==5?'<small style="color:#8a7a68">손목 안쪽에 한 방울, 미지근하면 OK</small>':'')+'<button id="cx" style="background:#eee;color:#2B2118">그만</button>';$('cx').onclick=()=>{standUp();stopFormula()}}
 function renderBooth(c){if(me.st=='feed'){const mins=Math.floor((Date.now()-me.stAt)/60000);c.innerHTML='<b>모유수유 중</b>'+mins+'분째 · 커튼 닫혀 있어'+feedersHTML()+'<br><button id="bp">아기 토닥</button> <button id="cb">수유 끝</button>';bindPats(c);$('bp').onclick=babyPat;$('cb').onclick=()=>{me.st='';pushP();toast('수고했어');renderCard()};return}
  c.innerHTML='<b>모유수유실</b>커튼 치면 다른 엄마들한텐 안 보여.<br><button id="cb">모유수유 시작</button>';$('cb').onclick=startBreast}
-function dawnHTML(){const i=dawnInfo();return '<div style="margin-top:6px;font-size:11px">'+(i.total?'새벽 출석<span class="stamp">🌙 '+i.streak+'일 연속 · 총 '+i.total+'번</span>':'<small style="color:#8a7a68">0~5시에 들어오면 새벽 출석 도장이 쌓여</small>')+'</div><div class="notepick" id="np" style="display:none">'+NOTES.map((s,i)=>'<button data-n="'+i+'">'+s+'</button>').join('')+'</div><div style="margin-top:6px"><button id="nb" style="background:#fff;color:#2B2118;border:1px solid #e8d9c2">천장에 쪽지</button> <button id="sh" style="background:#fff;color:#2B2118;border:1px solid #e8d9c2">📸 스토리 카드</button></div>'}
+function dawnHTML(){const i=dawnInfo(),sb='background:#fff;color:#2B2118;border:1px solid #e8d9c2;padding:2px 7px;min-height:26px';return '<div class="notepick" id="np" style="display:none">'+NOTES.map((s,i)=>'<button data-n="'+i+'">'+s+'</button>').join('')+'</div><div style="margin-top:4px;display:flex;gap:4px;align-items:center;flex-wrap:wrap">'+(i.total?'<span class="stamp" style="margin:0">🌙 '+i.streak+'일</span>':'')+'<button id="nb" style="'+sb+'">📝 쪽지</button><button id="sh" style="'+sb+'">📸 카드</button></div>'}
 function bindExtras(c){const nb=c.querySelector('#nb');if(nb)nb.onclick=()=>{const p=c.querySelector('#np');p.style.display=p.style.display=='none'?'flex':'none'};c.querySelectorAll('[data-n]').forEach(b=>b.onclick=()=>myNote(+b.dataset.n));const sh=c.querySelector('#sh');if(sh)sh.onclick=shareCard}
 function renderCard(){const c=$('card');if(!me.room){c.style.display='none';return}
  if(cardOff&&!(me.fm>0||me.st=='bottle'||me.zone||breastPend)){c.style.display='none';return}c.style.display='';
@@ -564,7 +566,7 @@ function renderCard(){const c=$('card');if(!me.room){c.style.display='none';retu
  if(me.zone=='formula'){renderFormula(c);return}
  const here=others().filter(p=>p.state.room===me.room);
  if(tab=='feed'){const n=here.filter(p=>p.state.st=='feed').length+(me.st=='feed'?1:0);const mins=me.st=='feed'?Math.floor((Date.now()-me.stAt)/60000):0;
-  c.innerHTML='<b>'+(isNight()?'새벽수유 같이 하기':'수유 같이 하기')+'</b>'+(me.st=='feed'?'나 · '+mins+'분째 수유 중':'수유 시작하면 같은 방 엄마들한테 보여')+'<div class="bar"><i style="width:'+Math.min(100,mins/30*100)+'%"></i></div>지금 같이 수유 중 '+n+'명'+feedersHTML()+dawnHTML()+(me.st=='feed'?'<button id="cb">수유 끝</button> <button id="bp">아기 토닥</button>':'<button id="fb">분유 수유</button> <button id="bb">모유수유실</button><br><button id="cb" style="margin-top:6px;background:#eee;color:#2B2118">여기서 수유 시작</button>');bindPats(c);bindExtras(c);if($('bp'))$('bp').onclick=babyPat;if($('fb'))$('fb').onclick=startFormula;if($('bb'))$('bb').onclick=startBreast;
+  c.innerHTML='<b>'+(isNight()?'새벽수유 같이 하기':'수유 같이 하기')+'</b>'+(me.st=='feed'?'나 · '+mins+'분째 수유 중':'')+(me.st=='feed'?'<div class="bar"><i style="width:'+Math.min(100,mins/30*100)+'%"></i></div>':'')+'같이 수유 중 '+n+'명'+feedersHTML()+dawnHTML()+(me.st=='feed'?'<button id="cb">수유 끝</button> <button id="bp">아기 토닥</button>':'<div style="display:flex;flex-wrap:wrap;gap:4px"><button id="fb">🍼 분유</button><button id="bb">모유수유실</button><button id="cb" style="background:#eee;color:#2B2118">여기서 수유</button></div>');bindPats(c);bindExtras(c);if($('bp'))$('bp').onclick=babyPat;if($('fb'))$('fb').onclick=startFormula;if($('bb'))$('bb').onclick=startBreast;
   $('cb').onclick=()=>{if(me.st=='feed'){me.st='';toast('수고했어. 오늘 '+mins+'분')}else{me.st='feed';me.stAt=Date.now()}pushP();ensure(myId,meState(),true);renderCard()}}
  else{const n=here.filter(p=>p.state.st=='dunga').length+(me.st=='dunga'?1:0);
   if(me.kind=='preg'){c.innerHTML='<b>애기 재우기</b>임신 중엔 같이 산책만 해. 아기 태어나면 열려!';return}
@@ -730,7 +732,7 @@ function diagHTML(){if(!DG.wt){DG.wt=autoWT();DG.auto=true}
  const [R,N]=judge();
  h+='<div class="box law" id="dres"><div class="t">받을 수 있는 것 '+R.length+'개 <small>'+esc(WT.find(x=>x[0]==DG.wt)[1])+' 기준</small></div><ul style="padding-left:18px;margin:0">'+R.map(i=>'<li><b>'+i[0]+'</b> · '+esc(i[1])+'<br><small>근거 · '+i[2]+'</small></li>').join('')+'</ul>'+
   (N.length?'<h5 style="color:#8a7a68">해당 안 되는 것</h5><ul style="padding-left:18px;margin:0;color:#8a7a68">'+N.map(i=>'<li>'+i[0]+' · '+esc(i[1])+(i[2]?'<br><small>'+i[2]+'</small>':'')+'</li>').join('')+'</ul>':'')+
-  '<p class="note">입력한 정보로 계산한 예상치야. 근거는 2026.11.18 법제처·고용노동부 고시로 확인했어.</p><button class="btn" id="dreq" style="width:100%">노무사 엄마한테 신청 맡기기</button></div>';
+  '<p class="note">입력한 정보로 계산한 예상치야. 근거는 2026.11.18 법제처·고용노동부 고시로 확인했어.</p><button class="btn" id="dreq" style="width:100%">찬이랑 내 이름으로 바로 신청하기</button></div>';
  return h}
 function bindDiag(){const re=()=>{saveDG();const y=sb.scrollTop;openAide();sb.scrollTop=y};
  sb.querySelectorAll('#dwt button').forEach(b=>b.onclick=()=>{DG.wt=b.dataset.w;DG.auto=false;re()});
@@ -742,15 +744,16 @@ function bindDiag(){const re=()=>{saveDG();const y=sb.scrollTop;openAide();sb.sc
  if($('dw'))$('dw').oninput=e=>{DG.w=+e.target.value||0;upd()};if($('dm'))$('dm').oninput=e=>{DG.m=Math.max(1,Math.min(18,+e.target.value||1));upd()};if($('dsix'))$('dsix').onchange=e=>{DG.six=e.target.checked;upd()};
  $('dfetch').onclick=()=>{const a=$('dfetch');if(a.dataset.o)return;a.dataset.o=1;a.insertAdjacentHTML('afterend','<div class="box" style="margin-top:6px;background:#fff7d6">간편인증으로 고용24·건강보험 기록을 불러오는 기능은 지금 만드는 중이야. 열리면 버튼 한 번에 채워질 거야. 그 전까지는 위 칸이 시기에 맞춰 자동으로 채워져 있으니 다른 것만 바꿔줘.</div>')};
  const q=$('dreq');if(q)q.onclick=openReq}
-function openReq(){const [R]=judge();openSheet('신청 맡기기');
- sb.innerHTML='<div class="box"><div class="t">노무사 엄마가 대신 해줄게</div><div style="font-size:14px;line-height:1.6">진단 결과를 보고 노무사가 연락해서 서류를 같이 챙기고, 고용보험 급여처럼 노무사가 대신 낼 수 있는 신청은 대신 내줘.<br><small style="color:#8a7a68">출산휴가·육아휴직 급여는 고용보험법 신청이라 노무사 직무(공인노무사법 제2조 제1항 제1호, 시행령 별표 1). 첫만남이용권은 위임장 받아 대리 신청할 수 있어(아동수당법 시행령 제10조의3 제2항).</small></div>'+
- '<label>이름 또는 별명</label><input id="rq_n" maxlength="20" value="'+esc(me.nick)+'"><label>연락받을 곳 (카톡 아이디나 휴대폰)</label><input id="rq_c" maxlength="40" autocapitalize="off"><label>하고 싶은 말 (선택)</label><textarea id="rq_m" maxlength="300"></textarea>'+
- '<label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--ink);margin:10px 0"><input type="checkbox" id="rq_ok" style="width:22px;min-height:22px;flex:none"> 상담·신청 대행을 위해 이름·연락처·진단 결과를 수집하는 데 동의해. 상담이 끝나면 지워줘.</label><button class="btn" id="rq_s" style="width:100%">맡기기</button></div>';
- $('rq_s').onclick=async()=>{const c=$('rq_c').value.trim();if(!c){toast('연락받을 곳을 적어줘');return}if(!$('rq_ok').checked){toast('동의에 체크해줘');return}
+function openReq(){const [R]=judge();openSheet('내 이름으로 바로 신청');
+ sb.innerHTML='<div class="box"><div class="t">신청은 내 이름으로, 귀찮은 건 찬이가</div><ol style="font-size:14px;line-height:1.7;padding-left:18px;margin:6px 0"><li>카카오·패스 간편인증 한 번 (내 폰에서 승인)</li><li>찬이가 고용24·건강보험에서 내 기록을 불러와 신청서 칸을 다 채워</li><li>나는 채워진 내용 확인하고 <b style="display:inline">제출</b>만 눌러</li></ol><small style="color:#8a7a68;display:block">신청인은 엄마 본인이고 최종 제출도 엄마 손으로 해. 인증 정보는 저장하지 않고 신청이 끝나면 바로 지워.</small></div>'+
+ '<div class="box" style="background:#fff7d6"><div class="t">지금 만드는 중이야</div><div style="font-size:13px">간편인증 자동 신청은 곧 열려. 열리면 바로 알려줄게.</div>'+
+ '<label>알림 받을 곳 (카톡 아이디나 휴대폰)</label><input id="rq_c" maxlength="40" autocapitalize="off"><input id="rq_n" type="hidden" value="'+esc(me.nick)+'"><input id="rq_m" type="hidden" value="self-apply 알림">'+
+ '<label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--ink);margin:10px 0"><input type="checkbox" id="rq_ok" style="width:22px;min-height:22px;flex:none"> 오픈 알림을 위해 연락처와 진단 결과를 보관하는 데 동의해. 알림 보내면 지워줘.</label><button class="btn" id="rq_s" style="width:100%">열리면 알려줘</button><p class="note">회사랑 얘기가 꼬였거나 애매하면 노동법 상담소에서 먼저 물어봐.</p></div>';
+ $('rq_s').onclick=async()=>{const c=$('rq_c').value.trim();if(!c){toast('알림 받을 곳을 적어줘');return}if(!$('rq_ok').checked){toast('동의에 체크해줘');return}
   if(typeof SB=='undefined'||!SB||!uid){toast('아직 연결 중이야. 잠시 뒤 다시');return}
   const r=await SB.from('requests').insert({uid:uid,name:$('rq_n').value.slice(0,20),contact:c.slice(0,40),memo:$('rq_m').value.slice(0,300),diag:{in:DG,result:R.map(x=>x[0]+' · '+x[1])}});
   if(r.error){toast('접수가 안 됐어. 카톡 상담으로 연락줘');return}
-  sb.innerHTML='<div class="box"><div class="t">접수됐어</div>노무사 엄마가 곧 연락할게. 급하면 카톡으로 바로 말해줘.<a class="kakao" href="http://pf.kakao.com/_xmxmxjxeX" target="_blank" rel="noopener">카톡으로 노무사 상담</a></div>'}}
+  sb.innerHTML='<div class="box"><div class="t">알림 신청 완료</div>바로 신청이 열리면 제일 먼저 알려줄게. 그 전에 궁금한 건 노동법 상담소에서 물어봐.</div>'}}
 function leaveCalc(w,n,six){const r=[];let tot=0;const cap6=[250,250,300,350,400,450];for(let k=1;k<=n;k++){let v;if(k<=6&&six)v=Math.min(w,cap6[k-1]);else if(k<=3)v=Math.min(w,250);else if(k<=6)v=Math.min(w,200);else v=Math.min(Math.round(w*.8*10)/10,160);v=Math.max(v,Math.min(70,w));r.push([k,v]);tot+=v}return[r,Math.round(tot*10)/10]}
 function openAide(){openSheet('육아비서 찬이');const t=TODO[me.kind]||TODO.carrier;
  const tabs=[['todo','내 시기 할 일'],['law','모성보호 전체'],['diag','내 맞춤 진단'],['region','지역 지원금'],['baby','예방접종·검진'],['ask','노동법 상담소']];
@@ -796,7 +799,7 @@ function loop(){requestAnimationFrame(loop);const dt=Math.min(.1,clk.getDelta())
  {const b0=camBase(),f=[b0[0]+PAN.x,b0[1]+PAN.z];camF.x+=(f[0]-camF.x)*Math.min(1,dt*4);camF.z+=(f[1]-camF.z)*Math.min(1,dt*4);cam.position.copy(camF).addScaledVector(camOff(),zoomK);cam.lookAt(camF.x,.2,camF.z)}
  const occ={};
  Object.entries(AV).forEach(([id,o])=>{if(id!==myId){const dx=o.tx-o.x,dz=o.tz-o.z,d=Math.hypot(dx,dz);if(d>.02){const s=Math.min(d,Math.max(2,d*3)*dt);o.x+=dx/d*s;o.z+=dz/d*s;o.a.root.rotation.y=Math.atan2(dx,dz);o.a.walk=Math.min(1,o.a.walk+dt*6)}else o.a.walk=Math.max(0,o.a.walk-dt*6)}
-  {const fm=o.st&&o.st.fm||0,bt=o.st&&o.st.st=='bottle',bf=o.st&&o.st.st=='feed'&&o.st.sit;o.a.bottle.visible=bt||fm>=5&&fm<7;o.a.babyF.visible=bt||bf;
+  {const fm=o.st&&o.st.fm||0,bt=o.st&&o.st.st=='bottle',bf=o.st&&o.st.st=='feed'&&o.st.sit;o.a.bottle.visible=bt||fm>=5&&fm<7;o.a.babyF.visible=bt||bf;if(o.a.cb)o.a.cb.visible=!o.a.babyF.visible;
    if(!o.a.arm1)o.a.arm1=o.a.arms[1].position.clone();
    o.a.bottle.scale.setScalar(1.35);if(bt){o.a.bottle.position.set(.36,.6,.47);o.a.bottle.rotation.set(0,0,1.15);o.a.arms[1].position.set(.4,.56,.46);o.a.milk.scale.y=id===myId?babyLvl:.6;o.a.milk.position.y=-.11+.11*o.a.milk.scale.y;o.a.babyF.rotation.y=-.2}
    else{o.a.bottle.position.set(.4,.5,.15);o.a.bottle.rotation.set(0,0,0);o.a.milk.scale.y=1;o.a.milk.position.y=0;if(!o.a.shake)o.a.arms[1].position.copy(o.a.arm1)}
