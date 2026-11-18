@@ -245,9 +245,9 @@ function avatar(o){o=Object.assign({hair:'#4a3020',top:'#ff8a8a',kind:'preg',bun
  if(o.kind=='newborn'){extra=G(sph(.22,'#ffffff',0,.6,.32,1.3,.8,.9),sph(.13,SKIN,.12,.7,.42),sph(.135,'#ffffff',.12,.75,.4,1,.6,1));bod.add(extra);arms[0].position.set(-.22,.6,.3);arms[1].position.set(.22,.6,.3)}
  if(o.kind=='work'){extra=G(box(.32,.24,.1,'#8a5a3c',.42,.35,.05),box(.12,.05,.04,'#5a3a20',.42,.49,.05));bod.add(extra)}
  let stroller=null;if(o.kind=='stroller'){stroller=G(box(.55,.3,.7,'#7fb3e8',0,.55,0),mesh(new T.SphereGeometry(.4,16,10,0,Math.PI*2,0,Math.PI/2),'#5a8fd0',0,.62,-.15),sph(.14,SKIN,0,.8,.1),sph(.145,'#5a4030',0,.85,.08,1,.7,1),cyl(.12,.12,.06,'#2B2118',-.25,.12,.28,12).rotateZ(1.57),cyl(.12,.12,.06,'#2B2118',.25,.12,.28,12).rotateZ(1.57),cyl(.12,.12,.06,'#2B2118',-.25,.12,-.28,12).rotateZ(1.57),cyl(.12,.12,.06,'#2B2118',.25,.12,-.28,12).rotateZ(1.57),box(.5,.04,.04,'#444',0,.95,-.5));stroller.position.z=.75;root.add(stroller);arms[0].position.set(-.24,.6,.28);arms[1].position.set(.24,.6,.28)}
- const bottle=G(cyl(.065,.065,.24,'#fbfaf6',0,0,0,12,{transparent:true,opacity:.92}),cyl(.066,.066,.1,'#fff1c9',0,-.06,0,12),cyl(.07,.07,.04,'#f6a7b8',0,.13,0,12),sph(.04,'#f2c48d',0,.18,0,1,1.3,1));bottle.visible=false;bottle.position.set(.4,.5,.15);bod.add(bottle);
+ const milk=cyl(.058,.058,.22,'#fff3d6',0,0,0,12);const bottle=G(cyl(.066,.066,.24,'#9fd3ff',0,0,0,12,{transparent:true,opacity:.55}),milk,cyl(.07,.07,.045,'#ff8fab',0,.13,0,12),sph(.04,'#f2a65a',0,.185,0,1,1.4,1));bottle.visible=false;bottle.position.set(.4,.5,.15);bod.add(bottle);
  const babyF=G(sph(.2,'#ffffff',0,0,0,1.35,.75,.85),sph(.12,SKIN,.18,.07,.06),sph(.125,'#ffffff',.18,.11,.04,1,.6,1),sph(.018,'#2B2118',.25,.08,.15),sph(.018,'#2B2118',.15,.08,.16));babyF.position.set(-.05,.62,.34);babyF.rotation.y=-.2;babyF.visible=false;bod.add(babyF);
- return {root,bod,feet,arms,head,belly,bottle,babyF,shake:0,t:Math.random()*9,walk:0,sit:0,wave:0,o}}
+ return {root,bod,feet,arms,head,belly,bottle,milk,babyF,shake:0,t:Math.random()*9,walk:0,sit:0,wave:0,o}}
 function animA(a,dt){a.t+=dt;const w=a.walk,s=Math.sin(a.t*10);
  a.bod.position.y=a.sit?-.22:Math.abs(s)*.07*w;a.bod.rotation.z=s*.06*w;
  a.feet[0].position.z=.05+s*.14*w;a.feet[1].position.z=.05-s*.14*w;
@@ -315,24 +315,24 @@ function sign(txt,x,y,z,ry,w){const tx=ctex(512,128,(g,W,H)=>{g.fillStyle='#fffa
   const ch=G(box(.85,.42,.7,'#e9b6c2',0,.21,0),box(.85,.6,.16,'#e9b6c2',0,.7,-.3),box(.14,.3,.7,'#dca1b0',-.44,.5,0),box(.14,.3,.7,'#dca1b0',.44,.5,0),sph(.16,'#fff3ea',-.25,.55,.05,1.3,.6,1));ch.position.set(bx,0,z0+.75);S.add(ch);
   S.add(cyl(.16,.16,.5,'#c98b5a',bx+.6,.25,z0+.45));S.add(cyl(.05,.05,.2,'#9fd3ff',bx+.6,.6,z0+.45,10));
   const gl=GL('rgba(255,190,200,.5)',1.4);gl.position.set(bx,1.9,z0+.6);S.add(gl);
-  addSeat(bx,z0+.8,0,.32,.85,.7);
+  const seatI=SEATS.length;addSeat(bx,z0+.8,0,.32,.85,.7);
   const cm=new T.MeshStandardMaterial({color:'#f6b8c8',roughness:1,side:T.DoubleSide});
   const mk=()=>{const g=new T.Group();for(let k=0;k<5;k++){const f=mesh(new T.BoxGeometry(.16,2.05,.03),cm,-.31+k*.155,0,(k%2)*.04);g.add(f)}return g};
   const L=mk(),R=mk(),cg=new T.Group();cg.add(L,R);cg.position.set(bx,1.1,zf+.02);S.add(cg);
-  BOOTHS.push({x:bx,L,R,c:0})})}
+  BOOTHS.push({x:bx,L,R,c:0,seat:seatI})})}
 /* 분유존: 뒷벽 왼쪽 */
 {const z0=-RD/2;S.add(box(3.2,.9,.7,'#f3ead9',-7.05,.45,z0+.38));S.add(box(3.3,.06,.78,'#c98b5a',-7.05,.93,z0+.38));
- S.add(box(.5,.32,.38,'#ffffff',-8.1,1.12,z0+.38));S.add(box(.46,.04,.34,'#9fd3ff',-8.1,1.3,z0+.38));
- S.add(cyl(.15,.17,.3,'#f3f3f3',-7.5,1.11,z0+.36));S.add(cyl(.12,.12,.04,'#bfc5cc',-7.5,1.28,z0+.36));S.add(box(.06,.18,.05,'#555',-7.32,1.14,z0+.36));S.add(cyl(.2,.2,.03,'#9aa3ad',-7.5,.975,z0+.36));
- KET.y=1.35;KET.glow=GL('rgba(255,140,90,.9)',.7);KET.glow.position.set(-7.5,1.05,z0+.42);KET.glow.material.opacity=0;S.add(KET.glow);
- for(let i=0;i<3;i++){const s=new T.Sprite(new T.SpriteMaterial({map:ctex(64,64,(g)=>{const gr=g.createRadialGradient(32,32,0,32,32,32);gr.addColorStop(0,'rgba(255,255,255,.9)');gr.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=gr;g.fillRect(0,0,64,64)}),transparent:true,depthWrite:false}));s.scale.set(.35,.35,1);s.position.set(-7.5+(i-1)*.05,1.35,z0+.36);s.visible=false;S.add(s);KET.steam.push(s)}
- [['#FFD43B',-6.9],['#9fd3ff',-6.6],['#f6a7b8',-6.3]].forEach(([c,x])=>{S.add(cyl(.11,.11,.24,c,x,1.08,z0+.32));S.add(cyl(.115,.115,.04,'#fff',x,1.22,z0+.32))});
- for(let i=0;i<4;i++){S.add(cyl(.05,.05,.2,'#fffaf0',-5.95+i*.13,1.06,z0+.55,10,{transparent:true,opacity:.85}));S.add(sph(.04,'#f2c48d',-5.95+i*.13,1.2,z0+.55))}
+ S.add(box(.5,.32,.38,'#ffffff',-8.3,1.12,z0+.38));S.add(box(.46,.04,.34,'#9fd3ff',-8.3,1.3,z0+.38));
+ KET.g=G(cyl(.15,.17,.3,'#f3f3f3',0,.15,0),cyl(.12,.12,.04,'#bfc5cc',0,.32,0),box(.06,.18,.05,'#555',.18,.18,0),cyl(.025,.035,.16,'#f3f3f3',-.17,.22,0).rotateZ(.9));KET.g.position.set(-7.8,.96,z0+.36);S.add(KET.g);S.add(cyl(.2,.2,.03,'#9aa3ad',-7.8,.975,z0+.36));
+  KET.y=1.35;KET.glow=GL('rgba(255,140,90,.9)',.7);KET.glow.position.set(-7.8,1.05,z0+.42);KET.glow.material.opacity=0;S.add(KET.glow);
+ for(let i=0;i<3;i++){const s=new T.Sprite(new T.SpriteMaterial({map:ctex(64,64,(g)=>{const gr=g.createRadialGradient(32,32,0,32,32,32);gr.addColorStop(0,'rgba(255,255,255,.9)');gr.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=gr;g.fillRect(0,0,64,64)}),transparent:true,depthWrite:false}));s.scale.set(.35,.35,1);s.position.set(-7.8+(i-1)*.05,1.35,z0+.36);s.visible=false;S.add(s);KET.steam.push(s)}
+ [['#FFD43B',-6.15],['#9fd3ff',-5.88],['#f6a7b8',-5.61]].forEach(([c,x])=>{S.add(cyl(.11,.11,.24,c,x,1.08,z0+.32));S.add(cyl(.115,.115,.04,'#fff',x,1.22,z0+.32))});
+ for(let i=0;i<4;i++){S.add(cyl(.05,.05,.2,'#fffaf0',-7.45+i*.12,1.06,z0+.2,10,{transparent:true,opacity:.85}));S.add(sph(.04,'#f2c48d',-7.45+i*.12,1.2,z0+.2))}
  S.add(box(.45,1.3,.45,'#e9eef5',-8.35,.65,z0+1.25));S.add(box(.2,.1,.05,'#7fb3e8',-8.35,1,z0+1.48));
- S.add(cyl(.45,.45,.06,'#c98b5a',-6.6,.75,z0+1.9));S.add(cyl(.05,.05,.72,'#9a6a46',-6.6,.37,z0+1.9));
+ S.add(cyl(.45,.45,.06,'#c98b5a',-7.9,.75,z0+2.7));S.add(cyl(.05,.05,.72,'#9a6a46',-7.9,.37,z0+2.7));
  sign('분유존',-7.05,2.4,z0+.03,0,1.6);
- XBLOCK.push([-8.75,z0,-5.4,z0+.8],[-8.65,z0+.95,-8.05,z0+1.55],[-7.1,z0+1.4,-6.1,z0+2.4]);
- for(const a of[0,2.1,4.2]){const x=-6.6+Math.sin(a)*.85,z=z0+1.9+Math.cos(a)*.85;S.add(cyl(.2,.2,.42,'#ffe28a',x,.21,z));addSeat(x,z,Math.atan2(-6.6-x,z0+1.9-z),.28,.5,.5)}}
+ XBLOCK.push([-8.75,z0,-5.4,z0+.8],[-8.65,z0+.95,-8.05,z0+1.55],[-8.4,z0+2.2,-7.4,z0+3.2]);
+ for(const a of[0,1.6,3.6]){const x=-7.9+Math.sin(a)*.85,z=z0+2.7+Math.cos(a)*.85;S.add(cyl(.2,.2,.42,'#ffe28a',x,.21,z));addSeat(x,z,Math.atan2(-7.9-x,z0+2.7-z),.28,.5,.5)}}
 /* 소파 2개 */
 function sofa(x,z,ry,col,n){const g=new T.Group();const w=n*.75+.3;g.add(box(w,.4,.85,col,0,.2,0),box(w,.6,.2,col,0,.7,-.35),box(.18,.55,.85,col,-w/2+.09,.45,0),box(.18,.55,.85,col,w/2-.09,.45,0));
  for(let i=0;i<n;i++)g.add(box(.68,.12,.6,'#fff3ea',-((n-1)*.75)/2+i*.75,.46,.05));g.position.set(x,0,z);g.rotation.y=ry;S.add(g);
@@ -358,6 +358,24 @@ function feedChair(x,z,ry){const g=new T.Group(),fr='#5b5f63',fb='#c9b48f';
  FEEDSEATS.push(SEATS.length);addSeat(x,z,ry,.34,.8,.8);XBLOCK.push([x-.45,z-.45,x+.45,z+.45])}
 feedChair(-4.5,-5.2,.25);feedChair(-3.1,-5.2,-.15);
 sign('수유의자',-3.8,2.78,-RD/2+.03,0,1.3);
+
+/* 분유 만들기 소품: 작업 젖병·스푼·물줄기·가루 */
+const FSPOT=[-7.35,-RD/2+1.2];
+const FPROP=(()=>{const z0=-RD/2,bx=-6.7,bz=z0+.62,by=.96;
+ const milk=cyl(.07,.07,.26,'#eaf4ff',0,.13,0,14);const lv=v=>{milk.scale.y=v;milk.position.y=.13*v};lv(.01);
+ const wb=G(cyl(.078,.078,.3,'#ffffff',0,.15,0,14,{transparent:true,opacity:.4}),milk,cyl(.082,.082,.05,'#f6a7b8',0,.32,0,14));wb.position.set(bx,by,bz);wb.visible=false;S.add(wb);
+ const sc=G(box(.03,.03,.22,'#ffffff',0,0,.1),sph(.05,'#ffffff',0,0,-.02,1,.6,1),sph(.035,'#fff3d6',0,.02,-.02,1,.5,1));const can=[-6.15,1.27,z0+.32];sc.position.set(...can);S.add(sc);
+ const pw=[];for(let i=0;i<6;i++){const p=sph(.018,'#fff3d6',0,0,0);p.visible=false;S.add(p);pw.push(p)}
+ const st=cyl(.015,.015,1,'#bfe3ff',0,0,0,8,{transparent:true,opacity:.8});st.visible=false;S.add(st);
+ const kHome=[-7.8,.96,z0+.36];
+ return{reset(){wb.visible=false;lv(.01);sc.position.set(...can);sc.rotation.set(0,0,0);pw.forEach(p=>p.visible=false);st.visible=false;KET.g.position.set(...kHome);KET.g.rotation.set(0,0,0);this.boil(-1)},
+  boil(f){const on=f>=0&&f<1;KET.glow.material.opacity=on?.9:0;KET.steam.forEach((s,i)=>{s.visible=f>=0;if(f>=0){const u=(KET.t+i*.33)%1;s.position.y=1.35+u*.6;s.material.opacity=.5*(1-u)}});KET.t+=.016;if(f>=0)wb.visible=true},
+  scoop(f){if(f<0){pw.forEach(p=>p.visible=false);sc.position.set(...can);sc.rotation.set(0,0,0);return}wb.visible=true;const n=Math.floor(f*3),u=(f*3)%1;
+   const x=u<.5?can[0]+(bx-can[0])*(u/.5):bx+(can[0]-bx)*((u-.5)/.5),y=1.27+Math.sin(Math.min(1,u*2)*Math.PI)*.25;sc.position.set(x,y,can[2]+(bz-can[2])*(u<.5?u/.5:1-(u-.5)/.5));sc.rotation.z=u>.4&&u<.6?-1.2:0;
+   pw.forEach((p,i)=>{const on=u>.42&&u<.75;p.visible=on;if(on){const v=(u-.42)/.33;p.position.set(bx+(i%3-1)*.02,by+.42-v*.3-i*.02,bz+(i%2)*.02)}});lv(Math.max(.01,.06*n+.06*Math.min(1,u)));milk.material.color.set('#fff3d6')},
+  pour(f){if(f<0){st.visible=false;KET.g.position.set(...kHome);KET.g.rotation.set(0,0,0);return}wb.visible=true;const up=Math.min(1,f*3);KET.g.position.set(kHome[0]+(bx+.28-kHome[0])*up,kHome[1]+.35*up,kHome[2]+(bz-kHome[2])*up);KET.g.rotation.z=up*.9;
+   st.visible=f>.3&&f<.92;st.scale.y=.32;st.position.set(bx+.05,by+.52,bz);lv(Math.min(1,.2+Math.max(0,(f-.3)/.6)*.8));milk.material.color.set(f>.3?'#fff6e2':'#fff3d6')},
+  hideBottle(){wb.visible=false;lv(.01)}}})();
 
 function konny(av,col,col2){const b=av.bod;
  /* 크로스 어깨끈 (뒤에서 X) */
@@ -423,7 +441,7 @@ cvs.addEventListener('pointermove',e=>{if(!PT.has(e.pointerId))return;const pv=P
 const pUp=e=>{const had=PT.has(e.pointerId);PT.delete(e.pointerId);if(!had)return;if(PT.size==0){if(!pinched&&!dragging&&down&&Math.hypot(e.clientX-down[0],e.clientY-down[1])<14)tapAt(e);dragging=false;down=null;setTimeout(()=>{pinched=false},50)}};
 cvs.addEventListener("pointerup",pUp);cvs.addEventListener('pointercancel',e=>{PT.delete(e.pointerId);down=null});
 cvs.addEventListener('wheel',e=>{e.preventDefault();zoomK=Math.max(.45,Math.min(3.1,zoomK*(1+e.deltaY*.0012)))},{passive:false});
-function tapAt(e){if(!me.room)return;closeMenu();const r=R.domElement.getBoundingClientRect();mv.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(mv,cam);
+function tapAt(e){if(!me.room)return;closeMenu();if(me.fm&&me.fm<7){me.fm=0;FPROP.reset();renderCard()}breastPend=false;const r=R.domElement.getBoundingClientRect();mv.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(mv,cam);
  const ids=Object.keys(AV).filter(id=>id!==myId);let hitId=null,best=1e9;
  for(const id of ids){const h=ray.intersectObject(AV[id].a.root,true);if(h.length&&h[0].distance<best){best=h[0].distance;hitId=id}}
  if(hitId){openMenu(hitId);return}
@@ -432,7 +450,7 @@ function tapAt(e){if(!me.room)return;closeMenu();const r=R.domElement.getBoundin
  const h=ray.intersectObject(floor);if(h.length){pendSeat=-1;PAN.set(0,0,0);tgt=clampXZ(h[0].point.x,h[0].point.z);ring.position.set(tgt[0],.03,tgt[1]);ring.material.opacity=1}}
 let pendSeat=-1;
 function seatTaken(i){return others().some(p=>p.state.room===me.room&&p.state.sit===i+1)}
-function standUp(){if(me.sit){if(me.st=='bottle'){me.st='';me.fm=0;toast('수유 끝')}else if(me.fm==6)me.fm=5;const s=SEATS[me.sit-1];me.sit=0;const p=clampXZ(s.x+Math.sin(s.ry)*.8,s.z+Math.cos(s.ry)*.8);me.x=p[0];me.z=p[1];pushP()}}
+function standUp(){if(me.sit){if(me.st=='bottle'){me.st='';me.fm=0;toast('수유 끝')}if(me.st=='feed'){me.st='';toast('수유 끝')}const s=SEATS[me.sit-1];me.sit=0;const p=clampXZ(s.x+Math.sin(s.ry)*.8,s.z+Math.cos(s.ry)*.8);me.x=p[0];me.z=p[1];pushP()}}
 document.querySelectorAll('#zoom button').forEach(b=>b.onclick=()=>{zoomK=Math.max(.45,Math.min(3.1,zoomK+(+b.dataset.z)*.3))});
 function openMenu(id){const o=AV[id];closeMenu();menuEl=document.createElement('div');menuEl.className='menu';const fdg=o.st&&(o.st.st=='feed'||o.st.st=='bottle');menuEl.innerHTML='<button>'+(fdg?'토닥':'쓰담')+'</button><button class="w">미니홈피</button>';app.appendChild(menuEl);menuEl.dataset.id=id;
  const [b1,b2]=menuEl.querySelectorAll('button');b1.onclick=()=>{sendPat(id);closeMenu()};b2.onclick=()=>{closeMenu();openHome(id,o.st.nick)}}
@@ -451,28 +469,34 @@ let tab='feed';
 document.querySelectorAll('#dock button').forEach(b=>b.onclick=()=>{if(!me.room)return;const t=b.dataset.t;
  if(t=='home'){openHome(myId,me.nick);return}if(t=='aide'){openAide();return}
  tab=t;document.querySelectorAll('#dock button').forEach(x=>x.classList.toggle('on',x==b));closeSheet();renderCard()});
-const FM=[['분유포트에 물 끓이기','끓인 물을 70도 정도로 식혀요'],['젖병에 분유 넣기','스푼 깎아서 정량대로 (탭 3번)'],['물 붓기','눈금까지 물 맞추기'],['젖병 흔들기','뭉치지 않게 흔들흔들 (탭 6번)'],['수유의자로 가기','손목 안쪽에 한 방울 떨어뜨려 온도 확인'],['아기한테 젖병 물리기','아기 고개를 살짝 들고 천천히']];
-let fmTap=0,boilT=0,boilAt=0,stuckT=0;
-function renderFormula(c){const done=me.fm;
- if(me.st=='bottle'){const mins=Math.floor((Date.now()-me.stAt)/60000);c.innerHTML='<b>분유 먹이는 중</b>'+mins+'분째 · 꿀꺽꿀꺽<div class="bar"><i style="width:'+Math.min(100,mins/20*100)+'%"></i></div>다 먹으면 트림 꼭!'+feedersHTML()+'<br><button id="bp">아기 토닥</button> <button id="cb">트림시키고 끝내기</button>';bindPats(c);$('bp').onclick=babyPat;$('cb').onclick=()=>{me.st='';me.fm=0;pushP();toast('트림 성공! 수고했어');renderCard()};return}
- const i=Math.min(done,5);const step=done==0?0:done==1?0:done-1;
- c.innerHTML='<b>분유 타기</b>'+FM.map((s,k)=>'<div style="opacity:'+(k<step?'.45':k==step?'1':'.7')+'">'+(k<step?'✔ ':(k+1)+'. ')+(k==step?'<b style="display:inline">'+s[0]+'</b>':s[0])+'</div>').join('')+
-  '<small style="color:#8a7a68">'+FM[step][1]+'</small><div class="bar"><i id="fbar" style="width:'+(me.fm==1?Math.min(100,boilT/5*100):fmTap/(step==1?3:step==3?6:1)*100)+'%"></i></div>'+
-  (me.fm==1?'<button disabled>'+(boilT<3.5?'보글보글 끓는 중…':'70도로 식히는 중…')+'</button>':'<button id="cb">'+(['물 끓이기','분유 한 스푼','물 붓기','흔들흔들','수유의자로 가기','젖병 물리기'][step])+'</button>')+(me.fm>0?' <button id="cx" style="background:#eee;color:#2B2118">그만</button>':'');
- const cx=$('cx');if(cx)cx.onclick=()=>{me.fm=0;fmTap=0;pushP();renderCard()};
- const cb=$('cb');if(!cb)return;cb.onclick=()=>{
-  if(step==0){me.fm=1;boilT=0;boilAt=Date.now();pushP()}
-  else if(step==1){fmTap++;if(fmTap>=3){fmTap=0;me.fm=3;toast('분유 정량 쏙')}}
-  else if(step==2){me.fm=4;toast('젖병 들었어');pushP();ensure(myId,meState(),true)}
-  else if(step==3){fmTap++;if(AV[myId])AV[myId].a.shake=.45;if(fmTap>=6){fmTap=0;me.fm=5;toast('손목에 한 방울 · 미지근하면 OK');pushP()}}
-  else if(step==4){const i=FEEDSEATS.find(k=>!seatTaken(k));if(i===undefined){toast('수유의자가 다 찼어. 잠깐만');return}standUp();pendSeat=i;const s=SEATS[i];tgt=clampXZ(s.x+Math.sin(s.ry)*.8,s.z+Math.cos(s.ry)*.8);ring.position.set(s.x,.03,s.z);ring.material.opacity=1}
-  else if(step==5){me.st='bottle';me.stAt=Date.now();pushP();toast('꿀꺽꿀꺽')}
-  renderCard()}}
+/* ---------- 분유·모유 자동 진행 ---------- */
+const FSTEP=['분유존으로 가는 중','분유포트에 물 끓이는 중','젖병에 분유 3스푼','물 붓기','젖병 흔들기','수유의자로 가는 중','아기한테 젖병 물리는 중'];
+let fmAt=0,stuckT=0,babyLvl=1;
+function startFormula(){standUp();me.st='';me.fm=1;fmAt=Date.now();pendSeat=-1;PAN.set(0,0,0);tgt=clampXZ(FSPOT[0],FSPOT[1]);pushP();renderCard()}
+function stopFormula(){me.fm=0;if(me.st=='bottle')me.st='';FPROP.reset();pushP();renderCard()}
+function startBreast(){const i=BOOTHS.findIndex(b=>Math.abs(me.x-b.x)<.75&&me.z<-RD/2+1.95);const bi=i>=0?i:BOOTHS.findIndex(b=>!others().some(p=>p.state.room===me.room&&p.state.zone=='b'+BOOTHS.indexOf(b)));if(bi<0){toast('수유실이 다 찼어. 잠깐만');return}
+ standUp();me.fm=0;breastPend=true;const s=SEATS[BOOTHS[bi].seat];pendSeat=BOOTHS[bi].seat;PAN.set(0,0,0);tgt=clampXZ(s.x,s.z+.55);renderCard()}
+let breastPend=false;
+function fmTick(){if(!me.fm||me.fm>=7)return;const el=(Date.now()-fmAt)/1000;if(me.fm>=2&&me.fm<=4&&AV[myId])AV[myId].a.root.rotation.y=2.55;
+ if(me.fm==1&&!tgt){me.fm=2;fmAt=Date.now();pushP();renderCard();return}
+ if(me.fm==2){FPROP.boil(Math.min(1,el/3));if(el>3.2){me.fm=3;fmAt=Date.now();renderCard()}return}
+ if(me.fm==3){FPROP.boil(-1);FPROP.scoop(el/3.6);if(el>3.6){me.fm=4;fmAt=Date.now();renderCard()}return}
+ if(me.fm==4){FPROP.scoop(-1);FPROP.pour(el/2.6);if(el>2.6){FPROP.pour(-1);FPROP.hideBottle();me.fm=5;fmAt=Date.now();pushP();renderCard()}return}
+ if(me.fm==5){if(AV[myId])AV[myId].a.shake=.2;if(el>1.8){const i=FEEDSEATS.find(k=>!seatTaken(k));if(i===undefined){if(el>2&&Math.round(el)%5==0)toast('수유의자가 다 찼어. 자리 나면 갈게');return}me.fm=6;fmAt=Date.now();pendSeat=i;const s=SEATS[i];tgt=clampXZ(s.x+Math.sin(s.ry)*.8,s.z+Math.cos(s.ry)*.8);pushP();renderCard()}return}
+ if(me.fm==6&&!tgt&&me.sit&&FEEDSEATS.includes(me.sit-1)){me.fm=7;me.st='bottle';me.stAt=Date.now();babyLvl=1;pushP();toast('꿀꺽꿀꺽');renderCard()}}
+function renderFormula(c){
+ if(me.st=='bottle'){const mins=Math.floor((Date.now()-me.stAt)/60000);c.innerHTML='<b>분유 먹이는 중</b>'+mins+'분째 · 꿀꺽꿀꺽<div class="bar"><i style="width:'+Math.round((1-babyLvl)*100)+'%"></i></div>다 먹으면 트림 꼭!'+feedersHTML()+'<br><button id="bp">아기 토닥</button> <button id="cb">트림시키고 끝내기</button>';bindPats(c);$('bp').onclick=babyPat;$('cb').onclick=()=>{toast('트림 성공! 수고했어');standUp();stopFormula()};return}
+ if(!me.fm){c.innerHTML='<b>분유존</b>포트·분유·젖병 다 있어. 누르면 물 끓이기부터 수유의자까지 알아서 해줘.<br><button id="cb">분유 수유 시작</button>';$('cb').onclick=startFormula;return}
+ const k=me.fm-1;c.innerHTML='<b>분유 타는 중</b>'+FSTEP.map((s,i)=>'<div style="opacity:'+(i<k?'.45':i==k?'1':'.6')+'">'+(i<k?'✔ ':i==k?'▶ ':'· ')+(i==k?'<b style="display:inline">'+s+'</b>':s)+'</div>').join('')+(me.fm==5?'<small style="color:#8a7a68">손목 안쪽에 한 방울, 미지근하면 OK</small>':'')+'<br><button id="cx" style="background:#eee;color:#2B2118">그만</button>';$('cx').onclick=()=>{standUp();stopFormula()}}
+function renderBooth(c){if(me.st=='feed'){const mins=Math.floor((Date.now()-me.stAt)/60000);c.innerHTML='<b>모유수유 중</b>'+mins+'분째 · 커튼 닫혀 있어'+feedersHTML()+'<br><button id="bp">아기 토닥</button> <button id="cb">수유 끝</button>';bindPats(c);$('bp').onclick=babyPat;$('cb').onclick=()=>{me.st='';pushP();toast('수고했어');renderCard()};return}
+ c.innerHTML='<b>모유수유실</b>커튼 치면 다른 엄마들한텐 안 보여.<br><button id="cb">모유수유 시작</button>';$('cb').onclick=startBreast}
 function renderCard(){const c=$('card');if(!me.room){c.style.display='none';return}c.style.display='';
- if(me.zone=='formula'||me.fm>0||me.st=='bottle'){renderFormula(c);return}
+ if(me.fm>0||me.st=='bottle'){renderFormula(c);return}
+ if(me.zone&&me.zone[0]=='b'||breastPend){renderBooth(c);return}
+ if(me.zone=='formula'){renderFormula(c);return}
  const here=others().filter(p=>p.state.room===me.room);
  if(tab=='feed'){const n=here.filter(p=>p.state.st=='feed').length+(me.st=='feed'?1:0);const mins=me.st=='feed'?Math.floor((Date.now()-me.stAt)/60000):0;
-  c.innerHTML='<b>새벽수유 같이 하기</b>'+(me.st=='feed'?'나 · '+mins+'분째 수유 중':'수유 시작하면 같은 방 엄마들한테 보여')+'<div class="bar"><i style="width:'+Math.min(100,mins/30*100)+'%"></i></div>지금 같이 수유 중 '+n+'명'+feedersHTML()+'<button id="cb">'+(me.st=='feed'?'수유 끝':'수유 시작')+'</button>'+(me.st=='feed'?' <button id="bp">아기 토닥</button>':'');bindPats(c);if($('bp'))$('bp').onclick=babyPat;
+  c.innerHTML='<b>새벽수유 같이 하기</b>'+(me.st=='feed'?'나 · '+mins+'분째 수유 중':'수유 시작하면 같은 방 엄마들한테 보여')+'<div class="bar"><i style="width:'+Math.min(100,mins/30*100)+'%"></i></div>지금 같이 수유 중 '+n+'명'+feedersHTML()+(me.st=='feed'?'<button id="cb">수유 끝</button> <button id="bp">아기 토닥</button>':'<button id="fb">분유 수유</button> <button id="bb">모유수유실</button><br><button id="cb" style="margin-top:6px;background:#eee;color:#2B2118">여기서 수유 시작</button>');bindPats(c);if($('bp'))$('bp').onclick=babyPat;if($('fb'))$('fb').onclick=startFormula;if($('bb'))$('bb').onclick=startBreast;
   $('cb').onclick=()=>{if(me.st=='feed'){me.st='';toast('수고했어. 오늘 '+mins+'분')}else{me.st='feed';me.stAt=Date.now()}pushP();ensure(myId,meState(),true);renderCard()}}
  else{const n=here.filter(p=>p.state.st=='dunga').length+(me.st=='dunga'?1:0);
   if(me.kind=='preg'){c.innerHTML='<b>애기 재우기</b>임신 중엔 같이 산책만 해. 아기 태어나면 열려!';return}
@@ -554,23 +578,77 @@ const LAW=[['임신 중',[['임신기 근로시간 단축','12주 이내·32주 
  ['일하면서 키울 때',[['육아기 근로시간 단축','만 12세·초6 이하, 주 15~35시간','남녀고용평등법 제19조의2'],['가족돌봄휴가','연 10일, 하루 단위 (아이 아플 때 연차 대신)','남녀고용평등법 제22조의2'],['방학·휴원 단기 육아휴직','1년 1회 1주 또는 2주 (육아휴직에 포함)','남녀고용평등법 제19조 제6항·제7항']]],
  ['돈 손해 체크',[['연차','출산휴가·육아휴직 기간은 출근한 걸로 봐','근로기준법 제60조 제6항'],['퇴직금','출산휴가·육아휴직 기간은 평균임금 계산에서 빠져','근로기준법 시행령 제2조 제1항'],['복지포인트','임금 아님 → 휴직 때 깎는지는 회사 규정','대법원 2019. 8. 22. 선고 2016다48785 전원합의체']]]];
 const SIDO=['서울','부산','대구','인천','광주','대전','울산','세종','경기','강원','충북','충남','전북','전남','경북','경남','제주'];
-let aTab='todo';
-function leaveCalc(w,n,six){const r=[];let tot=0;const cap6=[250,250,300,350,400,450];for(let k=1;k<=n;k++){let v;if(k<=6&&six)v=Math.min(w,cap6[k-1]);else if(k<=3)v=Math.min(w,250);else if(k<=6)v=Math.min(w,200);else v=Math.min(Math.round(w*.8*10)/10,160);r.push([k,v]);tot+=v}return[r,Math.round(tot*10)/10]}
+let aTab='diag';
+/* ---------- 내 맞춤 진단 (판정표: claude/maternity-case-matrix.md, 2026.11.12 법제처 확인) ---------- */
+const WT=[['emp','회사원','주 15시간 이상'],['short','주 15시간 미만','초단시간'],['day','일용직',''],['fixed','계약직·파견',''],['art','예술인','예술인 고용보험'],['plat','노무제공자','배달·대리·학습지 등'],['self','자영업자','사업자등록'],['free','프리랜서','3.3% 사업소득'],['pub','공무원·교원',''],['none','지금 일 안 함','']];
+let DG={wt:'',ins:'yes',big:'no',w:300,six:false,m:12,child:0,first:true};
+try{const s=JSON.parse(localStorage.getItem('cp_diag')||'null');if(s)DG=Object.assign(DG,s)}catch(e){}
+const saveDG=()=>{try{localStorage.setItem('cp_diag',JSON.stringify(DG))}catch(e){}};
+const won=v=>Math.round(v).toLocaleString()+'만 원';
+function judge(){const R=[],N=[];const w=Math.max(0,+DG.w||0),wt=DG.wt,emp=['emp','day','fixed'].includes(wt),ok=DG.ins=='yes';
+ if(emp||wt=='short'){R.push(['출산전후휴가 90일','쌍둥이 이상 120일, 출산 후 45일 이상, 처음 60일 유급','근로기준법 제74조 제1항·제4항'])}
+ if(emp){if(ok){const c=Math.min(w,220);R.push(['출산전후휴가 급여',DG.big=='yes'?'회사가 60일분 통상임금, 고용보험이 마지막 30일분 약 '+won(c):'고용보험 90일분 약 '+won(c*3)+' (월 상한 220만)','고용보험법 제75조·제76조, 상한액 고시 제2026-67호']);
+   const [r,tot]=leaveCalc(w,DG.m,DG.six);R.push(['육아휴직 급여',DG.m+'개월 약 '+won(tot)+(DG.six?' (6+6 적용)':''),'고용보험법 제70조, 시행령 제95조'+(DG.six?'·제95조의3':'')]);
+   R.push(['육아기 근로시간 단축 급여','주 15~35시간으로 줄이면 줄인 시간만큼 급여','고용보험법 시행령 제104조의2'])}
+  else N.push(['출산휴가·육아휴직 급여','고용보험 가입 180일이 안 되면 급여는 못 받아(휴가·휴직 자체는 가능)','고용보험법 제70조·제75조']);
+  R.push(['육아휴직','만 8세·초2 이하, 1년 · 부모 각각 3개월 넘게 쓰면 6개월 더'+(wt=='fixed'?' · 휴직 기간은 계약 기간에서 빠져':''),'남녀고용평등법 제19조'+(wt=='fixed'?' 제5항':'')]);
+  if(wt=='day')R.push(['참고','일용직은 실제 휴직이 어려울 수 있어. 급여 요건은 상담으로 확인','[확인 필요]'])}
+ if(wt=='short'){N.push(['육아휴직 급여','3개월 미만 초단시간은 고용보험 적용 제외','고용보험법 제10조 제1항 제2호']);R.push(['고용보험 미적용자 출산급여','150만 원 (고용24 신청)','고용24 안내'])}
+ if(wt=='art'){R.push(['예술인 출산전후급여','90일, 월평균보수 기준 약 '+won(Math.min(Math.max(w,60),220)*3)+' (단위기간 3개월 이상)','고용보험법 제77조의4, 시행령 제104조의9 · 상·하한 금액 [확인 필요]']);N.push(['육아휴직 급여','예술인은 대상 아님(근로자 피보험자 제도)','고용보험법 제70조'])}
+ if(wt=='plat'){R.push(['노무제공자 출산전후급여','90일, 월평균보수 기준 약 '+won(Math.min(Math.max(w,60),220)*3),'고용보험법 제77조의9, 시행령 제104조의16 · 상·하한 금액 [확인 필요]']);N.push(['육아휴직 급여','노무제공자는 대상 아님(근로자 피보험자 제도)','고용보험법 제70조'])}
+ if(wt=='self'||wt=='free'){R.push(['고용보험 미적용자 출산급여','150만 원 (고용24 신청, 소득활동 확인)','고용24 안내']);N.push(['출산휴가·육아휴직 급여',wt=='self'?'자영업자는 근로자 제도 대상 아님':'3.3% 프리랜서는 근로자 제도 대상 아님','근로기준법 제74조 · 고용보험법 제70조'])}
+ if(wt=='pub')R.push(['공무원·교원 육아휴직','소속 법령(공무원 수당 규정 등)으로 따로 받아. 고용보험 적용 제외','고용보험법 제10조 제1항 제3호·제4호']);
+ if(wt=='none')N.push(['출산휴가·육아휴직 급여','지금 일하지 않으면 대상 아님','']);
+ R.push(['부모급여',DG.child==0?'0세 월 100만 원':'1세 월 50만 원','보건복지부 2026 안내 · 복지로 [확인 필요]']);
+ R.push(['첫만남이용권',DG.first?'첫째 200만 원':'둘째부터 300만 원','보건복지부 2026 안내 · 복지로 [확인 필요]']);
+ return [R,N]}
+function diagHTML(){
+ let h='<div class="box"><div class="t">내 맞춤 진단 <small>일하는 형태부터 골라줘</small></div><div class="kpick" id="dwt">'+WT.map(([k,n,s])=>'<button data-w="'+k+'" class="'+(DG.wt==k?'on':'')+'">'+n+'</button>').join('')+'</div>'+
+  '<div class="lk" style="margin-top:8px"><a id="dfetch"><b>내 정보 자동으로 불러오기</b> · 간편인증 한 번이면 고용보험·건강보험 기록으로 일하는 형태와 월급을 찬이가 채워줘 <small style="display:block;color:#8a7a68">정식 오픈 준비 중 · 지금은 직접 골라줘</small></a></div></div>';
+ if(!DG.wt)return h;
+ const emp=['emp','day','fixed'].includes(DG.wt);
+ h+='<div class="box calc"><div class="t">조금만 더</div>'+
+  (emp?'<label>고용보험 가입 180일 넘었어?</label><div class="kpick" id="dins">'+[['yes','넘었어'],['no','아직'],['?','모르겠어']].map(([k,n])=>'<button data-v="'+k+'" class="'+(DG.ins==k?'on':'')+'">'+n+'</button>').join('')+'</div><label>회사 규모</label><div class="kpick" id="dbig">'+[['no','중소기업'],['yes','대기업']].map(([k,n])=>'<button data-v="'+k+'" class="'+(DG.big==k?'on':'')+'">'+n+'</button>').join('')+'</div>':'')+
+  (['emp','day','fixed','art','plat'].includes(DG.wt)?'<div class="row"><div><label>'+(emp?'월 통상임금':'월평균 보수')+'(만 원)</label><input id="dw" type="number" inputmode="numeric" value="'+DG.w+'"></div>'+(emp?'<div><label>육아휴직 개월</label><input id="dm" type="number" inputmode="numeric" value="'+DG.m+'" min="1" max="18"></div>':'')+'</div>':'')+
+  (emp?'<label style="display:flex;gap:8px;align-items:center;font-size:14px;color:var(--ink);margin-top:8px"><input type="checkbox" id="dsix" style="width:22px;min-height:22px" '+(DG.six?'checked':'')+'> 생후 18개월 안에 남편도 육아휴직 써 (6+6)</label>':'')+
+  '<label>아이</label><div class="kpick" id="dch">'+[['0','0세(출산 전 포함)'],['1','1세']].map(([k,n])=>'<button data-v="'+k+'" class="'+(String(DG.child)==k?'on':'')+'">'+n+'</button>').join('')+'</div><div class="kpick" id="dfi">'+[['1','첫째'],['0','둘째부터']].map(([k,n])=>'<button data-v="'+k+'" class="'+((DG.first?'1':'0')==k?'on':'')+'">'+n+'</button>').join('')+'</div></div>';
+ const [R,N]=judge();
+ h+='<div class="box law" id="dres"><div class="t">받을 수 있는 것 '+R.length+'개 <small>'+esc(WT.find(x=>x[0]==DG.wt)[1])+' 기준</small></div><ul style="padding-left:18px;margin:0">'+R.map(i=>'<li><b>'+i[0]+'</b> · '+esc(i[1])+'<br><small>근거 · '+i[2]+'</small></li>').join('')+'</ul>'+
+  (N.length?'<h5 style="color:#8a7a68">해당 안 되는 것</h5><ul style="padding-left:18px;margin:0;color:#8a7a68">'+N.map(i=>'<li>'+i[0]+' · '+esc(i[1])+(i[2]?'<br><small>'+i[2]+'</small>':'')+'</li>').join('')+'</ul>':'')+
+  '<p class="note">입력한 정보로 계산한 예상치야. 확인 필요 표시는 공식 고시·안내를 한 번 더 보고 확정할게.</p><button class="btn" id="dreq" style="width:100%">노무사 엄마한테 신청 맡기기</button></div>';
+ return h}
+function bindDiag(){const re=()=>{saveDG();const y=sb.scrollTop;openAide();sb.scrollTop=y};
+ sb.querySelectorAll('#dwt button').forEach(b=>b.onclick=()=>{DG.wt=b.dataset.w;re()});
+ [['dins','ins'],['dbig','big']].forEach(([id,k])=>{const e=$(id);if(e)e.querySelectorAll('button').forEach(b=>b.onclick=()=>{DG[k]=b.dataset.v;re()})});
+ const ch=$('dch');if(ch)ch.querySelectorAll('button').forEach(b=>b.onclick=()=>{DG.child=+b.dataset.v;re()});
+ const fi=$('dfi');if(fi)fi.querySelectorAll('button').forEach(b=>b.onclick=()=>{DG.first=b.dataset.v=='1';re()});
+ const upd=()=>{const r=$('dres');if(!r)return;const tmp=document.createElement('div');tmp.innerHTML=diagHTML();const nr=tmp.querySelector('#dres');if(nr){r.innerHTML=nr.innerHTML;const q=$('dreq');if(q)q.onclick=openReq}saveDG()};
+ if($('dw'))$('dw').oninput=e=>{DG.w=+e.target.value||0;upd()};if($('dm'))$('dm').oninput=e=>{DG.m=Math.max(1,Math.min(18,+e.target.value||1));upd()};if($('dsix'))$('dsix').onchange=e=>{DG.six=e.target.checked;upd()};
+ $('dfetch').onclick=()=>toast('간편인증 불러오기는 곧 열려 · 지금은 직접 골라줘');
+ const q=$('dreq');if(q)q.onclick=openReq}
+function openReq(){const [R]=judge();openSheet('신청 맡기기');
+ sb.innerHTML='<div class="box"><div class="t">노무사 엄마가 대신 해줄게</div><div style="font-size:14px;line-height:1.6">진단 결과를 보고 노무사가 연락해서 서류를 같이 챙기고, 고용보험 급여처럼 노무사가 대신 낼 수 있는 신청은 대신 내줘.<br><small style="color:#8a7a68">대행 범위 · 공인노무사법 제2조 제1항 (부모급여·첫만남이용권처럼 노동관계법이 아닌 신청은 같이 준비만 해줄 수 있어) [확인 필요]</small></div>'+
+ '<label>이름 또는 별명</label><input id="rq_n" maxlength="20" value="'+esc(me.nick)+'"><label>연락받을 곳 (카톡 아이디나 휴대폰)</label><input id="rq_c" maxlength="40" autocapitalize="off"><label>하고 싶은 말 (선택)</label><textarea id="rq_m" maxlength="300"></textarea>'+
+ '<label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--ink);margin:10px 0"><input type="checkbox" id="rq_ok" style="width:22px;min-height:22px;flex:none"> 상담·신청 대행을 위해 이름·연락처·진단 결과를 수집하는 데 동의해. 상담이 끝나면 지워줘.</label><button class="btn" id="rq_s" style="width:100%">맡기기</button></div>';
+ $('rq_s').onclick=async()=>{const c=$('rq_c').value.trim();if(!c){toast('연락받을 곳을 적어줘');return}if(!$('rq_ok').checked){toast('동의에 체크해줘');return}
+  if(typeof SB=='undefined'||!SB||!uid){toast('아직 연결 중이야. 잠시 뒤 다시');return}
+  const r=await SB.from('requests').insert({uid:uid,name:$('rq_n').value.slice(0,20),contact:c.slice(0,40),memo:$('rq_m').value.slice(0,300),diag:{in:DG,result:R.map(x=>x[0]+' · '+x[1])}});
+  if(r.error){toast('접수가 안 됐어. 카톡 상담으로 연락줘');return}
+  sb.innerHTML='<div class="box"><div class="t">접수됐어</div>노무사 엄마가 곧 연락할게. 급하면 카톡으로 바로 말해줘.<a class="kakao" href="http://pf.kakao.com/_xmxmxjxeX" target="_blank" rel="noopener">카톡으로 노무사 상담</a></div>'}}
+function leaveCalc(w,n,six){const r=[];let tot=0;const cap6=[250,250,300,350,400,450];for(let k=1;k<=n;k++){let v;if(k<=6&&six)v=Math.min(w,cap6[k-1]);else if(k<=3)v=Math.min(w,250);else if(k<=6)v=Math.min(w,200);else v=Math.min(Math.round(w*.8*10)/10,160);v=Math.max(v,Math.min(70,w));r.push([k,v]);tot+=v}return[r,Math.round(tot*10)/10]}
 function openAide(){openSheet('육아비서 찬이');const t=TODO[me.kind]||TODO.carrier;
- const tabs=[['todo','내 시기 할 일'],['law','모성보호 전체'],['money','지원금 계산'],['region','지역 지원금'],['ask','찬이에게 묻기']];
+ const tabs=[['todo','내 시기 할 일'],['law','모성보호 전체'],['diag','내 맞춤 진단'],['region','지역 지원금'],['ask','찬이에게 묻기']];
  let body='';
  if(aTab=='todo')body='<div class="box"><div class="t">지금 시기에 챙길 것 <small>'+esc(KINDS[me.kind].label)+' 기준</small></div>'+t.map(x=>'<div class="todo"><span class="dd">'+x[0]+'</span><div><b>'+x[1]+'</b><small>'+x[2]+'</small></div></div>').join('')+'<p class="note">시기는 미니홈피 꾸미기에서 바꿀 수 있어.</p></div>';
  if(aTab=='law')body='<div class="box law"><div class="t">임신부터 초6까지 모성보호 <small>2026.11 법제처 확인</small></div>'+LAW.map(([g,items])=>'<h5>'+g+'</h5><ul style="padding-left:18px;margin:0">'+items.map(i=>'<li><b>'+i[0]+'</b> · '+i[1]+'<br><small>근거 · '+i[2]+'</small></li>').join('')+'</ul>').join('')+'<p class="note">회사 규정·개별 사정에 따라 다를 수 있어. 내 상황 판단은 상담으로.</p></div>';
- if(aTab=='money')body='<div class="box calc"><div class="t">육아휴직 급여 계산 <small>시행령 제95조·제95조의3</small></div><div class="row"><div><label>월 통상임금(만 원)</label><input id="cw" type="number" inputmode="numeric" value="300"></div><div><label>쉬는 개월 수</label><input id="cn" type="number" inputmode="numeric" value="12" min="1" max="18"></div></div><label style="display:flex;gap:8px;align-items:center;font-size:14px;color:var(--ink);margin-top:8px"><input type="checkbox" id="c6" style="width:22px;min-height:22px"> 생후 18개월 안에 엄마 아빠 둘 다 써 (6+6)</label><div id="cout"></div><small>상한만 반영한 예상치야. 하한·단축급여·실제 지급은 고용24 모의계산으로 확인.</small></div>'+
-  '<div class="box calc"><div class="t">출산·양육 지원금 <small>2026 기준</small></div><table><tr><th>제도</th><th>금액</th></tr><tr><td>출산휴가 급여(고용보험)</td><td>90일 상한 660만</td></tr><tr><td>부모급여 0세</td><td>월 100만</td></tr><tr><td>부모급여 1세</td><td>월 50만</td></tr><tr><td>첫만남이용권</td><td>첫째 200만 · 둘째 이상 300만</td></tr></table><small>출산휴가 급여는 고시 제2026-67호 확인. 부모급여·첫만남이용권은 보건복지부 2026 안내 기준이라 신청 전 복지로에서 한 번 더 확인해줘. 2027년 개편안은 국회 확정 전이야.</small>'+
-  '<div class="lk"><a href="https://www.work24.go.kr" target="_blank" rel="noopener"><b>고용24</b> · 육아휴직·출산휴가 급여 신청·모의계산</a><a href="https://www.bokjiro.go.kr" target="_blank" rel="noopener"><b>복지로</b> · 부모급여·첫만남이용권·아동수당</a></div></div>';
+ if(aTab=='diag')body=diagHTML();
  if(aTab=='region')body='<div class="box"><div class="t">우리 동네 출산·육아 지원금</div><div class="row" style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><div><label>시·도</label><select id="rsd">'+SIDO.map(s=>'<option'+(s=='울산'?' selected':'')+'>'+s+'</option>').join('')+'</select></div><div><label>시·군·구</label><input id="rsg" placeholder="예) 남구"></div></div><div class="lk" id="rlk"></div><p class="note">지금은 공식 사이트로 바로 이어줘. 우리 동네 지원금을 이 화면에 바로 띄우는 건 공공데이터 연결(대한민국 공공서비스 정보) 붙이면 열려.</p></div>';
  if(aTab=='ask')body='<div class="box chat"><div class="t">찬이한테 묻기 <small>'+(SAMPLE?'AI 답변 · 근거 조문 포함':'자주 묻는 질문부터')+'</small></div><div id="log">'+(chat.length?chat.map(m=>m.role=='user'?'<div class="q"><span>'+esc(m.content)+'</span></div>':'<div class="a"><span>'+esc(m.content)+'</span></div>').join(''):'<div class="a"><span>안녕, 노무사엄마가 만든 육아비서 찬이야. 회사·제도 뭐든 물어봐.</span></div>')+'</div>'+
  '<div class="chips">'+['육아휴직 회사가 거절할 수 있어?','복직하는데 다른 부서로 가래','단축근무하면 월급 깎여?'].map(q=>'<button>'+q+'</button>').join('')+'</div><div class="ask"><input id="aq" placeholder="찬이한테 물어보기" maxlength="300"><button class="btn k" id="asend">보내기</button></div>'+
  '<a class="kakao" href="http://pf.kakao.com/_xmxmxjxeX" target="_blank" rel="noopener">카톡으로 노무사 상담</a><p class="note">찬이 답변은 참고용이야. 내 사건에 맞는 판단은 노무사 상담으로.</p></div>';
  sb.innerHTML='<div class="atabs">'+tabs.map(([k,n])=>'<button data-a="'+k+'" class="'+(aTab==k?'on':'')+'">'+n+'</button>').join('')+'</div>'+body;sb.scrollTop=0;
  sb.querySelectorAll('.atabs button').forEach(b=>b.onclick=()=>{aTab=b.dataset.a;openAide()});
- if(aTab=='money'){const f=()=>{const w=Math.max(0,+$('cw').value||0),n=Math.max(1,Math.min(18,+$('cn').value||1)),[r,tot]=leaveCalc(w,n,$('c6').checked);$('cout').innerHTML='<table><tr><th>개월</th><th>예상(만 원)</th></tr>'+r.map(([k,v])=>'<tr><td>'+k+'개월</td><td>'+v.toLocaleString()+'</td></tr>').join('')+'</table><div class="sum">합계 약 '+tot.toLocaleString()+'만 원</div>'};['cw','cn'].forEach(i=>$(i).oninput=f);$('c6').onchange=f;f()}
+ if(aTab=='diag')bindDiag();
  if(aTab=='region'){const f=()=>{const r=$('rsd').value+' '+($('rsg').value||'').trim();const q=encodeURIComponent(r.trim()+' 출산지원금 2026');$('rlk').innerHTML='<a href="https://www.gov.kr/portal/rcvfvrSvc/main" target="_blank" rel="noopener"><b>보조금24</b> · 로그인하면 내가 받을 수 있는 혜택 한 번에</a><a href="https://www.bokjiro.go.kr" target="_blank" rel="noopener"><b>복지로</b> · 지역 복지서비스 찾기</a><a href="https://search.naver.com/search.naver?query='+q+'" target="_blank" rel="noopener"><b>'+esc(r.trim())+'</b> 출산지원금 검색 결과 보기</a>'};$('rsd').onchange=f;$('rsg').oninput=f;f()}
  if(aTab=='ask'){sb.querySelectorAll('.chips button').forEach(b=>b.onclick=()=>ask(b.textContent));$('asend').onclick=()=>ask($('aq').value);$('aq').onkeydown=e=>{if(e.key=='Enter')ask($('aq').value)}}}
 const FAQ={'육아휴직 회사가 거절할 수 있어?':'요건을 갖춘 근로자가 신청하면 회사는 허용해야 해. 거절하면 벌칙 대상이야. 회사가 미루거나 눈치 주면 신청서를 서면으로 남겨두고 노무사랑 상의해.\n근거 · 남녀고용평등법 제19조①','복직하는데 다른 부서로 가래':'휴직 전과 같은 업무 또는 같은 수준 임금을 받는 직무로 복귀시키는 게 원칙이야. 휴직했다는 이유로 불리하게 대하면 안 돼. 발령 문서를 받아두고 바로 상담해.\n근거 · 남녀고용평등법 제19조③④','단축근무하면 월급 깎여?':'임신기 근로시간 단축은 임금을 깎을 수 없어. 육아기 근로시간 단축은 줄어든 시간만큼 임금이 조정될 수 있지만, 단축했다는 이유로 불리하게 대하면 안 돼.\n근거 · 근로기준법 제74조⑧ · 남녀고용평등법 제19조의2 (세부 조문은 확인 필요)'};
@@ -588,20 +666,22 @@ const V=new T.Vector3(),clk=new T.Clock();
 function place(e,x,y,z){V.set(x,y,z);V.project(cam);e.style.left=((V.x+1)/2*app.clientWidth)+'px';e.style.top=((1-V.y)/2*app.clientHeight)+'px'}
 function loop(){requestAnimationFrame(loop);const dt=Math.min(.1,clk.getDelta());
  if(me.room&&AV[myId]){const o=AV[myId];
-  if(tgt){const dx=tgt[0]-me.x,dz=tgt[1]-me.z,d=Math.hypot(dx,dz);if(d<.05){tgt=null;if(pendSeat>=0){const s=SEATS[pendSeat];me.sit=pendSeat+1;me.x=s.x;me.z=s.z;if(me.fm==5&&FEEDSEATS.includes(pendSeat)){me.fm=6;toast('수유의자 착석 · 젖병 물려줘');renderCard()}pendSeat=-1;pushP()}}else{const s=Math.min(d,2.6*dt);const ux=dx/d*s,uz=dz/d*s;let p=clampXZ(me.x+ux,me.z+uz);
+  if(tgt){const dx=tgt[0]-me.x,dz=tgt[1]-me.z,d=Math.hypot(dx,dz);if(d<.05){tgt=null;if(pendSeat>=0){const s=SEATS[pendSeat];me.sit=pendSeat+1;me.x=s.x;me.z=s.z;if(breastPend){breastPend=false;me.st='feed';me.stAt=Date.now();toast('모유수유 시작 · 커튼 쳤어');renderCard()}pendSeat=-1;pushP()}}else{const s=Math.min(d,2.6*dt);const ux=dx/d*s,uz=dz/d*s;let p=clampXZ(me.x+ux,me.z+uz);
     if(Math.hypot(p[0]-me.x,p[1]-me.z)<s*.4){const px=clampXZ(me.x+(ux>=0?1:-1)*s,me.z),pz=clampXZ(me.x,me.z+(uz>=0?1:-1)*s);const gx=Math.hypot(px[0]-me.x,px[1]-me.z),gz=Math.hypot(pz[0]-me.x,pz[1]-me.z);p=Math.abs(ux)>=Math.abs(uz)?(gx>s*.4?px:pz):(gz>s*.4?pz:px);stuckT+=dt;if(stuckT>2.5){stuckT=0;tgt=null;pendSeat=-1}}else stuckT=0;
     me.x=p[0];me.z=p[1];o.a.root.rotation.y=Math.atan2(dx,dz);o.a.walk=Math.min(1,o.a.walk+dt*6);
     if(me.carrier&&me.steps<100){me.steps=Math.min(100,me.steps+s*6);if(me.steps>=100){toast('아기 꿀잠 성공 zZ');fx(myId,'zZ')}if(tab=='dunga')renderCard()}pushP()}}
   else o.a.walk=Math.max(0,o.a.walk-dt*6);
-  if(me.fm==1){boilT=(Date.now()-boilAt)/1000;const b=$('fbar');if(b)b.style.width=Math.min(100,boilT/5*100)+'%';if(boilT>=5){me.fm=2;toast('물 준비 완료');renderCard()}else if(Math.abs(boilT-3.5)<dt)renderCard()}
-  KET.glow.material.opacity=me.fm==1&&boilT<3.5?.9:0;KET.steam.forEach((s,i)=>{const on=me.fm==1;s.visible=on;if(on){s.position.y=KET.y+((KET.t+i*.33)%1)*.6;s.material.opacity=.5*(1-((KET.t+i*.33)%1))}});KET.t+=dt*.8;
+  fmTick();if(me.st=='bottle'){babyLvl=Math.max(.08,1-(Date.now()-me.stAt)/240000);}
   const zn=zoneAt(me.x,me.z);if(zn!==me.zone){me.zone=zn;if(zn[0]=='b')toast('커튼 쳤어 · 다른 엄마들한텐 안 보여');else if(zn=='formula')toast('분유존이야 · 카드에서 분유 타기 시작');pushP();renderCard()}
   if(me.sit)o.a.root.rotation.y=SEATS[me.sit-1].ry;
   o.x=me.x;o.z=me.z;o.st=meState()}
  {const b0=camBase(),f=[b0[0]+PAN.x,b0[1]+PAN.z];camF.x+=(f[0]-camF.x)*Math.min(1,dt*4);camF.z+=(f[1]-camF.z)*Math.min(1,dt*4);cam.position.copy(camF).addScaledVector(CO,zoomK);cam.lookAt(camF.x,.2,camF.z)}
  const occ={};
  Object.entries(AV).forEach(([id,o])=>{if(id!==myId){const dx=o.tx-o.x,dz=o.tz-o.z,d=Math.hypot(dx,dz);if(d>.02){const s=Math.min(d,Math.max(2,d*3)*dt);o.x+=dx/d*s;o.z+=dz/d*s;o.a.root.rotation.y=Math.atan2(dx,dz);o.a.walk=Math.min(1,o.a.walk+dt*6)}else o.a.walk=Math.max(0,o.a.walk-dt*6)}
-  {const fm=o.st&&o.st.fm||0,bt=o.st&&o.st.st=='bottle';o.a.bottle.visible=bt||fm>=4;o.a.babyF.visible=bt;if(bt){o.a.bottle.position.set(.05,.78,.42);o.a.bottle.rotation.set(1.1,0,0)}else{o.a.bottle.position.set(.4,.5,.15);o.a.bottle.rotation.set(0,0,0)}
+  {const fm=o.st&&o.st.fm||0,bt=o.st&&o.st.st=='bottle',bf=o.st&&o.st.st=='feed'&&o.st.sit;o.a.bottle.visible=bt||fm>=5&&fm<7;o.a.babyF.visible=bt||bf;
+   if(!o.a.arm1)o.a.arm1=o.a.arms[1].position.clone();
+   o.a.bottle.scale.setScalar(1.35);if(bt){o.a.bottle.position.set(.36,.6,.47);o.a.bottle.rotation.set(0,0,1.15);o.a.arms[1].position.set(.4,.56,.46);o.a.milk.scale.y=id===myId?babyLvl:.6;o.a.milk.position.y=-.11+.11*o.a.milk.scale.y;o.a.babyF.rotation.y=-.2}
+   else{o.a.bottle.position.set(.4,.5,.15);o.a.bottle.rotation.set(0,0,0);o.a.milk.scale.y=1;o.a.milk.position.y=0;if(!o.a.shake)o.a.arms[1].position.copy(o.a.arm1)}
    if(o.a.tap>0){if(!o.a.arm0)o.a.arm0=o.a.arms[0].position.clone();o.a.tap-=dt;o.a.arms[0].position.set(-.18,.66+Math.abs(Math.sin(o.a.t*14))*.08,.38)}else if(o.a.arm0){o.a.arms[0].position.copy(o.a.arm0);o.a.arm0=null}
    if(o.a.shake>0){o.a.shake-=dt;o.a.bottle.position.y+=Math.sin(o.a.t*40)*.06;o.a.arms[1].position.y=.58+Math.sin(o.a.t*40)*.05}}
   const sit=o.st&&o.st.sit?SEATS[o.st.sit-1]:null;o.a.sit=sit?1:0;if(sit&&id!==myId){o.a.root.rotation.y=sit.ry}
