@@ -19,6 +19,9 @@ html,body{margin:0;height:100%;background:#1b1d38;overflow:hidden;font:15px/1.5 
 #app>canvas{display:block;width:100%;height:100%;touch-action:none}
 .top{position:absolute;left:12px;right:12px;top:max(12px,env(safe-area-inset-top));pointer-events:none}
 .brand{display:flex;align-items:center;gap:8px;color:#fff;font:22px Jua,sans-serif}
+#voice{margin-left:auto;pointer-events:auto;width:34px;height:34px;border-radius:50%;border:0;background:var(--y);color:#2B2118;font:20px Jua,sans-serif;box-shadow:0 2px 6px rgba(0,0,0,.3);animation:vp 2.4s ease-in-out infinite;cursor:pointer}
+.vchip{border:1px solid #e8d9c2;background:#fff;color:#2B2118;border-radius:999px;padding:6px 10px;font:13px Jua,sans-serif;cursor:pointer}.vchip.on{background:var(--y);border-color:var(--y)}
+@keyframes vp{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
 .brand span{background:var(--y);color:var(--ink);font-size:13px;border-radius:999px;padding:1px 10px}
 .live{margin-top:6px;display:flex;gap:6px;flex-wrap:wrap}
 .pill{background:rgba(255,255,255,.93);border-radius:999px;padding:3px 12px;font:14px Jua,sans-serif}
@@ -145,7 +148,7 @@ a.kakao{display:block;margin-top:10px;text-align:center;font:15px Jua,sans-serif
 </head>
 <body>
 <div id="app">
- <div class="top"><div class="brand">온라인 공동육아방 <span>엄마만 입장</span></div>
+ <div class="top"><div class="brand">온라인 공동육아방 <span>엄마만 입장</span><button id="voice" aria-label="엄마의 소리">!</button></div>
   <div class="live"><span class="pill"><span class="dot"></span>지금 엄마 <b id="tot">1명</b> 같이 육아 중</span><span class="pill d" id="rm">1호방</span></div></div>
  <div id="ceil"></div>
  <div class="card" id="card"></div>
@@ -585,6 +588,15 @@ function snsNorm(t,v){v=(v||'').trim();if(!v)return'';
  const m=v.match(/blog\.naver\.com\/([A-Za-z0-9_-]+)/i);if(m)return m[1];if(/^https?:\/\//i.test(v)||/\.[a-z]{2,}(\/|$)/i.test(v))return(/^https?:/i.test(v)?v:'https://'+v).slice(0,200);return v.replace(/^@/,'').replace(/\s/g,'').slice(0,40)}
 function snsLink(t,v){if(!v)return'';if(/^https?:/i.test(v))return v;if(t=='ig')return'https://www.instagram.com/'+encodeURIComponent(v)+'/';if(t=='yt')return'https://www.youtube.com/'+(v[0]=='@'?v:'@'+v);return'https://blog.naver.com/'+encodeURIComponent(v)}
 function snsShow(t,v){if(!v)return'-';if(/^https?:/i.test(v))return v.replace(/^https?:\/\/(www\.|m\.)?/i,'').slice(0,24);return t=='ig'?'@'+v:v}
+function openVoice(){openSheet('엄마의 소리');const cats=['이런 기능 있으면 좋겠어','이건 고쳐줘','그냥 하고 싶은 말'];let cat=0;
+ sb.innerHTML='<div class="box"><div class="t">이 방을 같이 만들어줘</div><div style="font-size:13px;color:#8a7a68">불편한 거, 있었으면 하는 거 다 적어줘. 노무사 엄마가 하나씩 다 읽어.</div><div id="vc" style="display:flex;flex-wrap:wrap;gap:6px;margin:10px 0">'+cats.map((c,i)=>'<button data-v="'+i+'" class="vchip'+(i?'':' on')+'">'+c+'</button>').join('')+'</div><textarea id="vt" maxlength="280" placeholder="예) 밤에 수유 알람 기능 있으면 좋겠어" style="min-height:110px"></textarea><button class="btn" id="vs" style="width:100%;margin-top:8px">보내기</button></div>';
+ sb.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{cat=+b.dataset.v;sb.querySelectorAll('[data-v]').forEach(x=>x.classList.toggle('on',x===b))});
+ $('vs').onclick=async()=>{const v=$('vt').value.trim();if(v.length<2){toast('한 줄만 적어줘');return}
+  if(typeof SB=='undefined'||!SB||!uid){toast('아직 연결 중이야. 잠시 뒤 다시');return}
+  const r=await SB.from('requests').insert({uid:uid,name:(me.nick||'익명').slice(0,20),contact:'-',memo:('[엄마의 소리 · '+cats[cat]+'] '+v).slice(0,300),diag:{type:'voice',cat:cats[cat],kind:me.kind||''}});
+  if(r.error){toast('전송이 안 됐어. 잠시 뒤 다시');return}
+  sb.innerHTML='<div class="box"><div class="t">고마워!</div>꼭 읽고 반영할게. 바뀌면 이 방에서 제일 먼저 보여줄게.</div>'}}
+setTimeout(()=>{const v=$('voice');if(v)v.onclick=openVoice},0);
 function openSheet(t){$('stt').textContent=t;sheet.classList.add('on')}
 function closeSheet(){sheet.classList.remove('on');if(miniR){miniR.dispose();miniR=null}}
 
@@ -732,7 +744,7 @@ function diagHTML(){if(!DG.wt){DG.wt=autoWT();DG.auto=true}
  const [R,N]=judge();
  h+='<div class="box law" id="dres"><div class="t">받을 수 있는 것 '+R.length+'개 <small>'+esc(WT.find(x=>x[0]==DG.wt)[1])+' 기준</small></div><ul style="padding-left:18px;margin:0">'+R.map(i=>'<li><b>'+i[0]+'</b> · '+esc(i[1])+'<br><small>근거 · '+i[2]+'</small></li>').join('')+'</ul>'+
   (N.length?'<h5 style="color:#8a7a68">해당 안 되는 것</h5><ul style="padding-left:18px;margin:0;color:#8a7a68">'+N.map(i=>'<li>'+i[0]+' · '+esc(i[1])+(i[2]?'<br><small>'+i[2]+'</small>':'')+'</li>').join('')+'</ul>':'')+
-  '<p class="note">입력한 정보로 계산한 예상치야. 근거는 2026.11.18 법제처·고용노동부 고시로 확인했어.</p><button class="btn" id="dreq" style="width:100%">찬이랑 내 이름으로 바로 신청하기</button></div>';
+  '<p class="note">입력한 정보로 계산한 예상치야. 근거는 2026.11.18 법제처·고용노동부 고시로 확인했어.</p><button class="btn" id="dreq" style="width:100%">바로 신청하기</button></div>';
  return h}
 function bindDiag(){const re=()=>{saveDG();const y=sb.scrollTop;openAide();sb.scrollTop=y};
  sb.querySelectorAll('#dwt button').forEach(b=>b.onclick=()=>{DG.wt=b.dataset.w;DG.auto=false;re()});
@@ -744,8 +756,8 @@ function bindDiag(){const re=()=>{saveDG();const y=sb.scrollTop;openAide();sb.sc
  if($('dw'))$('dw').oninput=e=>{DG.w=+e.target.value||0;upd()};if($('dm'))$('dm').oninput=e=>{DG.m=Math.max(1,Math.min(18,+e.target.value||1));upd()};if($('dsix'))$('dsix').onchange=e=>{DG.six=e.target.checked;upd()};
  $('dfetch').onclick=()=>{const a=$('dfetch');if(a.dataset.o)return;a.dataset.o=1;a.insertAdjacentHTML('afterend','<div class="box" style="margin-top:6px;background:#fff7d6">간편인증으로 고용24·건강보험 기록을 불러오는 기능은 지금 만드는 중이야. 열리면 버튼 한 번에 채워질 거야. 그 전까지는 위 칸이 시기에 맞춰 자동으로 채워져 있으니 다른 것만 바꿔줘.</div>')};
  const q=$('dreq');if(q)q.onclick=openReq}
-function openReq(){const [R]=judge();openSheet('내 이름으로 바로 신청');
- sb.innerHTML='<div class="box"><div class="t">신청은 내 이름으로, 귀찮은 건 찬이가</div><ol style="font-size:14px;line-height:1.7;padding-left:18px;margin:6px 0"><li>카카오·패스 간편인증 한 번 (내 폰에서 승인)</li><li>찬이가 고용24·건강보험에서 내 기록을 불러와 신청서 칸을 다 채워</li><li>나는 채워진 내용 확인하고 <b style="display:inline">제출</b>만 눌러</li></ol><small style="color:#8a7a68;display:block">신청인은 엄마 본인이고 최종 제출도 엄마 손으로 해. 인증 정보는 저장하지 않고 신청이 끝나면 바로 지워.</small></div>'+
+function openReq(){const [R]=judge();openSheet('바로 신청하기');
+ sb.innerHTML='<div class="box"><div class="t">간편인증 한 번이면 끝</div><ol style="font-size:14px;line-height:1.7;padding-left:18px;margin:6px 0"><li>간편인증</li><li>찬이가 신청서 채움</li><li>확인하고 제출</li></ol><small style="color:#8a7a68;display:block">내 이름으로 신청돼. 인증 정보는 저장 안 해.</small></div>'+
  '<div class="box" style="background:#fff7d6"><div class="t">지금 만드는 중이야</div><div style="font-size:13px">간편인증 자동 신청은 곧 열려. 열리면 바로 알려줄게.</div>'+
  '<label>알림 받을 곳 (카톡 아이디나 휴대폰)</label><input id="rq_c" maxlength="40" autocapitalize="off"><input id="rq_n" type="hidden" value="'+esc(me.nick)+'"><input id="rq_m" type="hidden" value="self-apply 알림">'+
  '<label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--ink);margin:10px 0"><input type="checkbox" id="rq_ok" style="width:22px;min-height:22px;flex:none"> 오픈 알림을 위해 연락처와 진단 결과를 보관하는 데 동의해. 알림 보내면 지워줘.</label><button class="btn" id="rq_s" style="width:100%">열리면 알려줘</button><p class="note">회사랑 얘기가 꼬였거나 애매하면 노동법 상담소에서 먼저 물어봐.</p></div>';
