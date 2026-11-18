@@ -41,8 +41,8 @@ html,body{margin:0;height:100%;background:#1b1d38;overflow:hidden;font:15px/1.5 
 .card .bar{height:6px;border-radius:9px;background:#eee;margin:4px 0;overflow:hidden}.card .bar i{display:block;height:100%;background:var(--y);transition:width .3s}
 .card button{font:12px Jua,sans-serif;background:var(--ink);color:var(--y);border:0;border-radius:999px;padding:4px 9px;min-height:30px;margin-top:3px;cursor:pointer}
 .sw{display:flex;gap:6px;margin:6px 0}.sw span{width:26px;height:26px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #ccc;cursor:pointer}.sw span.on{box-shadow:0 0 0 2px var(--ink)}
-.dock{position:absolute;left:10px;right:10px;bottom:max(12px,env(safe-area-inset-bottom));background:rgba(255,255,255,.96);border-radius:22px;display:grid;grid-template-columns:repeat(4,1fr);padding:6px;box-shadow:0 6px 18px rgba(0,0,0,.35)}
-.dock button{font:13px Jua,sans-serif;background:none;border:0;color:var(--ink);display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;border-radius:14px;min-height:52px;cursor:pointer}
+.dock{position:absolute;left:8px;right:8px;bottom:max(12px,env(safe-area-inset-bottom));background:rgba(255,255,255,.96);border-radius:22px;display:grid;grid-template-columns:repeat(5,1fr);padding:6px;box-shadow:0 6px 18px rgba(0,0,0,.35)}
+.dock button{font:12px Jua,sans-serif;background:none;border:0;color:var(--ink);display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;border-radius:14px;min-height:52px;cursor:pointer}
 .dock button.on{background:var(--y)}
 .dock svg{width:24px;height:24px}
 .toast{position:absolute;left:50%;top:92px;transform:translate(-50%,-260%);background:var(--y);border:2px solid var(--ink);border-radius:999px;padding:4px 14px;font:14px Jua,sans-serif;transition:transform .3s;white-space:nowrap;visibility:hidden;max-width:92%;overflow:hidden;text-overflow:ellipsis}
@@ -144,6 +144,9 @@ a.kakao{display:block;margin-top:10px;text-align:center;font:15px Jua,sans-serif
 @keyframes sway{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
 .notepick{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}.notepick button{background:#fff7e0!important;color:#2B2118!important;font-size:11px!important;padding:4px 7px!important}
 .stamp{display:inline-block;background:#2B2118;color:#ffd43b;border-radius:9px;padding:1px 7px;font-size:11px;margin-left:4px}
+#comfort{position:absolute;left:50%;top:150px;transform:translate(-50%,-10px);width:min(300px,84vw);background:#fffaf0;border:2px solid var(--y);border-radius:18px;padding:12px 14px;text-align:center;box-shadow:0 6px 18px rgba(0,0,0,.3);z-index:20;opacity:0;pointer-events:none;transition:.35s}
+#comfort.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+#comfort button{font:13px Jua,sans-serif;background:var(--ink);color:var(--y);border:0;border-radius:999px;padding:6px 12px;cursor:pointer}
 </style>
 </head>
 <body>
@@ -157,6 +160,7 @@ a.kakao{display:block;margin-top:10px;text-align:center;font:15px Jua,sans-serif
  <div class="dock" id="dock">
   <button data-t="feed" class="on" id="feedTab"></button>
   <button data-t="dunga"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.5-7-9.5A3.8 3.8 0 0 1 12 8a3.8 3.8 0 0 1 7 2.5C19 15.5 12 20 12 20z" fill="none" stroke="currentColor" stroke-width="2"/></svg>애기재우기</button>
+  <button data-t="grow"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>내 시간</button>
   <button data-t="home"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z" fill="none" stroke="currentColor" stroke-width="2"/></svg>미니홈피</button>
   <button data-t="aide"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z" fill="none" stroke="currentColor" stroke-width="2"/></svg>육아비서 찬이</button>
  </div>
@@ -177,14 +181,14 @@ a.kakao{display:block;margin-top:10px;text-align:center;font:15px Jua,sans-serif
 {
 const app=document.getElementById('app');
 const CAP=(()=>{const m=location.hash.match(/^#cap-(\d+)$/);return m?Math.max(1,+m[1]):30})();
-const KINDS={preg:{label:'임신 중',top:'#ffd27a'},newborn:{label:'출산 직후',top:'#ffb4c8'},carrier:{label:'육아휴직 중',top:'#a8e6b8'},work:{label:'워킹맘',top:'#9fd3ff'},home:{label:'전업맘',top:'#f6a7b8'}};
+const KINDS={preg:{label:'임신 중',top:'#ffd27a'},newborn:{label:'출산 직후',top:'#ffb4c8'},carrier:{label:'육아휴직 중',top:'#a8e6b8'},work:{label:'워킹맘',top:'#9fd3ff'},home:{label:'전업맘',top:'#f6a7b8'},toddler:{label:'유아식 이후',top:'#ffcf8a'}};
 const $=id=>document.getElementById(id);
 let toastT;function toast(s){const e=$('toast');e.textContent=s;e.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>e.classList.remove('on'),2400)}
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 /* ---------- 나 ---------- */
 let uid=null;let myId='p-'+Math.random().toString(36).slice(2,8);
-const me={nick:'엄마'+String(1000+Math.floor(Math.random()*9000)),kind:null,room:0,wait:0,ws:0,x:0,z:2,st:'',stAt:0,patTo:'',patAt:0,carrier:0,cc:'#4a4744',steps:0,zone:'',sit:0,fm:0,note:-1,noteAt:0};
+const me={nick:'엄마'+String(1000+Math.floor(Math.random()*9000)),kind:null,room:0,wait:0,ws:0,x:0,z:2,st:'',stAt:0,patTo:'',patAt:0,carrier:0,cc:'#4a4744',steps:0,zone:'',sit:0,fm:0,note:-1,noteAt:0,ex:{}};
 let peers=[],RM=null,DB=null,USER=null,SAMPLE=null;
 
 /* ---------- 입장 화면 ---------- */
@@ -257,11 +261,12 @@ function avatar(o){o=Object.assign({hair:'#4a3020',top:'#ff8a8a',kind:'preg',bun
  if(o.kind=='newborn'){extra=G(sph(.22,'#ffffff',0,.6,.32,1.3,.8,.9),sph(.13,SKIN,.12,.7,.42),sph(.135,'#ffffff',.12,.75,.4,1,.6,1));bod.add(extra);arms[0].position.set(-.22,.6,.3);arms[1].position.set(.22,.6,.3)}
  if(o.kind=='work'){extra=G(box(.32,.24,.1,'#8a5a3c',.42,.35,.05),box(.12,.05,.04,'#5a3a20',.42,.49,.05));bod.add(extra)}
  let cb=(o.kind=='carrier'||o.kind=='newborn')?extra:null;
+ let kid=null;if(o.kind=='toddler'){kid=G(sph(.17,'#ffcf8a',0,.3,0,1,1.15,.9),sph(.16,SKIN,0,.56,0),sph(.165,'#7a5030',0,.62,-.02,1,.7,1),sph(.022,'#2B2118',-.05,.55,.15),sph(.022,'#2B2118',.05,.55,.15),cyl(.05,.05,.16,'#5a7fbf',-.07,.08,0,8),cyl(.05,.05,.16,'#5a7fbf',.07,.08,0,8));kid.position.set(-.55,0,.2);root.add(kid)}
  if(o.kind=='work'||o.kind=='home'){const c=o.kind=='work'?'#c9d8f0':'#ffd0dc';cb=G(sph(.19,c,0,.55,.27,1,1,.7),sph(.15,SKIN,0,.79,.32),sph(.155,'#7a5030',0,.85,.3,1,.7,1),sph(.024,'#2B2118',-.05,.78,.45),sph(.024,'#2B2118',.05,.78,.45),box(.05,.3,.04,c,-.17,.72,.18),box(.05,.3,.04,c,.17,.72,.18));bod.add(cb)}
  let stroller=null;if(o.kind=='stroller'){stroller=G(box(.55,.3,.7,'#7fb3e8',0,.55,0),mesh(new T.SphereGeometry(.4,16,10,0,Math.PI*2,0,Math.PI/2),'#5a8fd0',0,.62,-.15),sph(.14,SKIN,0,.8,.1),sph(.145,'#5a4030',0,.85,.08,1,.7,1),cyl(.12,.12,.06,'#2B2118',-.25,.12,.28,12).rotateZ(1.57),cyl(.12,.12,.06,'#2B2118',.25,.12,.28,12).rotateZ(1.57),cyl(.12,.12,.06,'#2B2118',-.25,.12,-.28,12).rotateZ(1.57),cyl(.12,.12,.06,'#2B2118',.25,.12,-.28,12).rotateZ(1.57),box(.5,.04,.04,'#444',0,.95,-.5));stroller.position.z=.75;root.add(stroller);arms[0].position.set(-.24,.6,.28);arms[1].position.set(.24,.6,.28)}
  const milk=cyl(.058,.058,.22,'#fff3d6',0,0,0,12);const bottle=G(cyl(.066,.066,.24,'#9fd3ff',0,0,0,12,{transparent:true,opacity:.55}),milk,cyl(.07,.07,.045,'#ff8fab',0,.13,0,12),sph(.04,'#f2a65a',0,.185,0,1,1.4,1));bottle.visible=false;bottle.position.set(.4,.5,.15);bod.add(bottle);
  const babyF=G(sph(.2,'#ffffff',0,0,0,1.35,.75,.85),sph(.12,SKIN,.18,.07,.06),sph(.125,'#ffffff',.18,.11,.04,1,.6,1),sph(.018,'#2B2118',.25,.08,.15),sph(.018,'#2B2118',.15,.08,.16));babyF.position.set(-.05,.62,.34);babyF.rotation.y=-.2;babyF.visible=false;bod.add(babyF);
- return {root,bod,feet,arms,head,belly,bottle,milk,babyF,cb,shake:0,t:Math.random()*9,walk:0,sit:0,wave:0,o}}
+ return {root,bod,feet,arms,head,belly,bottle,milk,babyF,cb,kid,shake:0,t:Math.random()*9,walk:0,sit:0,wave:0,o}}
 function animA(a,dt){a.t+=dt;const w=a.walk,s=Math.sin(a.t*10);
  a.bod.position.y=a.sit?-.22:Math.abs(s)*.07*w;a.bod.rotation.z=s*.06*w;
  a.feet[0].position.z=.05+s*.14*w;a.feet[1].position.z=.05-s*.14*w;
@@ -362,6 +367,14 @@ sofa(-7.6,1.6,Math.PI/2,'#b9a6d9',3);sofa(7.7,3,-Math.PI/2,'#9fc9b8',3);
 /* 큰 러그 하나 더 + 화분 */
 {const rg=new T.Mesh(new T.CircleGeometry(2.2,40),new T.MeshStandardMaterial({color:'#e8d9f3',roughness:1}));rg.rotation.x=-Math.PI/2;rg.position.set(-6.4,.012,1.6);rg.receiveShadow=true;S.add(rg)}
 for(const [x,z] of[[8.4,-4.4],[-8.4,5.8],[8.3,6.1]]){const g=G(cyl(.24,.18,.42,'#c98e6b',0,.21,0));for(let i=0;i<8;i++)g.add(sph(.17,i%2?'#4f9a55':'#3f8a4c',Math.cos(i)*.16,.62+Math.random()*.3,Math.sin(i*1.7)*.16,1,1.6,.6));g.position.set(x,0,z);S.add(g);XBLOCK.push([x-.3,z-.3,x+.3,z+.3])}
+/* 같이 일하는 책상: 앉으면 카메라를 보고 일한다 */
+const DESKSEATS=[];
+{const tz=5.4;S.add(box(3.4,.06,.8,'#c98b5a',5.0,.74,tz));S.add(box(3.3,.7,.7,'#f3ead9',5.0,.36,tz+.03));S.add(box(3.3,.36,.02,'#bfe3ff',5.0,.4,tz+.4));
+ sign('같이 일하는 책상',5.0,.42,tz+.42,0,1.0);XBLOCK.push([3.25,tz-.45,6.75,tz+.45]);
+ for(const x of[3.9,5.0,6.1]){S.add(box(.5,.05,.5,'#ffe28a',x,.46,tz-.75));S.add(box(.5,.5,.06,'#ffe28a',x,.72,tz-1.0));S.add(cyl(.04,.04,.44,'#9aa3ad',x,.22,tz-.75));
+  const lap=G(box(.42,.02,.3,'#d9dde3',0,0,0),box(.42,.28,.02,'#e7ebf0',0,.14,.15));lap.position.set(x,.78,tz-.1);S.add(lap);S.add(sph(.02,'#ffffff',x,.92,tz+.06));
+  DESKSEATS.push(SEATS.length);addSeat(x,tz-.75,0,.46,.6,.6);SEATS[SEATS.length-1].back=1}}
+function seatApp(s){const k=s.back?-.8:.8;return clampXZ(s.x+Math.sin(s.ry)*k,s.z+Math.cos(s.ry)*k)}
 function zoneAt(x,z){if(z<-RD/2+1.9){for(let i=0;i<BOOTHS.length;i++)if(Math.abs(x-BOOTHS[i].x)<.75)return'b'+i}if(x<-5.3&&z<-RD/2+2.6)return'formula';return''}
 
 /* 수유의자 2개 (캠핑의자 느낌 리클라이너) */
@@ -425,25 +438,26 @@ function clampXZ(x,z){x=Math.max(-RW/2+.35,Math.min(RW/2-.3,x));z=Math.max(-RD/2
 
 /* 아바타 관리 */
 const AV={};
-const AK=k=>({carrier:'carrier',home:'stroller',work:'work',newborn:'newborn',preg:'preg'}[k]||'preg');
+const AK=k=>({carrier:'carrier',home:'stroller',work:'work',newborn:'newborn',preg:'preg',toddler:'toddler'}[k]||'preg');
 function makeAv(st){const kind=st.carrier?'none':AK(st.kind);const a=avatar({kind,top:(KINDS[st.kind]||KINDS.preg).top,hair:st.hair||'#3b2a20'});if(st.carrier)konny(a,st.cc||'#4a4744','#efe6d8');a.sig=kind+'|'+st.carrier+'|'+st.cc;return a}
 function ensure(id,st,isMe){let o=AV[id];const sig=(st.carrier?'none':AK(st.kind))+'|'+st.carrier+'|'+st.cc;
  if(o&&o.a.sig!==sig){S.remove(o.a.root);o.a=makeAv(st);o.a.root.position.set(o.x,0,o.z);S.add(o.a.root)}
  if(!o){const a=makeAv(st);a.root.position.set(st.x||0,0,st.z||0);S.add(a.root);const e=document.createElement('div');e.className='name'+(isMe?' me':'');app.insertBefore(e,$('card'));o=AV[id]={a,e,x:st.x||0,z:st.z||0,tx:st.x||0,tz:st.z||0};}
  o.st=st;o.tx=st.x;o.tz=st.z;return o}
 function drop(id){const o=AV[id];if(!o)return;S.remove(o.a.root);o.e.remove();delete AV[id]}
-function label(st){const k=KINDS[st.kind]?KINDS[st.kind].label:'';const s=st.zone&&st.zone[0]=='b'?'수유실 이용 중':st.st=='bottle'?'분유 먹이는 중 '+Math.max(1,Math.round((Date.now()-st.stAt)/60000))+'분':st.fm>0&&st.fm<6?['','분유 바로 가는 중','🔥 물 끓이는 중','🥄 분유 3스푼 넣는 중','💧 물 붓는 중','🍼 쉐킷쉐킷 흔드는 중'][st.fm]:st.zone=='formula'?'분유 바에 있어':st.sit?'앉아서 쉬는 중':st.st=='feed'?'수유 중 '+Math.max(1,Math.round((Date.now()-st.stAt)/60000))+'분':st.st=='dunga'?(st.steps>=100?'아기 꿀잠 zZ':'재우는 중 '+Math.floor(st.steps/34+1)+'바퀴'):k;return esc(st.nick)+' <i>'+esc(s)+'</i>'}
+function label(st){const k=KINDS[st.kind]?KINDS[st.kind].label:'';const s=st.zone&&st.zone[0]=='b'?'수유실 이용 중':st.st=='bottle'?'분유 먹이는 중 '+Math.max(1,Math.round((Date.now()-st.stAt)/60000))+'분':st.fm>0&&st.fm<6?['','분유 바로 가는 중','🔥 물 끓이는 중','🥄 분유 3스푼 넣는 중','💧 물 붓는 중','🍼 쉐킷쉐킷 흔드는 중'][st.fm]:st.zone=='formula'?'분유 바에 있어':st.st=='work'?'💻 집중 중 '+Math.max(1,Math.round((Date.now()-st.stAt)/60000))+'분':st.sit?'앉아서 쉬는 중':st.st=='work'?'💻 집중 중 '+Math.max(1,Math.round((Date.now()-st.stAt)/60000))+'분':st.st=='yukte'?'🍺 육퇴 성공':st.st=='walk'?'🤰 태교 산책 중':st.st=='feed'?'수유 중 '+Math.max(1,Math.round((Date.now()-st.stAt)/60000))+'분':st.st=='dunga'?(st.steps>=100?'아기 꿀잠 zZ':'재우는 중 '+Math.floor(st.steps/34+1)+'바퀴'):k;return esc(st.nick)+' <i>'+esc(s+(st.kind=='preg'&&st.ex&&st.ex.wk&&s==k?' '+st.ex.wk+'주':''))+'</i>'}
 
 /* ---------- 실시간 ---------- */
 let lastPush=0,pend=false;
 function pushP(){if(!RM)return;const now=Date.now();if(now-lastPush<250){if(!pend){pend=true;setTimeout(()=>{pend=false;pushP()},260)}return}lastPush=now;
- try{RM.presence({id:myId,uid:uid||'',nick:me.nick,kind:me.kind,room:me.room,wait:me.wait,ws:me.ws,x:+me.x.toFixed(2),z:+me.z.toFixed(2),st:me.st,stAt:me.stAt,patTo:me.patTo,patAt:me.patAt,carrier:me.carrier,cc:me.cc,steps:me.steps,zone:me.zone,sit:me.sit,note:me.note,noteAt:me.noteAt,fm:me.fm})}catch(e){}}
+ try{RM.presence({id:myId,uid:uid||'',nick:me.nick,kind:me.kind,room:me.room,wait:me.wait,ws:me.ws,x:+me.x.toFixed(2),z:+me.z.toFixed(2),st:me.st,stAt:me.stAt,patTo:me.patTo,patAt:me.patAt,carrier:me.carrier,cc:me.cc,steps:me.steps,zone:me.zone,sit:me.sit,note:me.note,noteAt:me.noteAt,ex:me.ex,fm:me.fm})}catch(e){}}
 const seenPat={};
 function onPeers(list){peers=list||[];
  if(!me.room){renderGate();updateTop();return}
  const here=new Set();
  others().forEach(p=>{const s=p.state;if(s.room!==me.room||!s.kind)return;const id=s.id||p.id;here.add(id);ensure(id,s,false);
-  if(s.patTo===myId&&s.patAt&&seenPat[id]!==s.patAt){if(seenPat[id]!==undefined||Date.now()-s.patAt<8000){const fd=me.st=='feed'||me.st=='bottle';fx(myId,fd?'토닥 ♥':'쓰담 ♥');toast(s.nick+(fd?'가 수유 중인 나를 토닥토닥했어':'가 나를 쓰담했어'));gotPat()}seenPat[id]=s.patAt}
+  if(s.patTo===myId&&s.patAt&&seenPat[id]!==s.patAt){if(seenPat[id]!==undefined||Date.now()-s.patAt<8000){const fd=me.st=='feed'||me.st=='bottle',pt=s.ex&&s.ex.pt;const L={cheer:['응원 ♥','가 응원을 보냈어'],toast:['짠 🍺','가 같이 건배했어'],work:['화이팅 ✊','가 화이팅을 보냈어']}[pt]||(fd?['토닥 ♥','가 수유 중인 나를 토닥토닥했어']:['쓰담 ♥','가 나를 쓰담했어']);fx(myId,L[0]);toast(s.nick+L[1]);gotPat()}seenPat[id]=s.patAt}
+  if(s.ex&&s.ex.cheerAt&&s.room===me.room&&seenCheer[id]!==s.ex.cheerAt){if(seenCheer[id]!==undefined||Date.now()-s.ex.cheerAt<8000){fx(myId,'♡');toast('누군가 말없이 응원을 보냈어 ♡')}seenCheer[id]=s.ex.cheerAt}
   else if(seenPat[id]===undefined)seenPat[id]=s.patAt});
  Object.keys(AV).forEach(id=>{if(id!==myId&&!here.has(id))drop(id)});
  trackPeak();renderCeil();updateTop();renderCard()}
@@ -452,8 +466,8 @@ function updateTop(){const c=roomCounts();$('tot').textContent=(others().length+
 /* ---------- 입장 ---------- */
 function enter(r){me.room=r;me.wait=0;const p=clampXZ((Math.random()-.5)*6,3+Math.random()*2.5);camF.set(p[0],0,p[1]);me.x=p[0];me.z=p[1];
  $('gate').style.display='none';ensure(myId,meState(),true);pushP();onPeers(peers);renderCard();
- toast(r+'호방에 들어왔어 · 바닥을 탭하면 걸어가');loadHome().then(dawnStamp);loadCeil()}
-const meState=()=>({nick:me.nick,kind:me.kind,x:me.x,z:me.z,st:me.st,stAt:me.stAt,carrier:me.carrier,cc:me.cc,steps:me.steps,zone:me.zone,sit:me.sit,note:me.note,noteAt:me.noteAt,fm:me.fm});
+ toast(r+'호방에 들어왔어 · 바닥을 탭하면 걸어가');loadHome().then(dawnStamp);loadCeil();weekStamp();loadMeals();feedLabel()}
+const meState=()=>({nick:me.nick,kind:me.kind,x:me.x,z:me.z,st:me.st,stAt:me.stAt,carrier:me.carrier,cc:me.cc,steps:me.steps,zone:me.zone,sit:me.sit,note:me.note,noteAt:me.noteAt,ex:me.ex,fm:me.fm});
 
 /* ---------- 입력 ---------- */
 const ray=new T.Raycaster(),mv=new T.Vector2();let tgt=null,menuEl=null,WP=[];
@@ -475,18 +489,19 @@ function tapAt(e){if(!me.room)return;closeMenu();WP=[];if(me.fm&&me.fm<7){me.fm=
  for(const id of ids){const h=ray.intersectObject(AV[id].a.root,true);if(h.length&&h[0].distance<best){best=h[0].distance;hitId=id}}
  if(hitId){openMenu(hitId);return}
  const sh=ray.intersectObjects(SEATHIT);standUp();
- if(sh.length){const i=sh[0].object.userData.seat,s=SEATS[i];if(seatTaken(i)){toast('누가 앉아 있어');return}pendSeat=i;tgt=clampXZ(s.x+Math.sin(s.ry)*.8,s.z+Math.cos(s.ry)*.8);ring.position.set(s.x,.03,s.z);ring.material.opacity=1;return}
+ if(sh.length){const i=sh[0].object.userData.seat,s=SEATS[i];if(seatTaken(i)){toast('누가 앉아 있어');return}pendSeat=i;tgt=seatApp(s);if(s.back&&me.z>s.z-.3){const sx=me.x<5?2.8:7.2;WP=[clampXZ(sx,Math.max(me.z,6.2)),clampXZ(sx,s.z-.8),seatApp(s)];tgt=WP.shift()}ring.position.set(s.x,.03,s.z);ring.material.opacity=1;return}
  const h=ray.intersectObject(floor);if(h.length){pendSeat=-1;PAN.set(0,0,0);tgt=clampXZ(h[0].point.x,h[0].point.z);ring.position.set(tgt[0],.03,tgt[1]);ring.material.opacity=1}}
 let pendSeat=-1;
 function seatTaken(i){return others().some(p=>p.state.room===me.room&&p.state.sit===i+1)}
-function standUp(){if(me.sit){if(me.st=='bottle'){me.st='';me.fm=0;toast('수유 끝')}if(me.st=='feed'){me.st='';toast('수유 끝')}const s=SEATS[me.sit-1];me.sit=0;const p=clampXZ(s.x+Math.sin(s.ry)*.8,s.z+Math.cos(s.ry)*.8);me.x=p[0];me.z=p[1];pushP()}}
+function standUp(){if(me.sit){if(me.st=='bottle'){me.st='';me.fm=0;toast('수유 끝')}if(me.st=='feed'){me.st='';toast('수유 끝')}if(me.st=='work'){me.st='';toast('오늘도 한 뼘 자랐어')}const s=SEATS[me.sit-1];me.sit=0;const p=seatApp(s);me.x=p[0];me.z=p[1];pushP()}}
 document.querySelectorAll('#zoom button').forEach(b=>b.onclick=()=>{zoomK=Math.max(.45,Math.min(3.1,zoomK+(+b.dataset.z)*.3))});
 function openMenu(id){const o=AV[id];closeMenu();menuEl=document.createElement('div');menuEl.className='menu';const fdg=o.st&&(o.st.st=='feed'||o.st.st=='bottle');menuEl.innerHTML='<button>'+(fdg?'토닥':'쓰담')+'</button><button class="w">미니홈피</button>';app.appendChild(menuEl);menuEl.dataset.id=id;
  const [b1,b2]=menuEl.querySelectorAll('button');b1.onclick=()=>{sendPat(id);closeMenu()};b2.onclick=()=>{closeMenu();openHome(id,o.st.nick)}}
-function sendPat(id){const o=AV[id];if(!o)return;const fdg=o.st&&(o.st.st=='feed'||o.st.st=='bottle');me.patTo=id;me.patAt=Date.now();pushP();fx(id,fdg?'토닥 ♥':'쓰담 ♥');toast(o.st.nick+(fdg?' 토닥토닥 보냄':'에게 쓰담 보냄'))}
+function sendPat(id,ty){const o=AV[id];if(!o)return;const fdg=o.st&&(o.st.st=='feed'||o.st.st=='bottle');me.patTo=id;me.patAt=Date.now();me.ex=Object.assign({},me.ex,{pt:ty||''});pushP();const L={cheer:['응원 ♥',' 응원 보냄'],toast:['짠 🍺','이랑 건배'],work:['화이팅 ✊',' 화이팅 보냄']}[ty]||(fdg?['토닥 ♥',' 토닥토닥 보냄']:['쓰담 ♥','에게 쓰담 보냄']);fx(id,L[0]);toast(o.st.nick+L[1])}
+let seenCheer={};function roomCheer(){me.ex=Object.assign({},me.ex,{cheerAt:Date.now()});pushP();fx(myId,'♡');toast('방 엄마들한테 말없이 응원 보냈어')}
 function feedersHTML(){const fs=others().filter(p=>p.state.room===me.room&&(p.state.st=='feed'||p.state.st=='bottle'));if(!fs.length)return'';
- return '<div style="margin:6px 0 2px;max-height:66px;overflow-y:auto">'+fs.map(p=>{const s=p.state,id=s.id||p.id;return '<div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin:3px 0"><span>'+esc(s.nick)+' <small style="color:#8a7a68">'+Math.max(1,Math.round((Date.now()-s.stAt)/60000))+'분</small></span><button data-pat="'+esc(id)+'" style="padding:2px 8px;min-height:24px;margin:0">토닥</button></div>'}).join('')+'</div>'}
-function bindPats(c){c.querySelectorAll('[data-pat]').forEach(b=>b.onclick=()=>{sendPat(b.dataset.pat);b.textContent='♥';b.disabled=true})}
+ return '<div style="margin:6px 0 2px;max-height:66px;overflow-y:auto">'+fs.map(p=>{const s=p.state,id=s.id||p.id;return '<div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin:3px 0"><span>'+esc(s.nick)+' <small style="color:#8a7a68">'+Math.max(1,Math.round((Date.now()-s.stAt)/60000))+'분</small></span><button data-pat="'+esc(id)+'" style="padding:2px 8px;min-height:24px;margin:0">'+(me.kind=='preg'?'응원':'토닥')+'</button></div>'}).join('')+'</div>'}
+function bindPats(c){c.querySelectorAll('[data-pat]').forEach(b=>b.onclick=()=>{sendPat(b.dataset.pat,b.dataset.ty||(me.kind=='preg'?'cheer':''));b.textContent='♥';b.disabled=true})}
 function babyPat(){const a=AV[myId];if(a)a.a.tap=1.2;fx(myId,'토닥토닥');babyPats++;if(babyPats%5==0)toast('끄억~ 트림 나왔다')}
 let babyPats=0;
 function closeMenu(){if(menuEl){menuEl.remove();menuEl=null}}
@@ -497,7 +512,7 @@ const fxs=[];
 let tab='feed',cardOff=false;
 const isNight=()=>{const h=new Date().getHours();return h>=21||h<6};
 const ICON_MOON='<svg viewBox="0 0 24 24"><path d="M12 3a7 7 0 1 0 9 9A8 8 0 1 1 12 3z" fill="none" stroke="currentColor" stroke-width="2"/></svg>',ICON_SUN='<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
-function feedLabel(){const n=isNight();$('feedTab').innerHTML=(n?ICON_MOON:ICON_SUN)+(n?'새벽수유':'수유')}
+function feedLabel(){const n=isNight();$('feedTab').innerHTML=me.kind=='preg'?'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 12h6M12 9v6" stroke="currentColor" stroke-width="2"/></svg>태교':me.kind=='toddler'?'<svg viewBox="0 0 24 24"><path d="M4 11h16a8 8 0 0 1-16 0zM8 7c0-2 2-2 2-4M13 7c0-2 2-2 2-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>유아식':(n?ICON_MOON:ICON_SUN)+(n?'새벽수유':'수유')}
 feedLabel();setInterval(feedLabel,60000);
 const ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 const LS={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
@@ -512,8 +527,9 @@ function trackPeak(){const n=feedNow(),d=new Date(),k=ymd(d);const pk=LS.get('cp
 const NOTES=['오늘도 버텼다','잘하고 있어','혼자 아니야','같이 깨어 있어','밥은 먹었어?','내일은 푹 자자','오늘 처음 뒤집었다','웃어줘서 버틴다'];
 let ceilNotes=[];
 function myNote(i){me.note=i;me.noteAt=Date.now();pushP();toast('천장에 쪽지 걸었어');renderCeil();
+ if(hasSB()){sbPost('ceil:'+me.room,NOTES[i]);return}
  if(DB&&uid){(async()=>{try{const ref=DB.doc('notes/'+uid);let cur={};try{const d=await ref.get();cur=d&&d.exists!==false?(d.data?d.data():d):{}}catch(e){}const items=(cur.items||[]).filter(x=>!(x.to||'').startsWith('ceil:')||Date.now()-x.at<864e5).slice(-40);items.push({to:'ceil:'+me.room,text:NOTES[i],at:Date.now()});await ref.set({nick:me.nick,items})}catch(e){}})()}}
-async function loadCeil(){if(!DB)return;try{const q=await DB.collection('notes').get();const L=[];(q.docs||q||[]).forEach(d=>{const v=d.data?d.data():d;(v.items||[]).forEach(it=>{if(it.to==='ceil:'+me.room&&Date.now()-it.at<864e5&&NOTES.includes(it.text))L.push({nick:v.nick,text:it.text,at:it.at})})});ceilNotes=L.sort((a,b)=>b.at-a.at).slice(0,12);renderCeil()}catch(e){}}
+async function loadCeil(){if(hasSB()){ceilNotes=(await sbNotes('ceil:'+me.room)).filter(n=>NOTES.includes(n.text)).slice(0,12);renderCeil();return}if(!DB)return;try{const q=await DB.collection('notes').get();const L=[];(q.docs||q||[]).forEach(d=>{const v=d.data?d.data():d;(v.items||[]).forEach(it=>{if(it.to==='ceil:'+me.room&&Date.now()-it.at<864e5&&NOTES.includes(it.text))L.push({nick:v.nick,text:it.text,at:it.at})})});ceilNotes=L.sort((a,b)=>b.at-a.at).slice(0,12);renderCeil()}catch(e){}}
 function renderCeil(){const el=$('ceil');if(!el)return;if(!me.room){el.innerHTML='';return}
  const live=others().filter(p=>p.state.room===me.room&&p.state.note>=0&&p.state.noteAt&&Date.now()-p.state.noteAt<864e5).map(p=>({nick:p.state.nick,text:NOTES[p.state.note],at:p.state.noteAt}));
  if(me.note>=0&&me.noteAt)live.push({nick:'나',text:NOTES[me.note],at:me.noteAt});
@@ -547,12 +563,13 @@ function stopFormula(){me.fm=0;if(me.st=='bottle')me.st='';FPROP.reset();pushP()
 function startBreast(){const i=BOOTHS.findIndex(b=>Math.abs(me.x-b.x)<.75&&me.z<-RD/2+1.95);const bi=i>=0?i:BOOTHS.findIndex(b=>!others().some(p=>p.state.room===me.room&&p.state.zone=='b'+BOOTHS.indexOf(b)));if(bi<0){toast('수유실이 다 찼어. 잠깐만');return}
  standUp();me.fm=0;breastPend=true;const s=SEATS[BOOTHS[bi].seat];pendSeat=BOOTHS[bi].seat;PAN.set(0,0,0);tgt=clampXZ(s.x,s.z+.55);renderCard()}
 let breastPend=false;
-function fmTick(){if(!me.fm||me.fm>=7)return;const el=(Date.now()-fmAt)/1000;if(me.fm>=2&&me.fm<=5&&AV[myId])AV[myId].a.root.rotation.y=0;
+function deskTick(){const onDesk=me.sit&&DESKSEATS.includes(me.sit-1);if(onDesk&&me.st!='work'){me.st='work';me.stAt=Date.now();pushP();toast('같이 일하는 책상에 앉았어. 오늘도 나를 키우는 시간');if(tab=='grow')renderCard()}}
+function fmTick(){deskTick();if(!me.fm||me.fm>=7)return;const el=(Date.now()-fmAt)/1000;if(me.fm>=2&&me.fm<=5&&AV[myId])AV[myId].a.root.rotation.y=0;
  if(me.fm==1&&!tgt){me.fm=2;fmAt=Date.now();pushP();renderCard();return}
  if(me.fm==2){FPROP.boil(Math.min(1,el/3));if(el>3.2){me.fm=3;fmAt=Date.now();renderCard()}return}
  if(me.fm==3){FPROP.boil(-1);FPROP.set('scoop',el/4.2);if(el>4.2){FPROP.endScoop();me.fm=4;fmAt=Date.now();renderCard()}return}
  if(me.fm==4){FPROP.set('pour',el/3.4);if(el>3.4){FPROP.endPour();FPROP.hideBottle();me.fm=5;fmAt=Date.now();pushP();renderCard()}return}
- if(me.fm==5){if(AV[myId])AV[myId].a.shake=.2;if(el>1.8){const i=FEEDSEATS.find(k=>!seatTaken(k));if(i===undefined){if(el>2&&Math.round(el)%5==0)toast('수유의자가 다 찼어. 자리 나면 갈게');return}me.fm=6;fmAt=Date.now();pendSeat=i;const s=SEATS[i];tgt=clampXZ(s.x+Math.sin(s.ry)*.8,s.z+Math.cos(s.ry)*.8);pushP();renderCard()}return}
+ if(me.fm==5){if(AV[myId])AV[myId].a.shake=.2;if(el>1.8){const i=FEEDSEATS.find(k=>!seatTaken(k));if(i===undefined){if(el>2&&Math.round(el)%5==0)toast('수유의자가 다 찼어. 자리 나면 갈게');return}me.fm=6;fmAt=Date.now();pendSeat=i;const s=SEATS[i];tgt=seatApp(s);if(s.back&&me.z>s.z-.3){const sx=me.x<5?2.8:7.2;WP=[clampXZ(sx,Math.max(me.z,6.2)),clampXZ(sx,s.z-.8),seatApp(s)];tgt=WP.shift()}pushP();renderCard()}return}
  if(me.fm==6&&!tgt&&me.sit&&FEEDSEATS.includes(me.sit-1)){me.fm=7;me.st='bottle';me.stAt=Date.now();babyLvl=1;pushP();toast('꿀꺽꿀꺽');renderCard()}}
 function renderFormula(c){
  if(me.st=='bottle'){const mins=Math.floor((Date.now()-me.stAt)/60000);c.innerHTML='<b>분유 먹이는 중</b>'+mins+'분째 · 꿀꺽꿀꺽<div class="bar"><i style="width:'+Math.round((1-babyLvl)*100)+'%"></i></div>다 먹으면 트림 꼭!'+feedersHTML()+'<br><button id="bp">아기 토닥</button> <button id="cb">트림시키고 끝내기</button>';bindPats(c);$('bp').onclick=babyPat;$('cb').onclick=()=>{toast('트림 성공! 수고했어');standUp();stopFormula()};return}
@@ -562,17 +579,85 @@ function renderBooth(c){if(me.st=='feed'){const mins=Math.floor((Date.now()-me.s
  c.innerHTML='<b>모유수유실</b>커튼 치면 다른 엄마들한텐 안 보여.<br><button id="cb">모유수유 시작</button>';$('cb').onclick=startBreast}
 function dawnHTML(){const i=dawnInfo(),sb='background:#fff;color:#2B2118;border:1px solid #e8d9c2;padding:2px 7px;min-height:26px';return '<div class="notepick" id="np" style="display:none">'+NOTES.map((s,i)=>'<button data-n="'+i+'">'+s+'</button>').join('')+'</div><div style="margin-top:4px;display:flex;gap:4px;align-items:center;flex-wrap:wrap">'+(i.total?'<span class="stamp" style="margin:0">🌙 '+i.streak+'일</span>':'')+'<button id="nb" style="'+sb+'">📝 쪽지</button><button id="sh" style="'+sb+'">📸 카드</button></div>'}
 function bindExtras(c){const nb=c.querySelector('#nb');if(nb)nb.onclick=()=>{const p=c.querySelector('#np');p.style.display=p.style.display=='none'?'flex':'none'};c.querySelectorAll('[data-n]').forEach(b=>b.onclick=()=>myNote(+b.dataset.n));const sh=c.querySelector('#sh');if(sh)sh.onclick=shareCard}
+const hasSB=()=>typeof SB!=='undefined'&&SB;
+async function sbNotes(to){if(!hasSB())return[];try{const r=await SB.from('notes').select('from_nick,text,at').eq('to_id',to).gte('at',new Date(Date.now()-864e5).toISOString()).order('at',{ascending:false}).limit(30);return(r.data||[]).map(n=>({nick:n.from_nick,text:n.text,at:new Date(n.at).getTime()}))}catch(e){return[]}}
+async function sbPost(to,text){if(!hasSB()||!uid)return;try{await SB.from('notes').insert({from_id:uid,from_nick:me.nick,to_id:to,text:String(text).slice(0,100)})}catch(e){}}
+/* ---------- 임신 중: 주수 도장 · 출산가방 ---------- */
+function pregWeek(){const due=LS.get('cp_due','');if(!due)return 0;const d=(new Date(due)-new Date())/864e5;return Math.max(1,Math.min(42,40-Math.ceil(d/7)))}
+function weekStamp(){if(me.kind!='preg')return;const w=pregWeek();me.ex=Object.assign({},me.ex,{wk:w||0});const st=LS.get('cp_wkst',[]),k=ymd(new Date());if(w&&!st.includes(k)){st.push(k);LS.set('cp_wkst',st.slice(-300));setTimeout(()=>toast('🤰 '+w+'주 도장 쾅 · 아기 만나기까지 D-'+Math.max(0,Math.ceil((new Date(LS.get('cp_due',''))-new Date())/864e5))),2200)}}
+const BAG=[['엄마','산모패드','수유브라','손목보호대','회음부 방석','편한 내복','슬리퍼','수유쿠션'],['아기','배냇저고리','속싸개','기저귀','가제손수건','신생아 모자','겉싸개'],['서류','신분증','산모수첩','보험서류','카시트(퇴원날)']];
+function openBag(){openSheet('출산가방 싸기');const b=LS.get('cp_bag',{});const all=BAG.flatMap(g=>g.slice(1)),n=all.filter(x=>b[x]).length;
+ sb.innerHTML='<div class="box"><div class="t">가방 '+n+'/'+all.length+(n==all.length?' · 다 쌌다 🎉':'')+'</div><div class="bar" style="height:8px;background:#eee;border-radius:9px;overflow:hidden"><i style="display:block;height:100%;background:var(--y);width:'+Math.round(n/all.length*100)+'%"></i></div>'+BAG.map(g=>'<div style="margin-top:10px"><b style="font:14px Jua,sans-serif">'+g[0]+'</b><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">'+g.slice(1).map(x=>'<button class="vchip'+(b[x]?' on':'')+'" data-b="'+esc(x)+'">'+(b[x]?'✔ ':'')+esc(x)+'</button>').join('')+'</div></div>').join('')+'<p class="note">눌러서 가방에 넣어. 병원마다 준비물이 조금씩 달라서 다니는 병원 안내문이랑 같이 봐줘.</p></div>';
+ sb.querySelectorAll('[data-b]').forEach(e=>e.onclick=()=>{const y=sb.scrollTop;b[e.dataset.b]=!b[e.dataset.b];LS.set('cp_bag',b);openBag();sb.scrollTop=y;if(BAG.flatMap(g=>g.slice(1)).every(x=>b[x]))toast('출산가방 완성! 이제 만나기만 하면 돼')})}
+function renderPreg(c,here){const w=pregWeek(),due=LS.get('cp_due',''),st=LS.get('cp_wkst',[]).length,b=LS.get('cp_bag',{}),bn=BAG.flatMap(g=>g.slice(1)).filter(x=>b[x]).length;
+ const fd=here.filter(p=>p.state.st=='feed'||p.state.st=='bottle').length;
+ c.innerHTML='<b>'+(w?'🤰 '+w+'주 · D-'+Math.max(0,Math.ceil((new Date(due)-new Date())/864e5)):'예정일 넣으면 주수 도장')+'</b>'+(w?'<span class="stamp" style="margin:0">도장 '+st+'개</span>':'<input id="due" type="date" style="width:100%;min-height:30px;font-size:12px">')+
+ '<div style="margin-top:4px">선배맘 수유 중 '+fd+'명'+(fd?' · 응원 보내봐':'')+'</div>'+feedersHTML()+'<div style="display:flex;flex-wrap:wrap;gap:4px"><button id="bag">출산가방 '+bn+'/'+BAG.flatMap(g=>g.slice(1)).length+'</button>'+(w?'<button id="due2" style="background:#eee;color:#2B2118">예정일</button>':'')+'</div>'+dawnHTML();
+ bindPats(c);bindExtras(c);$('bag').onclick=openBag;const dd=$('due');if(dd){dd.onclick=()=>{try{dd.showPicker()}catch(e){}};dd.onchange=()=>{LS.set('cp_due',dd.value);weekStamp();pushP();renderCard()}}
+ const d2=$('due2');if(d2)d2.onclick=()=>{LS.set('cp_due','');renderCard()}}
+/* ---------- 유아식 이후: 오늘의 유아식 · 등원 준비 ---------- */
+const FOODS=['🍚 밥','🥣 국','🥦 브로콜리','🥕 당근','🐟 생선','🥚 계란','🍗 닭고기','🥩 소고기','🍠 고구마','🧀 치즈','🍌 바나나','🍝 국수','🥟 만두','🍙 주먹밥','🥛 우유','🍓 딸기'];
+let mealBoard=[];
+async function loadMeals(){if(hasSB()){mealBoard=(await sbNotes('meal')).map(n=>({nick:n.nick,m:String(n.text).split(',').map(Number).filter(i=>FOODS[i]),at:n.at}));return}if(!DB)return;try{const q=await DB.collection('notes').get();const L=[];(q.docs||q||[]).forEach(d=>{const v=d.data?d.data():d;(v.items||[]).forEach(it=>{if((it.to||'')=='meal'&&Date.now()-it.at<864e5)L.push({nick:v.nick,m:it.m||[],at:it.at})})});mealBoard=L.sort((a,b)=>b.at-a.at).slice(0,20)}catch(e){}}
+function openMeal(){openSheet('오늘의 유아식');const mine=LS.get('cp_meal',{});const today=mine.day===ymd(new Date())?mine.m:[];let pick=today.slice();
+ const live=others().filter(p=>p.state.ex&&p.state.ex.meal&&p.state.ex.meal.length).map(p=>({nick:p.state.nick,m:p.state.ex.meal,at:p.state.ex.mealAt||0}));
+ const seen=new Set(),board=[];live.concat(mealBoard).forEach(x=>{if(!seen.has(x.nick)){seen.add(x.nick);board.push(x)}});
+ const draw=()=>{sb.innerHTML='<div class="box"><div class="t">우리 아이 오늘 먹은 거 <small>최대 4개</small></div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">'+FOODS.map((f,i)=>'<button class="vchip'+(pick.includes(i)?' on':'')+'" data-f="'+i+'">'+f+'</button>').join('')+'</div><button class="btn" id="mok" style="width:100%;margin-top:10px">식탁에 올리기</button></div>'+
+  '<div class="box"><div class="t">다른 엄마들 식탁</div>'+(board.length?board.map(x=>'<div style="padding:8px 0;border-bottom:1px solid #f0e2cf;font-size:14px"><b>'+esc(x.nick)+'</b><br>'+x.m.filter(i=>FOODS[i]).map(i=>FOODS[i]).join(' · ')+' <button class="vchip" data-copy="'+esc(x.m.join(','))+'" style="padding:3px 8px">따라 할래</button></div>').join(''):'<div class="note">아직 올린 엄마가 없어. 첫 식탁을 올려줘!</div>')+'</div>';
+  sb.querySelectorAll('[data-f]').forEach(e=>e.onclick=()=>{const i=+e.dataset.f;if(pick.includes(i))pick=pick.filter(x=>x!==i);else if(pick.length<4)pick.push(i);else{toast('4개까지만');return}const y=sb.scrollTop;draw();sb.scrollTop=y});
+  sb.querySelectorAll('[data-copy]').forEach(e=>e.onclick=()=>{const fav=LS.get('cp_mealfav',[]);fav.push(e.dataset.copy);LS.set('cp_mealfav',fav.slice(-30));toast('내일 메뉴로 찜했어')});
+  $('mok').onclick=async()=>{if(!pick.length){toast('하나는 골라줘');return}LS.set('cp_meal',{day:ymd(new Date()),m:pick});me.ex=Object.assign({},me.ex,{meal:pick,mealAt:Date.now()});pushP();toast('식탁에 올렸어');
+   if(hasSB())await sbPost('meal',pick.join(','));else if(DB&&uid){try{const ref=DB.doc('notes/'+uid);let cur={};try{const d=await ref.get();cur=d&&d.exists!==false?(d.data?d.data():d):{}}catch(e){}const items=(cur.items||[]).filter(x=>x.to!='meal').slice(-40);items.push({to:'meal',m:pick,at:Date.now()});await ref.set({nick:me.nick,items})}catch(e){}}closeSheet();renderCard()}};draw()}
+const SCHOOL=['기저귀','여벌옷','물병·빨대컵','수저통','손수건','낮잠이불','알림장 확인','투약의뢰서(필요하면)'];
+function openSchool(){openSheet('등원 준비 체크');const k=ymd(new Date()),s=LS.get('cp_sch',{});const d=s.day===k?s.c:{};const n=SCHOOL.filter(x=>d[x]).length;
+ sb.innerHTML='<div class="box"><div class="t">오늘 가방 '+n+'/'+SCHOOL.length+'</div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">'+SCHOOL.map(x=>'<button class="vchip'+(d[x]?' on':'')+'" data-s="'+esc(x)+'">'+(d[x]?'✔ ':'')+esc(x)+'</button>').join('')+'</div><p class="note">매일 새로 시작돼. 다 챙기면 등원 도장 쾅. 지금까지 도장 '+LS.get('cp_schst',[]).length+'개</p></div>';
+ sb.querySelectorAll('[data-s]').forEach(e=>e.onclick=()=>{d[e.dataset.s]=!d[e.dataset.s];LS.set('cp_sch',{day:k,c:d});if(SCHOOL.every(x=>d[x])){const st=LS.get('cp_schst',[]);if(!st.includes(k)){st.push(k);LS.set('cp_schst',st);toast('🎒 등원 준비 끝! 도장 쾅')}}openSchool()})}
+function renderToddler(c,here){const m=LS.get('cp_meal',{}),k=ymd(new Date()),h=new Date().getHours();const sc=LS.get('cp_sch',{});const sn=sc.day===k?SCHOOL.filter(x=>sc.c[x]).length:0;
+ const mates=here.filter(p=>p.state.ex&&p.state.ex.meal&&p.state.ex.meal.length).length;
+ c.innerHTML='<b>🍚 유아식 · 등원</b>'+(m.day===k?'오늘 식탁: '+m.m.map(i=>FOODS[i].split(' ')[0]).join(''):'오늘 뭐 먹였어?')+'<div>식탁 올린 엄마 '+mates+'명</div><div style="display:flex;flex-wrap:wrap;gap:4px"><button id="ml">오늘의 유아식</button><button id="sc"'+(h>=6&&h<10?'':' style="background:#eee;color:#2B2118"')+'>등원 준비 '+sn+'/'+SCHOOL.length+'</button></div>'+dawnHTML();
+ bindExtras(c);$('ml').onclick=async()=>{await loadMeals();openMeal()};$('sc').onclick=openSchool}
+/* ---------- 내 시간: 같이 일하는 책상 · 육퇴 라운지 · 미니홈피 구경 ---------- */
+function renderGrow(c,here){const wk=here.filter(p=>p.state.st=='work').length+(me.st=='work'?1:0),yk=here.filter(p=>p.state.st=='yukte').length+(me.st=='yukte'?1:0),h=new Date().getHours();
+ const mins=me.st=='work'?Math.floor((Date.now()-me.stAt)/60000):0;
+ c.innerHTML='<b>내 시간</b><div style="color:#8a7a68">아기 키우면서 나도 같이 커</div>'+
+ '<div style="margin-top:4px">💻 같이 집중 중 '+wk+'명'+(me.st=='work'?' · 나 '+mins+'분':'')+'</div>'+
+ '<div>🍺 오늘 육퇴한 엄마 '+yk+'명</div>'+
+ '<div style="display:flex;flex-wrap:wrap;gap:4px">'+(me.st=='work'?'<button id="wkx" style="background:#eee;color:#2B2118">일어나기</button>':'<button id="wk">책상 가서 앉기</button>')+
+ (me.st=='yukte'?'<button id="yk" style="background:#eee;color:#2B2118">육퇴 끝</button>':'<button id="yk">'+(h>=20||h<5?'육퇴 선언':'육퇴 미리 선언')+'</button>')+
+ '<button id="hb" style="background:#fff;color:#2B2118;border:1px solid #e8d9c2">미니홈피 구경</button></div>'+
+ (here.some(p=>p.state.st=='work'||p.state.st=='yukte')?'<div style="margin-top:4px;max-height:60px;overflow-y:auto">'+here.filter(p=>p.state.st=='work'||p.state.st=='yukte').map(p=>'<div style="display:flex;justify-content:space-between;align-items:center"><span>'+esc(p.state.nick)+'</span><button data-pat="'+esc(p.state.id||p.id)+'" data-ty="'+(p.state.st=='work'?'work':'toast')+'" style="padding:2px 8px;min-height:24px;margin:0">'+(p.state.st=='work'?'화이팅':'짠')+'</button></div>').join('')+'</div>':'');
+ bindPats(c);
+ const w=$('wk');if(w)w.onclick=()=>{const free=DESKSEATS.find(i=>!others().some(p=>p.state.room===me.room&&p.state.sit==i+1));if(free==null){toast('책상이 꽉 찼어');return}const s=SEATS[free];pendSeat=free;WP=[];tgt=seatApp(s);if(me.z>s.z-.3){const sx=me.x<5?2.8:7.2;WP=[clampXZ(sx,Math.max(me.z,6.2)),clampXZ(sx,s.z-.8),seatApp(s)];tgt=WP.shift()}pushP()};
+ const wx=$('wkx');if(wx)wx.onclick=()=>{standUp();renderCard()};
+ $('yk').onclick=()=>{if(me.st=='yukte'){me.st=''}else{if(me.st=='work')standUp();me.st='yukte';me.stAt=Date.now();toast('🍺 육퇴 성공! 오늘도 진짜 고생했어');fx(myId,'🍺')}pushP();ensure(myId,meState(),true);renderCard()};
+ $('hb').onclick=openHomes}
+async function openHomes(){openSheet('엄마들 미니홈피 구경');sb.innerHTML='<div class="note">불러오는 중…</div>';let L=[];
+ if(hasSB()){try{const r=await SB.from('homes').select('id,data').limit(200);(r.data||[]).forEach(x=>{if(x.data&&x.data.nick&&x.id!==uid)L.push({id:x.id,v:x.data})})}catch(e){}}
+ else if(DB){try{const q=await DB.collection('homes').get();(q.docs||q||[]).forEach(d=>{const v=d.data?d.data():d,id=d.id||v.id;if(v&&v.nick&&id!==uid)L.push({id,v})})}catch(e){}}
+ const sns=v=>['ig','yt','blog'].filter(k=>v[k]).length;L.sort((a,b)=>sns(b.v)-sns(a.v));
+ sb.innerHTML='<div class="box"><div class="t">다른 엄마들은 어떻게 키우고 있을까</div><div style="font-size:13px;color:#8a7a68">육아하면서 SNS·블로그로 부업 키우는 엄마들 미니홈피야. 들어가서 어떻게 하는지 구경하고 레퍼런스 삼아봐.</div><button class="btn" id="mk" style="width:100%;margin-top:8px">내 미니홈피 꾸미기</button></div>'+
+ (L.length?L.map(x=>'<div class="box" data-h="'+esc(x.id)+'" data-n="'+esc(x.v.nick)+'" style="cursor:pointer"><b style="font:15px Jua,sans-serif">'+esc(x.v.nick)+'</b> '+(x.v.ig?'<span class="chip">인스타</span>':'')+(x.v.yt?'<span class="chip">유튜브</span>':'')+(x.v.blog?'<span class="chip">블로그</span>':'')+'<div style="font-size:13px;color:#5a4a3a;margin-top:4px">'+esc((x.v.intro||'').slice(0,60))+'</div></div>').join(''):'<div class="note">아직 미니홈피를 연 엄마가 없어. 첫 번째로 열어봐!</div>');
+ $('mk').onclick=()=>openHome(myId,me.nick,true);sb.querySelectorAll('[data-h]').forEach(e=>e.onclick=()=>openHome('uid:'+e.dataset.h,e.dataset.n))}
+/* ---------- 위로 카드: 랜덤으로 한 장씩 ---------- */
+const COMFORT=['오늘도 버틴 너, 충분히 잘하고 있어','아기 키우는 시간은 경력 단절이 아니라 경력 연장이야','엄마가 되면서 생긴 감각, 그게 너의 새 무기야','오늘 10분만 나를 위해 써도 괜찮아','잠 못 잔 밤도 다 지나가. 지금 이 방에 너 혼자 아니야','완벽한 엄마 말고 행복한 엄마면 돼','작게라도 매일 기록하면 그게 포트폴리오가 돼','아이가 크는 만큼 나도 같이 크는 중','오늘 못 한 건 내일 하면 돼. 오늘은 여기까지 잘했어','남들 SNS 보고 조급해하지 마. 너의 속도가 있어','육아로 배운 인내심, 일할 때도 진짜 쓸모 있어','지금 이 순간에도 누군가 너를 응원하고 있어','나한테 귀 기울이는 것도 육아만큼 중요해','쉬는 것도 일이야. 오늘은 푹 쉬자'];
+function showComfort(){if(!me.room||sheet.classList.contains('on'))return;let el=$('comfort');if(!el){el=document.createElement('div');el.id='comfort';app.appendChild(el)}
+ const t=COMFORT[Math.floor(Math.random()*COMFORT.length)];el.innerHTML='<div style="font:15px Jua,sans-serif;line-height:1.45">'+esc(t)+'</div><div style="margin-top:8px;display:flex;gap:6px;justify-content:center"><button id="cfh">♡ 말없이 응원 보내기</button><button id="cfx" style="background:#eee;color:#2B2118">고마워</button></div>';el.classList.add('on');
+ $('cfh').onclick=()=>{roomCheer();el.classList.remove('on')};$('cfx').onclick=()=>el.classList.remove('on');setTimeout(()=>el.classList.remove('on'),15000)}
+setTimeout(showComfort,25000);setInterval(showComfort,7*60000);
 function renderCard(){const c=$('card');if(!me.room){c.style.display='none';return}
  if(cardOff&&!(me.fm>0||me.st=='bottle'||me.zone||breastPend)){c.style.display='none';return}c.style.display='';
  if(me.fm>0||me.st=='bottle'){renderFormula(c);return}
  if(me.zone&&me.zone[0]=='b'||breastPend){renderBooth(c);return}
  if(me.zone=='formula'){renderFormula(c);return}
  const here=others().filter(p=>p.state.room===me.room);
+ if(tab=='grow'){renderGrow(c,here);return}
+ if(tab=='feed'&&me.kind=='preg'){renderPreg(c,here);return}
+ if(tab=='feed'&&me.kind=='toddler'){renderToddler(c,here);return}
  if(tab=='feed'){const n=here.filter(p=>p.state.st=='feed').length+(me.st=='feed'?1:0);const mins=me.st=='feed'?Math.floor((Date.now()-me.stAt)/60000):0;
   c.innerHTML='<b>'+(isNight()?'새벽수유 같이 하기':'수유 같이 하기')+'</b>'+(me.st=='feed'?'나 · '+mins+'분째 수유 중':'')+(me.st=='feed'?'<div class="bar"><i style="width:'+Math.min(100,mins/30*100)+'%"></i></div>':'')+'같이 수유 중 '+n+'명'+feedersHTML()+dawnHTML()+(me.st=='feed'?'<button id="cb">수유 끝</button> <button id="bp">아기 토닥</button>':'<div style="display:flex;flex-wrap:wrap;gap:4px"><button id="fb">🍼 분유</button><button id="bb">모유수유실</button><button id="cb" style="background:#eee;color:#2B2118">여기서 수유</button></div>');bindPats(c);bindExtras(c);if($('bp'))$('bp').onclick=babyPat;if($('fb'))$('fb').onclick=startFormula;if($('bb'))$('bb').onclick=startBreast;
   $('cb').onclick=()=>{if(me.st=='feed'){me.st='';toast('수고했어. 오늘 '+mins+'분')}else{me.st='feed';me.stAt=Date.now()}pushP();ensure(myId,meState(),true);renderCard()}}
  else{const n=here.filter(p=>p.state.st=='dunga').length+(me.st=='dunga'?1:0);
-  if(me.kind=='preg'){c.innerHTML='<b>애기 재우기</b>임신 중엔 같이 산책만 해. 아기 태어나면 열려!';return}
+  if(me.kind=='preg'){const tm=LS.get('cp_taegyo',{});const td=tm[ymd(new Date())]||0;const w=here.filter(p=>p.state.st=='walk').length+(me.st=='walk'?1:0);c.innerHTML='<b>태교 산책</b>걸은 만큼 오늘 태교 시간이 쌓여<div class="bar"><i style="width:'+Math.min(100,td/30*100)+'%"></i></div>오늘 '+Math.round(td)+'분 · 같이 걷는 예비맘 '+w+'명<br><button id="cb">'+(me.st=='walk'?'산책 끝':'산책 시작')+'</button>';$('cb').onclick=()=>{me.st=me.st=='walk'?'':'walk';pushP();ensure(myId,meState(),true);renderCard()};return}
   c.innerHTML='<b>애기 재우기</b>'+(me.carrier?'코니 아기띠 메고 러그를 걸어봐':'아기띠를 메고 걸으면 아기가 스르륵')+'<div class="bar"><i style="width:'+Math.round(Math.min(100,me.steps))+'%"></i></div>'+(me.steps>=100?'꿀잠 성공 zZ':'꿀잠까지 '+Math.round(Math.max(0,100-me.steps))+'%')+' · 같이 걷는 엄마 '+n+'명'+
    '<div class="sw">'+['#4a4744','#d9cbb8','#7d8f9e'].map(col=>'<span data-c="'+col+'" class="'+(me.carrier&&me.cc==col?'on':'')+'" style="background:'+col+'"></span>').join('')+'</div><small style="color:#8a7a68">× 코니 · 협업 제안 시안</small><br><button id="cb">'+(me.carrier?'아기띠 풀기':'아기띠 메기')+'</button>';
   c.querySelectorAll('[data-c]').forEach(s=>s.onclick=()=>{me.cc=s.dataset.c;me.carrier=1;me.st='dunga';me.steps=0;pushP();ensure(myId,meState(),true);renderCard()});
@@ -607,7 +692,7 @@ async function getHome(id){if(!SB||!id)return null;try{const r=await SB.from('ho
 async function putHome(h){if(!SB||!uid)throw 0;const r=await SB.from('homes').upsert({id:uid,data:h,updated_at:new Date().toISOString()});if(r.error)throw r.error}
 async function loadHome(){myHome=await getHome(uid)}
 async function gotPat(){if(!SB||!uid)return;try{const h=Object.assign({nick:me.nick,pats:0},myHome||{});h.pats=(h.pats||0)+1;myHome=h;await putHome(h)}catch(e){}}
-async function openHome(id,nick,edit){const mine=id===myId;edit=mine&&edit;const hid=mine?uid:(AV[id]&&AV[id].st.uid)||null;openSheet(mine?'나의 미니홈피':esc(nick)+'의 미니홈피');sb.innerHTML='<div class="note">불러오는 중…</div>';
+async function openHome(id,nick,edit){const mine=id===myId;edit=mine&&edit;const hid=mine?uid:String(id).startsWith('uid:')?String(id).slice(4):(AV[id]&&AV[id].st.uid)||null;openSheet(mine?'나의 미니홈피':esc(nick)+'의 미니홈피');sb.innerHTML='<div class="note">불러오는 중…</div>';
  let h=await getHome(hid);
  h=Object.assign({nick,intro:'',ig:'',yt:'',blog:'',collab:false,pats:0},h||{});
  let notes=[];if(SB&&hid){try{const r=await SB.from('notes').select('from_nick,text,at').eq('to_id',hid).order('at',{ascending:false}).limit(20);notes=(r.data||[]).map(n=>({from:n.from_nick,text:n.text,at:new Date(n.at).getTime()}))}catch(e){}}
@@ -802,6 +887,7 @@ function loop(){requestAnimationFrame(loop);const dt=Math.min(.1,clk.getDelta())
   if(tgt){const dx=tgt[0]-me.x,dz=tgt[1]-me.z,d=Math.hypot(dx,dz);if(d<.05&&WP.length){tgt=WP.shift();}else if(d<.05){tgt=null;if(pendSeat>=0){const s=SEATS[pendSeat];me.sit=pendSeat+1;me.x=s.x;me.z=s.z;if(breastPend){breastPend=false;me.st='feed';me.stAt=Date.now();toast('모유수유 시작 · 커튼 쳤어');renderCard()}pendSeat=-1;pushP()}}else{const s=Math.min(d,2.6*dt);const ux=dx/d*s,uz=dz/d*s;let p=clampXZ(me.x+ux,me.z+uz);
     if(Math.hypot(p[0]-me.x,p[1]-me.z)<s*.4){const px=clampXZ(me.x+(ux>=0?1:-1)*s,me.z),pz=clampXZ(me.x,me.z+(uz>=0?1:-1)*s);const gx=Math.hypot(px[0]-me.x,px[1]-me.z),gz=Math.hypot(pz[0]-me.x,pz[1]-me.z);p=Math.abs(ux)>=Math.abs(uz)?(gx>s*.4?px:pz):(gz>s*.4?pz:px);stuckT+=dt;if(stuckT>2.5){stuckT=0;if(me.fm==1){const f=clampXZ(FSPOT[0],FSPOT[1]);me.x=f[0];me.z=f[1];WP=[];tgt=null}else{tgt=null;WP=[];pendSeat=-1}}}else stuckT=0;
     me.x=p[0];me.z=p[1];o.a.root.rotation.y=Math.atan2(dx,dz);o.a.walk=Math.min(1,o.a.walk+dt*6);
+    if(me.st=='walk'){const tm=LS.get('cp_taegyo',{}),k=ymd(new Date());tm[k]=(tm[k]||0)+s/1.2/60*6;LS.set('cp_taegyo',tm);if(tab=='dunga'&&Math.random()<.05)renderCard()}
     if(me.carrier&&me.steps<100){me.steps=Math.min(100,me.steps+s*6);if(me.steps>=100){toast('아기 꿀잠 성공 zZ');fx(myId,'zZ')}if(tab=='dunga')renderCard()}pushP()}}
   else o.a.walk=Math.max(0,o.a.walk-dt*6);
   fmTick();if(me.st=='bottle'){babyLvl=Math.max(.08,1-(Date.now()-me.stAt)/240000);}
