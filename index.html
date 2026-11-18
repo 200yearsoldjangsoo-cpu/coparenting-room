@@ -147,6 +147,8 @@ a.kakao{display:block;margin-top:10px;text-align:center;font:15px Jua,sans-serif
 #comfort{position:absolute;left:50%;top:150px;transform:translate(-50%,-10px);width:min(300px,84vw);background:#fffaf0;border:2px solid var(--y);border-radius:18px;padding:12px 14px;text-align:center;box-shadow:0 6px 18px rgba(0,0,0,.3);z-index:20;opacity:0;pointer-events:none;transition:.35s}
 #comfort.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
 #comfort button{font:13px Jua,sans-serif;background:var(--ink);color:var(--y);border:0;border-radius:999px;padding:6px 12px;cursor:pointer}
+#kinds{display:block!important}#kinds .opt{display:grid!important;grid-template-columns:repeat(3,1fr);gap:6px}#kinds .opt button{padding:8px 4px;font-size:14px;white-space:nowrap;grid-column:auto!important;width:auto!important}
+.ksub{font:12px Jua,sans-serif;color:#8a7a68;margin:8px 0 4px}
 </style>
 </head>
 <body>
@@ -192,13 +194,18 @@ const me={nick:'엄마'+String(1000+Math.floor(Math.random()*9000)),kind:null,ro
 let peers=[],RM=null,DB=null,USER=null,SAMPLE=null;
 
 /* ---------- 입장 화면 ---------- */
-$('kinds').innerHTML=Object.entries(KINDS).map(([k,v])=>'<button data-k="'+k+'">'+v.label+'</button>').join('');
-function markKind(){$('kinds').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.k==me.kind))}
-function setKind(k){me.kind=k;try{localStorage.setItem('cp_kind',k)}catch(e){}markKind()}
-$('kinds').querySelectorAll('button').forEach(b=>b.onclick=()=>{setKind(b.dataset.k);renderGate()});
-let savedKind=null;try{savedKind=localStorage.getItem('cp_kind')}catch(e){}
-if(savedKind&&KINDS[savedKind]){me.kind=savedKind;markKind()}
-$('nick').textContent=(savedKind&&KINDS[savedKind]?'지난번 선택 그대로야 · 바뀌었으면 다시 눌러 · ':'별명은 자동으로 붙어 · ')+me.nick;
+const STAGES={preg:'임신 중',baby:'돌 이전',todd:'돌 이후'},MSTATS={leave:'육아휴직 중',work:'워킹맘',home:'전업맘'};
+let mySt='',myMs='';
+function kindOf(st,ms){return st=='preg'?'preg':st=='todd'?'toddler':{leave:'carrier',work:'work',home:'home'}[ms]||'carrier'}
+const kpick=(id,O,cur)=>'<div class="ksub">'+id+'</div><div class="opt">'+Object.entries(O).map(([k,v])=>'<button data-'+(O===STAGES?'s':'m')+'="'+k+'" class="'+(cur==k?'on':'')+'">'+v+'</button>').join('')+'</div>';
+function drawKinds(){$('kinds').innerHTML=kpick('아이 시기',STAGES,mySt)+kpick('지금 나',MSTATS,myMs);
+ $('kinds').querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{mySt=b.dataset.s;applyKind()});$('kinds').querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{myMs=b.dataset.m;applyKind()})}
+function applyKind(){try{localStorage.setItem('cp_st',mySt);localStorage.setItem('cp_ms',myMs)}catch(e){}if(mySt&&myMs){me.kind=kindOf(mySt,myMs);me.ex=Object.assign({},me.ex,{ms:myMs,sg:mySt});try{localStorage.setItem('cp_kind',me.kind)}catch(e){}}else me.kind=null;drawKinds();renderGate()}
+function setKind(k){me.kind=k;try{localStorage.setItem('cp_kind',k)}catch(e){}}
+function markKind(){drawKinds()}
+try{mySt=localStorage.getItem('cp_st')||'';myMs=localStorage.getItem('cp_ms')||''}catch(e){}
+if(mySt&&myMs){me.kind=kindOf(mySt,myMs);me.ex=Object.assign({},me.ex,{ms:myMs,sg:mySt})}drawKinds();
+$('nick').textContent=(me.kind?'지난번 선택 그대로야 · 바뀌었으면 다시 눌러 · ':'별명은 자동으로 붙어 · ')+me.nick;
 function others(){return peers.filter(p=>!p.you&&p.state&&p.state.nick)}
 function roomCounts(){const c={};others().forEach(p=>{const r=p.state.room;if(r)c[r]=(c[r]||0)+1});return c}
 function pickRoom(){const c=roomCounts();for(let r=1;r<100;r++)if((c[r]||0)<CAP)return r;return 1}
@@ -445,7 +452,7 @@ function ensure(id,st,isMe){let o=AV[id];const sig=(st.carrier?'none':AK(st.kind
  if(!o){const a=makeAv(st);a.root.position.set(st.x||0,0,st.z||0);S.add(a.root);const e=document.createElement('div');e.className='name'+(isMe?' me':'');app.insertBefore(e,$('card'));o=AV[id]={a,e,x:st.x||0,z:st.z||0,tx:st.x||0,tz:st.z||0};}
  o.st=st;o.tx=st.x;o.tz=st.z;return o}
 function drop(id){const o=AV[id];if(!o)return;S.remove(o.a.root);o.e.remove();delete AV[id]}
-function label(st){const k=KINDS[st.kind]?KINDS[st.kind].label:'';const s=st.zone&&st.zone[0]=='b'?'수유실 이용 중':st.st=='bottle'?'분유 먹이는 중 '+Math.max(1,Math.round((Date.now()-st.stAt)/60000))+'분':st.fm>0&&st.fm<6?['','분유 바로 가는 중','🔥 물 끓이는 중','🥄 분유 3스푼 넣는 중','💧 물 붓는 중','🍼 쉐킷쉐킷 흔드는 중'][st.fm]:st.zone=='formula'?'분유 바에 있어':st.st=='work'?'💻 집중 중 '+Math.max(1,Math.round((Date.now()-st.stAt)/60000))+'분':st.sit?'앉아서 쉬는 중':st.st=='work'?'💻 집중 중 '+Math.max(1,Math.round((Date.now()-st.stAt)/60000))+'분':st.st=='yukte'?'🍺 육퇴 성공':st.st=='walk'?'🤰 태교 산책 중':st.st=='feed'?'수유 중 '+Math.max(1,Math.round((Date.now()-st.stAt)/60000))+'분':st.st=='dunga'?(st.steps>=100?'아기 꿀잠 zZ':'재우는 중 '+Math.floor(st.steps/34+1)+'바퀴'):k;return esc(st.nick)+' <i>'+esc(s+(st.kind=='preg'&&st.ex&&st.ex.wk&&s==k?' '+st.ex.wk+'주':''))+'</i>'}
+function label(st){const ex=st.ex||{};const k=ex.sg&&ex.ms?STAGES[ex.sg]+' · '+MSTATS[ex.ms]:KINDS[st.kind]?KINDS[st.kind].label:'';const s=st.zone&&st.zone[0]=='b'?'수유실 이용 중':st.st=='bottle'?'분유 먹이는 중 '+Math.max(1,Math.round((Date.now()-st.stAt)/60000))+'분':st.fm>0&&st.fm<6?['','분유 바로 가는 중','🔥 물 끓이는 중','🥄 분유 3스푼 넣는 중','💧 물 붓는 중','🍼 쉐킷쉐킷 흔드는 중'][st.fm]:st.zone=='formula'?'분유 바에 있어':st.st=='work'?'💻 집중 중 '+Math.max(1,Math.round((Date.now()-st.stAt)/60000))+'분':st.sit?'앉아서 쉬는 중':st.st=='work'?'💻 집중 중 '+Math.max(1,Math.round((Date.now()-st.stAt)/60000))+'분':st.st=='yukte'?'🍺 육퇴 성공':st.st=='walk'?'🤰 태교 산책 중':st.st=='feed'?'수유 중 '+Math.max(1,Math.round((Date.now()-st.stAt)/60000))+'분':st.st=='dunga'?(st.steps>=100?'아기 꿀잠 zZ':'재우는 중 '+Math.floor(st.steps/34+1)+'바퀴'):k;return esc(st.nick)+' <i>'+esc(s+(st.kind=='preg'&&st.ex&&st.ex.wk&&s==k?' '+st.ex.wk+'주':''))+'</i>'}
 
 /* ---------- 실시간 ---------- */
 let lastPush=0,pend=false;
@@ -700,7 +707,7 @@ async function openHome(id,nick,edit){const mine=id===myId;edit=mine&&edit;const
  const st=mine?meState():(AV[id]?AV[id].st:{kind:'carrier'});
  const chips=[['ig','인스타',h.ig],['yt','유튜브',h.yt],['bl','블로그',h.blog]];
  const editBox=edit?'<div class="box"><div class="t">내 홈피 꾸미기 <small>'+(SB&&uid?'저장돼':'연결 중')+'</small></div>'+
-  '<label>지금 나는</label><div class="kpick" id="hkind">'+Object.entries(KINDS).map(([k,v])=>'<button data-k="'+k+'" class="'+(me.kind==k?'on':'')+'">'+v.label+'</button>').join('')+'</div>'+
+  '<label>아이 시기</label><div class="kpick" id="hkind">'+Object.entries(STAGES).map(([k,v])=>'<button data-hs="'+k+'" class="'+(mySt==k?'on':'')+'">'+v+'</button>').join('')+'</div><label>지금 나</label><div class="kpick" id="hkind2">'+Object.entries(MSTATS).map(([k,v])=>'<button data-hm="'+k+'" class="'+(myMs==k?'on':'')+'">'+v+'</button>').join('')+'</div>'+
   '<label>TODAY is..</label><div class="kpick" id="hmood">'+MOODS.map(m=>'<button data-m="'+m+'" class="'+((h.mood||MOODS[0])==m?'on':'')+'">'+m+'</button>').join('')+'</div>'+'<label>한 줄 소개</label><textarea id="hi" maxlength="200">'+esc(h.intro)+'</textarea><label>♬ 오늘의 BGM (노래 제목만)</label><input id="hbgm" maxlength="40" value="'+esc(h.bgm||'')+'" placeholder="예) 자장가 메들리">'+
   chips.map(([k,n,v])=>'<label>'+n+' · 아이디만 쓰거나 주소 붙여넣기</label><input id="h'+k+'" value="'+esc(v)+'" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="'+(k=='ig'?'@아이디 또는 instagram.com/…':k=='yt'?'@채널 또는 youtube.com/…':'네이버 아이디 또는 블로그 주소')+'"><div class="hint" id="p'+k+'"></div>').join('')+
   '<label style="display:flex;gap:8px;align-items:center;font-size:15px;color:var(--ink);margin:10px 0"><input type="checkbox" id="hco" style="width:22px;min-height:22px" '+(h.collab?'checked':'')+'> 협업 제안 받기</label><button class="btn" id="hsave" style="width:100%">저장</button></div>':'';
@@ -720,7 +727,7 @@ async function openHome(id,nick,edit){const mine=id===myId;edit=mine&&edit;const
  sb.scrollTop=0;
  const he=$('hedit');if(he)he.onclick=()=>openHome(myId,me.nick,true);
  chips.forEach(([k])=>{const i=$('h'+k),p=$('p'+k);if(!i)return;const f=()=>{const n=snsNorm(k,i.value);p.textContent=n?'→ '+snsLink(k,n).replace(/^https:\/\/(www\.)?/,'')+' 로 연결돼':''};i.oninput=f;f()});
- const hk=$('hkind');if(hk)hk.querySelectorAll('button').forEach(b=>b.onclick=()=>{setKind(b.dataset.k);hk.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x==b));pushP();ensure(myId,meState(),true);renderCard()});
+ [['hkind','hs'],['hkind2','hm']].forEach(([id,a])=>{const hk=$(id);if(hk)hk.querySelectorAll('button').forEach(b=>b.onclick=()=>{if(a=='hs')mySt=b.dataset.hs;else myMs=b.dataset.hm;applyKind();hk.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x==b));pushP();ensure(myId,meState(),true);feedLabel();renderCard()})});
  drawMini(st);
  const sv=$('hsave');if(sv)sv.onclick=async()=>{const mo=document.querySelector('#hmood .on');const nh=Object.assign({},h,{nick:me.nick,kind:me.kind,mood:mo?mo.dataset.m:MOODS[0],bgm:$('hbgm').value.slice(0,40),intro:$('hi').value.slice(0,200),ig:snsNorm('ig',$('hig').value),yt:snsNorm('yt',$('hyt').value),blog:snsNorm('bl',$('hbl').value),collab:$('hco').checked});myHome=nh;
   if(SB&&uid){sv.disabled=true;try{await putHome(nh);toast('저장했어')}catch(e){toast('저장이 안 됐어. 잠시 뒤 다시')}sv.disabled=false}else toast('아직 연결 중이야');openHome(myId,me.nick)};
@@ -814,10 +821,10 @@ function judge(){const R=[],N=[];const w=Math.max(0,+DG.w||0),wt=DG.wt,emp=['emp
  R.push(['아동수당','9세 미만 월 10만 원 (2026년 기준, 비수도권 월 5천 원·인구감소지역 1만~2만 원 추가)','아동수당법 제4조 제1항·제6항, 부칙(2026.3.20) 제2조, 시행령 제2조 제2항']);
  R.push(['첫만남이용권',(DG.first?'첫째 200만 원':'둘째부터 300만 원')+' 바우처, 출생일부터 2년 안에 사용','아동수당법 시행령 제10조의3']);
  return [R,N]}
-function autoWT(){if(DG.wt)return DG.wt;return me.kind=='home'?'none':'emp'}
+function autoWT(){if(DG.wt)return DG.wt;return (me.ex&&me.ex.ms||'')=='home'||me.kind=='home'?'none':'emp'}
 function diagHTML(){if(!DG.wt){DG.wt=autoWT();DG.auto=true}
  const wn=WT.find(x=>x[0]==DG.wt)[1];
- let h='<div class="box"><div class="t">내 맞춤 진단 <small>'+esc(KINDS[me.kind].label)+' 기준으로 미리 채웠어</small></div><div style="font-size:14px">지금 <b>'+esc(wn)+'</b>으로 봤어. <a id="dchg" style="color:#c27a00;text-decoration:underline">아니면 바꾸기</a></div><div class="kpick" id="dwt" style="display:none;margin-top:8px">'+WT.map(([k,n,s])=>'<button data-w="'+k+'" class="'+(DG.wt==k?'on':'')+'">'+n+'</button>').join('')+'</div>'+
+ let h='<div class="box"><div class="t">내 맞춤 진단 <small>'+esc(mySt&&myMs?STAGES[mySt]+' · '+MSTATS[myMs]:KINDS[me.kind].label)+' 기준으로 미리 채웠어</small></div><div style="font-size:14px">지금 <b>'+esc(wn)+'</b>으로 봤어. <a id="dchg" style="color:#c27a00;text-decoration:underline">아니면 바꾸기</a></div><div class="kpick" id="dwt" style="display:none;margin-top:8px">'+WT.map(([k,n,s])=>'<button data-w="'+k+'" class="'+(DG.wt==k?'on':'')+'">'+n+'</button>').join('')+'</div>'+
   '<div class="lk" style="margin-top:8px"><a id="dfetch"><b>내 정보 자동으로 불러오기</b> · 간편인증 한 번이면 고용보험·건강보험 기록으로 찬이가 채워줘 <small style="display:block;color:#8a7a68">정식 오픈 준비 중</small></a></div></div>';
  if(!DG.wt)return h;
  const emp=['emp','day','fixed'].includes(DG.wt);
