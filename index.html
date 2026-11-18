@@ -143,7 +143,7 @@ a.kakao{display:block;margin-top:10px;text-align:center;font:15px Jua,sans-serif
  <div class="zoom" id="zoom"><button data-z="-1" aria-label="가까이">+</button><button data-z="1" aria-label="멀리">−</button></div>
  <div class="toast" id="toast"></div>
  <div class="dock" id="dock">
-  <button data-t="feed" class="on"><svg viewBox="0 0 24 24"><path d="M12 3a7 7 0 1 0 9 9A8 8 0 1 1 12 3z" fill="none" stroke="currentColor" stroke-width="2"/></svg>새벽수유</button>
+  <button data-t="feed" class="on" id="feedTab"></button>
   <button data-t="dunga"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.5-7-9.5A3.8 3.8 0 0 1 12 8a3.8 3.8 0 0 1 7 2.5C19 15.5 12 20 12 20z" fill="none" stroke="currentColor" stroke-width="2"/></svg>애기재우기</button>
   <button data-t="home"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z" fill="none" stroke="currentColor" stroke-width="2"/></svg>미니홈피</button>
   <button data-t="aide"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z" fill="none" stroke="currentColor" stroke-width="2"/></svg>육아비서 찬이</button>
@@ -207,7 +207,7 @@ const R=new T.WebGLRenderer({antialias:true});R.setPixelRatio(Math.min(2,deviceP
 app.prepend(R.domElement);
 const cam=new T.PerspectiveCamera(36,1,.1,100);
 function size(){const w=app.clientWidth,h=app.clientHeight;R.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}
-const camF=new T.Vector3(0,0,0),CO=new T.Vector3(3.4,14.2,16.2);let zoomK=.8;
+const camF=new T.Vector3(0,0,0),CO=new T.Vector3(3.4,14.2,16.2);let zoomK=.8,camYaw=0;const YAX=new T.Vector3(0,1,0);const camOff=()=>CO.clone().applyAxisAngle(YAX,camYaw);
 const S=new T.Scene();S.background=new T.Color('#1b1d38');
 /* ---------- 도우미 ---------- */
 const MC={};const M=(c,o)=>{const k=c+JSON.stringify(o||{});return MC[k]||(MC[k]=new T.MeshStandardMaterial(Object.assign({color:c,roughness:.85},o||{})))};
@@ -326,7 +326,7 @@ function sign(txt,x,y,z,ry,w){const tx=ctex(512,128,(g,W,H)=>{g.fillStyle='#fffa
  KET.g=G(cyl(.15,.17,.3,'#f3f3f3',0,.15,0),cyl(.12,.12,.04,'#bfc5cc',0,.32,0),box(.06,.18,.05,'#555',.18,.18,0),cyl(.025,.035,.16,'#f3f3f3',-.17,.22,0).rotateZ(.9));KET.g.position.set(-7.8,.96,z0+.36);S.add(KET.g);S.add(cyl(.2,.2,.03,'#9aa3ad',-7.8,.975,z0+.36));
   KET.y=1.35;KET.glow=GL('rgba(255,140,90,.9)',.7);KET.glow.position.set(-7.8,1.05,z0+.42);KET.glow.material.opacity=0;S.add(KET.glow);
  for(let i=0;i<3;i++){const s=new T.Sprite(new T.SpriteMaterial({map:ctex(64,64,(g)=>{const gr=g.createRadialGradient(32,32,0,32,32,32);gr.addColorStop(0,'rgba(255,255,255,.9)');gr.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=gr;g.fillRect(0,0,64,64)}),transparent:true,depthWrite:false}));s.scale.set(.35,.35,1);s.position.set(-7.8+(i-1)*.05,1.35,z0+.36);s.visible=false;S.add(s);KET.steam.push(s)}
- [['#FFD43B',-6.15],['#9fd3ff',-5.88],['#f6a7b8',-5.61]].forEach(([c,x])=>{S.add(cyl(.11,.11,.24,c,x,1.08,z0+.32));S.add(cyl(.115,.115,.04,'#fff',x,1.22,z0+.32))});
+ [['#9fd3ff',-5.88],['#f6a7b8',-5.61]].forEach(([c,x])=>{S.add(cyl(.11,.11,.24,c,x,1.08,z0+.32));S.add(cyl(.115,.115,.04,'#fff',x,1.22,z0+.32))});
  for(let i=0;i<4;i++){S.add(cyl(.05,.05,.2,'#fffaf0',-7.45+i*.12,1.06,z0+.2,10,{transparent:true,opacity:.85}));S.add(sph(.04,'#f2c48d',-7.45+i*.12,1.2,z0+.2))}
  S.add(box(.45,1.3,.45,'#e9eef5',-8.35,.65,z0+1.25));S.add(box(.2,.1,.05,'#7fb3e8',-8.35,1,z0+1.48));
  S.add(cyl(.45,.45,.06,'#c98b5a',-7.9,.75,z0+2.7));S.add(cyl(.05,.05,.72,'#9a6a46',-7.9,.37,z0+2.7));
@@ -359,22 +359,35 @@ function feedChair(x,z,ry){const g=new T.Group(),fr='#5b5f63',fb='#c9b48f';
 feedChair(-4.5,-5.2,.25);feedChair(-3.1,-5.2,-.15);
 sign('수유의자',-3.8,2.78,-RD/2+.03,0,1.3);
 
-/* 분유 만들기 소품: 작업 젖병·스푼·물줄기·가루 */
-const FSPOT=[-7.35,-RD/2+1.2];
-const FPROP=(()=>{const z0=-RD/2,bx=-6.7,bz=z0+.62,by=.96;
+/* 분유 만들기 소품: 캐릭터 손이 직접 스푼·포트를 잡는다 */
+const FSPOT=[-6.3,-RD/2+1.08];
+const FPROP=(()=>{const z0=-RD/2,bx=-6.72,bz=z0+.6,by=.96;
  const milk=cyl(.07,.07,.26,'#eaf4ff',0,.13,0,14);const lv=v=>{milk.scale.y=v;milk.position.y=.13*v};lv(.01);
  const wb=G(cyl(.078,.078,.3,'#ffffff',0,.15,0,14,{transparent:true,opacity:.4}),milk,cyl(.082,.082,.05,'#f6a7b8',0,.32,0,14));wb.position.set(bx,by,bz);wb.visible=false;S.add(wb);
- const sc=G(box(.03,.03,.22,'#ffffff',0,0,.1),sph(.05,'#ffffff',0,0,-.02,1,.6,1),sph(.035,'#fff3d6',0,.02,-.02,1,.5,1));const can=[-6.15,1.27,z0+.32];sc.position.set(...can);S.add(sc);
- const pw=[];for(let i=0;i<6;i++){const p=sph(.018,'#fff3d6',0,0,0);p.visible=false;S.add(p);pw.push(p)}
- const st=cyl(.015,.015,1,'#bfe3ff',0,0,0,8,{transparent:true,opacity:.8});st.visible=false;S.add(st);
- const kHome=[-7.8,.96,z0+.36];
- return{reset(){wb.visible=false;lv(.01);sc.position.set(...can);sc.rotation.set(0,0,0);pw.forEach(p=>p.visible=false);st.visible=false;KET.g.position.set(...kHome);KET.g.rotation.set(0,0,0);this.boil(-1)},
-  boil(f){const on=f>=0&&f<1;KET.glow.material.opacity=on?.9:0;KET.steam.forEach((s,i)=>{s.visible=f>=0;if(f>=0){const u=(KET.t+i*.33)%1;s.position.y=1.35+u*.6;s.material.opacity=.5*(1-u)}});KET.t+=.016;if(f>=0)wb.visible=true},
-  scoop(f){if(f<0){pw.forEach(p=>p.visible=false);sc.position.set(...can);sc.rotation.set(0,0,0);return}wb.visible=true;const n=Math.floor(f*3),u=(f*3)%1;
-   const x=u<.5?can[0]+(bx-can[0])*(u/.5):bx+(can[0]-bx)*((u-.5)/.5),y=1.27+Math.sin(Math.min(1,u*2)*Math.PI)*.25;sc.position.set(x,y,can[2]+(bz-can[2])*(u<.5?u/.5:1-(u-.5)/.5));sc.rotation.z=u>.4&&u<.6?-1.2:0;
-   pw.forEach((p,i)=>{const on=u>.42&&u<.75;p.visible=on;if(on){const v=(u-.42)/.33;p.position.set(bx+(i%3-1)*.02,by+.42-v*.3-i*.02,bz+(i%2)*.02)}});lv(Math.max(.01,.06*n+.06*Math.min(1,u)));milk.material.color.set('#fff3d6')},
-  pour(f){if(f<0){st.visible=false;KET.g.position.set(...kHome);KET.g.rotation.set(0,0,0);return}wb.visible=true;const up=Math.min(1,f*3);KET.g.position.set(kHome[0]+(bx+.28-kHome[0])*up,kHome[1]+.35*up,kHome[2]+(bz-kHome[2])*up);KET.g.rotation.z=up*.9;
-   st.visible=f>.3&&f<.92;st.scale.y=.32;st.position.set(bx+.05,by+.52,bz);lv(Math.min(1,.2+Math.max(0,(f-.3)/.6)*.8));milk.material.color.set(f>.3?'#fff6e2':'#fff3d6')},
+ const can=new T.Vector3(-7.02,1.24,z0+.42);S.add(cyl(.11,.11,.24,'#FFD43B',can.x,1.08,can.z));S.add(cyl(.115,.115,.03,'#fff',can.x,1.21,can.z));
+ const sc=G(box(.03,.03,.24,'#ffffff',0,0,.12),sph(.055,'#ffffff',0,0,-.02,1,.6,1),sph(.04,'#fff3d6',0,.02,-.02,1,.5,1));sc.position.copy(can).add(new T.Vector3(0,.05,0));S.add(sc);
+ const pw=[];for(let i=0;i<6;i++){const p=sph(.02,'#fff3d6',0,0,0);p.visible=false;S.add(p);pw.push(p)}
+ const st=cyl(.016,.016,1,'#bfe3ff',0,0,0,8,{transparent:true,opacity:.85});st.visible=false;S.add(st);
+ const kHome=new T.Vector3(-7.3,.96,z0+.36);KET.g.position.copy(kHome);
+ const scHome=sc.position.clone();
+ const SH=new T.Vector3(.26,.62,0),tmp=new T.Vector3();
+ let ph=null;
+ function hand(a,w,reach){a.root.updateMatrixWorld(true);const loc=a.bod.worldToLocal(w.clone()).sub(SH);if(loc.length()>reach)loc.setLength(reach);a.arms[1].position.copy(SH).add(loc);a.root.updateMatrixWorld(true);return a.arms[1].getWorldPosition(tmp).clone()}
+ const lerp=(p,q,u)=>p.clone().lerp(q,Math.max(0,Math.min(1,u)));
+ return{reset(){ph=null;wb.visible=false;lv(.01);sc.position.copy(scHome);sc.rotation.set(0,0,0);pw.forEach(p=>p.visible=false);st.visible=false;KET.g.position.copy(kHome);KET.g.rotation.set(0,0,0);this.boil(-1)},
+  boil(f){const on=f>=0&&f<1;KET.glow.material.opacity=on?.9:0;KET.glow.position.set(KET.g.position.x,1.05,KET.g.position.z+.06);KET.steam.forEach((s,i)=>{s.visible=f>=0;if(f>=0){const u=(KET.t+i*.33)%1;s.position.set(KET.g.position.x+(i-1)*.05,1.35+u*.6,KET.g.position.z);s.material.opacity=.5*(1-u)}});KET.t+=.016;if(f>=0)wb.visible=true},
+  set(k,f){ph=k?{k,f}:null;if(!k){pw.forEach(p=>p.visible=false);st.visible=false}},
+  pose(a){if(!ph)return;const f=ph.f;wb.visible=true;
+   if(ph.k=='scoop'){const n=Math.min(2,Math.floor(f*3)),u=(f*3)-n;const top=new T.Vector3(bx,by+.42,bz);
+    let tgt=u<.3?lerp(scHome.clone().add(new T.Vector3(0,.12,0)),can.clone().add(new T.Vector3(0,.02,0)),u/.3):u<.6?lerp(can.clone().add(new T.Vector3(0,.15,0)),top,(u-.3)/.3):top.clone();
+    const h=hand(a,tgt,.8);sc.position.copy(h);sc.rotation.set(0,Math.PI/2,u>.6&&u<.9?-1.3:0);
+    pw.forEach((p,i)=>{const on=u>.62&&u<.9;p.visible=on;if(on){const v=(u-.62)/.28;p.position.set(bx+(i%3-1)*.02,by+.4-v*.32-i*.015,bz+(i%2)*.02)}});lv(Math.max(.01,.07*n+.07*Math.min(1,Math.max(0,(u-.62)/.28))))}
+   if(ph.k=='pour'){const grab=KET.g.position.clone();const top=new T.Vector3(bx+.18,by+.55,bz);
+    if(f<.25){hand(a,lerp(new T.Vector3(-6.45,.9,FSPOT[1]-.2),kHome.clone().add(new T.Vector3(.12,.25,0)),f/.25),.8)}
+    else{const k=lerp(kHome,top,(f-.25)/.25);const h=hand(a,k.clone().add(new T.Vector3(.12,.25,0)),.8);KET.g.position.copy(h).add(new T.Vector3(-.12,-.25,0));KET.g.rotation.z=f>.5?Math.min(.9,(f-.5)*4):0}
+    st.visible=f>.55&&f<.92;st.scale.y=.3;st.position.set(bx,by+.48,bz);lv(Math.min(1,.21+Math.max(0,(f-.55)/.37)*.79));milk.material.color.set('#fff6e2')}},
+  endPour(){ph=null;st.visible=false;KET.g.position.copy(kHome);KET.g.rotation.set(0,0,0)},
+  endScoop(){ph=null;pw.forEach(p=>p.visible=false);sc.position.copy(scHome);sc.rotation.set(0,0,0)},
   hideBottle(){wb.visible=false;lv(.01)}}})();
 
 function konny(av,col,col2){const b=av.bod;
@@ -428,16 +441,16 @@ const meState=()=>({nick:me.nick,kind:me.kind,x:me.x,z:me.z,st:me.st,stAt:me.stA
 
 /* ---------- 입력 ---------- */
 const ray=new T.Raycaster(),mv=new T.Vector2();let tgt=null,menuEl=null;
-const PT=new Map();let pin0=0,zm0=0,pinched=false,down=null,dragging=false;
+const PT=new Map();let ang0=0,yaw0=0,pin0=0,zm0=0,pinched=false,down=null,dragging=false;
 const PAN=new T.Vector3(),FG=new T.Vector3(-CO.x,0,-CO.z).normalize(),RG=new T.Vector3(-FG.z,0,FG.x);
 function camBase(){return me.room&&AV[myId]&&zoomK<1.7?[me.x,me.z]:[0,-.5]}
 const cvs=R.domElement;
-cvs.addEventListener('pointerdown',e=>{PT.set(e.pointerId,[e.clientX,e.clientY]);if(PT.size==2){const [a,b]=[...PT.values()];pin0=Math.hypot(a[0]-b[0],a[1]-b[1]);zm0=zoomK;pinched=true;down=null}else if(PT.size==1){pinched=false;dragging=false;down=[e.clientX,e.clientY]}});
+cvs.addEventListener('pointerdown',e=>{PT.set(e.pointerId,[e.clientX,e.clientY]);if(PT.size==2){const [a,b]=[...PT.values()];pin0=Math.hypot(a[0]-b[0],a[1]-b[1]);ang0=Math.atan2(b[1]-a[1],b[0]-a[0]);yaw0=camYaw;zm0=zoomK;pinched=true;down=null}else if(PT.size==1){pinched=false;dragging=false;down=[e.clientX,e.clientY]}});
 cvs.addEventListener('pointermove',e=>{if(!PT.has(e.pointerId))return;const pv=PT.get(e.pointerId);
  if(PT.size==1&&down&&!pinched){if(!dragging&&Math.hypot(e.clientX-down[0],e.clientY-down[1])>12)dragging=true;
   if(dragging){const dx=e.clientX-pv[0],dy=e.clientY-pv[1];const k=CO.length()*zoomK*2*Math.tan(cam.fov*Math.PI/360)/app.clientHeight;
-   PAN.x+=(-RG.x*dx+FG.x*dy*1.5)*k;PAN.z+=(-RG.z*dx+FG.z*dy*1.5)*k;PAN.x=Math.max(-RW/2-camBase()[0],Math.min(RW/2-camBase()[0],PAN.x));PAN.z=Math.max(-RD/2-camBase()[1],Math.min(RD/2-camBase()[1],PAN.z))}}
- PT.set(e.pointerId,[e.clientX,e.clientY]);if(PT.size==2&&pin0>0){const [a,b]=[...PT.values()];const d=Math.hypot(a[0]-b[0],a[1]-b[1]);zoomK=Math.max(.45,Math.min(3.1,zm0*pin0/Math.max(20,d)))}});
+   const co=camOff(),fg=new T.Vector3(-co.x,0,-co.z).normalize(),rg=new T.Vector3(-fg.z,0,fg.x);PAN.x+=(-rg.x*dx+fg.x*dy*1.5)*k;PAN.z+=(-rg.z*dx+fg.z*dy*1.5)*k;PAN.x=Math.max(-RW/2-camBase()[0],Math.min(RW/2-camBase()[0],PAN.x));PAN.z=Math.max(-RD/2-camBase()[1],Math.min(RD/2-camBase()[1],PAN.z))}}
+ PT.set(e.pointerId,[e.clientX,e.clientY]);if(PT.size==2&&pin0>0){const [a,b]=[...PT.values()];const d=Math.hypot(a[0]-b[0],a[1]-b[1]);zoomK=Math.max(.45,Math.min(3.1,zm0*pin0/Math.max(20,d)));let da=Math.atan2(b[1]-a[1],b[0]-a[0])-ang0;if(da>Math.PI)da-=2*Math.PI;if(da<-Math.PI)da+=2*Math.PI;camYaw=yaw0-da}});
 const pUp=e=>{const had=PT.has(e.pointerId);PT.delete(e.pointerId);if(!had)return;if(PT.size==0){if(!pinched&&!dragging&&down&&Math.hypot(e.clientX-down[0],e.clientY-down[1])<14)tapAt(e);dragging=false;down=null;setTimeout(()=>{pinched=false},50)}};
 cvs.addEventListener("pointerup",pUp);cvs.addEventListener('pointercancel',e=>{PT.delete(e.pointerId);down=null});
 cvs.addEventListener('wheel',e=>{e.preventDefault();zoomK=Math.max(.45,Math.min(3.1,zoomK*(1+e.deltaY*.0012)))},{passive:false});
@@ -465,10 +478,15 @@ function fx(id,txt){const o=AV[id];if(!o)return;const e=document.createElement('
 const fxs=[];
 
 /* ---------- 탭 ---------- */
-let tab='feed';
+let tab='feed',cardOff=false;
+const isNight=()=>{const h=new Date().getHours();return h>=21||h<6};
+const ICON_MOON='<svg viewBox="0 0 24 24"><path d="M12 3a7 7 0 1 0 9 9A8 8 0 1 1 12 3z" fill="none" stroke="currentColor" stroke-width="2"/></svg>',ICON_SUN='<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+function feedLabel(){const n=isNight();$('feedTab').innerHTML=(n?ICON_MOON:ICON_SUN)+(n?'새벽수유':'수유')}
+feedLabel();setInterval(feedLabel,60000);
 document.querySelectorAll('#dock button').forEach(b=>b.onclick=()=>{if(!me.room)return;const t=b.dataset.t;
  if(t=='home'){openHome(myId,me.nick);return}if(t=='aide'){openAide();return}
- tab=t;document.querySelectorAll('#dock button').forEach(x=>x.classList.toggle('on',x==b));closeSheet();renderCard()});
+ if(tab==t&&!cardOff){cardOff=true;b.classList.remove('on');closeSheet();renderCard();return}
+ cardOff=false;tab=t;document.querySelectorAll('#dock button').forEach(x=>x.classList.toggle('on',x==b));closeSheet();renderCard()});
 /* ---------- 분유·모유 자동 진행 ---------- */
 const FSTEP=['분유존으로 가는 중','분유포트에 물 끓이는 중','젖병에 분유 3스푼','물 붓기','젖병 흔들기','수유의자로 가는 중','아기한테 젖병 물리는 중'];
 let fmAt=0,stuckT=0,babyLvl=1;
@@ -477,11 +495,11 @@ function stopFormula(){me.fm=0;if(me.st=='bottle')me.st='';FPROP.reset();pushP()
 function startBreast(){const i=BOOTHS.findIndex(b=>Math.abs(me.x-b.x)<.75&&me.z<-RD/2+1.95);const bi=i>=0?i:BOOTHS.findIndex(b=>!others().some(p=>p.state.room===me.room&&p.state.zone=='b'+BOOTHS.indexOf(b)));if(bi<0){toast('수유실이 다 찼어. 잠깐만');return}
  standUp();me.fm=0;breastPend=true;const s=SEATS[BOOTHS[bi].seat];pendSeat=BOOTHS[bi].seat;PAN.set(0,0,0);tgt=clampXZ(s.x,s.z+.55);renderCard()}
 let breastPend=false;
-function fmTick(){if(!me.fm||me.fm>=7)return;const el=(Date.now()-fmAt)/1000;if(me.fm>=2&&me.fm<=4&&AV[myId])AV[myId].a.root.rotation.y=2.55;
+function fmTick(){if(!me.fm||me.fm>=7)return;const el=(Date.now()-fmAt)/1000;if(me.fm>=2&&me.fm<=4&&AV[myId])AV[myId].a.root.rotation.y=-Math.PI/2;if(me.fm==5&&AV[myId])AV[myId].a.root.rotation.y=Math.atan2(camOff().x,camOff().z);
  if(me.fm==1&&!tgt){me.fm=2;fmAt=Date.now();pushP();renderCard();return}
  if(me.fm==2){FPROP.boil(Math.min(1,el/3));if(el>3.2){me.fm=3;fmAt=Date.now();renderCard()}return}
- if(me.fm==3){FPROP.boil(-1);FPROP.scoop(el/3.6);if(el>3.6){me.fm=4;fmAt=Date.now();renderCard()}return}
- if(me.fm==4){FPROP.scoop(-1);FPROP.pour(el/2.6);if(el>2.6){FPROP.pour(-1);FPROP.hideBottle();me.fm=5;fmAt=Date.now();pushP();renderCard()}return}
+ if(me.fm==3){FPROP.boil(-1);FPROP.set('scoop',el/4.2);if(el>4.2){FPROP.endScoop();me.fm=4;fmAt=Date.now();renderCard()}return}
+ if(me.fm==4){FPROP.set('pour',el/3.4);if(el>3.4){FPROP.endPour();FPROP.hideBottle();me.fm=5;fmAt=Date.now();pushP();renderCard()}return}
  if(me.fm==5){if(AV[myId])AV[myId].a.shake=.2;if(el>1.8){const i=FEEDSEATS.find(k=>!seatTaken(k));if(i===undefined){if(el>2&&Math.round(el)%5==0)toast('수유의자가 다 찼어. 자리 나면 갈게');return}me.fm=6;fmAt=Date.now();pendSeat=i;const s=SEATS[i];tgt=clampXZ(s.x+Math.sin(s.ry)*.8,s.z+Math.cos(s.ry)*.8);pushP();renderCard()}return}
  if(me.fm==6&&!tgt&&me.sit&&FEEDSEATS.includes(me.sit-1)){me.fm=7;me.st='bottle';me.stAt=Date.now();babyLvl=1;pushP();toast('꿀꺽꿀꺽');renderCard()}}
 function renderFormula(c){
@@ -490,13 +508,14 @@ function renderFormula(c){
  const k=me.fm-1;c.innerHTML='<b>분유 타는 중</b>'+FSTEP.map((s,i)=>'<div style="opacity:'+(i<k?'.45':i==k?'1':'.6')+'">'+(i<k?'✔ ':i==k?'▶ ':'· ')+(i==k?'<b style="display:inline">'+s+'</b>':s)+'</div>').join('')+(me.fm==5?'<small style="color:#8a7a68">손목 안쪽에 한 방울, 미지근하면 OK</small>':'')+'<br><button id="cx" style="background:#eee;color:#2B2118">그만</button>';$('cx').onclick=()=>{standUp();stopFormula()}}
 function renderBooth(c){if(me.st=='feed'){const mins=Math.floor((Date.now()-me.stAt)/60000);c.innerHTML='<b>모유수유 중</b>'+mins+'분째 · 커튼 닫혀 있어'+feedersHTML()+'<br><button id="bp">아기 토닥</button> <button id="cb">수유 끝</button>';bindPats(c);$('bp').onclick=babyPat;$('cb').onclick=()=>{me.st='';pushP();toast('수고했어');renderCard()};return}
  c.innerHTML='<b>모유수유실</b>커튼 치면 다른 엄마들한텐 안 보여.<br><button id="cb">모유수유 시작</button>';$('cb').onclick=startBreast}
-function renderCard(){const c=$('card');if(!me.room){c.style.display='none';return}c.style.display='';
+function renderCard(){const c=$('card');if(!me.room){c.style.display='none';return}
+ if(cardOff&&!(me.fm>0||me.st=='bottle'||me.zone||breastPend)){c.style.display='none';return}c.style.display='';
  if(me.fm>0||me.st=='bottle'){renderFormula(c);return}
  if(me.zone&&me.zone[0]=='b'||breastPend){renderBooth(c);return}
  if(me.zone=='formula'){renderFormula(c);return}
  const here=others().filter(p=>p.state.room===me.room);
  if(tab=='feed'){const n=here.filter(p=>p.state.st=='feed').length+(me.st=='feed'?1:0);const mins=me.st=='feed'?Math.floor((Date.now()-me.stAt)/60000):0;
-  c.innerHTML='<b>새벽수유 같이 하기</b>'+(me.st=='feed'?'나 · '+mins+'분째 수유 중':'수유 시작하면 같은 방 엄마들한테 보여')+'<div class="bar"><i style="width:'+Math.min(100,mins/30*100)+'%"></i></div>지금 같이 수유 중 '+n+'명'+feedersHTML()+(me.st=='feed'?'<button id="cb">수유 끝</button> <button id="bp">아기 토닥</button>':'<button id="fb">분유 수유</button> <button id="bb">모유수유실</button><br><button id="cb" style="margin-top:6px;background:#eee;color:#2B2118">여기서 수유 시작</button>');bindPats(c);if($('bp'))$('bp').onclick=babyPat;if($('fb'))$('fb').onclick=startFormula;if($('bb'))$('bb').onclick=startBreast;
+  c.innerHTML='<b>'+(isNight()?'새벽수유 같이 하기':'수유 같이 하기')+'</b>'+(me.st=='feed'?'나 · '+mins+'분째 수유 중':'수유 시작하면 같은 방 엄마들한테 보여')+'<div class="bar"><i style="width:'+Math.min(100,mins/30*100)+'%"></i></div>지금 같이 수유 중 '+n+'명'+feedersHTML()+(me.st=='feed'?'<button id="cb">수유 끝</button> <button id="bp">아기 토닥</button>':'<button id="fb">분유 수유</button> <button id="bb">모유수유실</button><br><button id="cb" style="margin-top:6px;background:#eee;color:#2B2118">여기서 수유 시작</button>');bindPats(c);if($('bp'))$('bp').onclick=babyPat;if($('fb'))$('fb').onclick=startFormula;if($('bb'))$('bb').onclick=startBreast;
   $('cb').onclick=()=>{if(me.st=='feed'){me.st='';toast('수고했어. 오늘 '+mins+'분')}else{me.st='feed';me.stAt=Date.now()}pushP();ensure(myId,meState(),true);renderCard()}}
  else{const n=here.filter(p=>p.state.st=='dunga').length+(me.st=='dunga'?1:0);
   if(me.kind=='preg'){c.innerHTML='<b>애기 재우기</b>임신 중엔 같이 산책만 해. 아기 태어나면 열려!';return}
@@ -594,16 +613,22 @@ function bindRegion(){$('rsd').onchange=e=>{RGN=e.target.value;try{localStorage.
 /* 예방접종·영유아검진 (질병관리청 표준예방접종일정, 국민건강보험공단 영유아 건강검진 8차) */
 const VAX=[[0,0,'B형간염 1차'],[0,1,'BCG(결핵) · 생후 4주 안'],[1,1,'B형간염 2차'],[2,2,'DTaP·IPV·Hib·폐렴구균·로타 1차'],[4,4,'DTaP·IPV·Hib·폐렴구균·로타 2차'],[6,6,'DTaP·IPV·Hib·폐렴구균 3차 · B형간염 3차 · 로타 3차(5가만)'],[6,6,'인플루엔자 (6개월부터 매년, 가을)'],[12,15,'Hib·폐렴구균 4차 · MMR 1차 · 수두'],[12,23,'A형간염 1·2차 · 일본뇌염 1·2차'],[15,18,'DTaP 4차'],[24,35,'일본뇌염 3차(불활성화) 또는 2차(생백신)'],[48,72,'DTaP 5차 · IPV 4차 · MMR 2차'],[72,83,'일본뇌염 4차(불활성화)']];
 const CHK=[[0.5,1.15,'영유아검진 1차 (생후 14~35일)'],[4,6,'영유아검진 2차'],[9,12,'영유아검진 3차'],[18,24,'영유아검진 4차 · 구강검진 1차(18~29개월)'],[30,36,'영유아검진 5차 · 구강검진 2차(30~41개월)'],[42,48,'영유아검진 6차 · 구강검진 3차(42~53개월)'],[54,60,'영유아검진 7차 · 구강검진 4차(54~65개월)'],[66,71,'영유아검진 8차']];
+const HOSP={"울산 남구": {"src": "질병관리청 예방접종도우미 위탁의료기관 찾기(국가예방접종, 2026.11.18 조회)", "list": [["(의)인석의료재단 보람병원", "052-278-0114", "돋질로336번길 10, (삼산동)"], ["강문수내과의원", "052-249-0645", "대학로 141, (무거동)"], ["권성운내과의원", "052-256-1717", "문수로 331, (옥동) 3층"], ["김동욱내과의원", "052-227-0275", "삼산로 269, (삼산동) 8층"], ["김복근내과의원", "052-267-0975", "신정로 39, (달동) 2층"], ["김정호소아과의원", "052-272-1062", "수암로 122, (야음동)"], ["김호철내과의원", "052-247-5936", "북부순환도로 13, (무거동) 3층"], ["다온소아청소년과의원", "052-716-7071", "수암로 132, (야음동) 7~8층"], ["드림메디의원", "052-267-8881", "문수로335번길 6, (옥동, 길상빌딩) 3층"], ["미래이비인후과의원", "052-221-2653", "북부순환도로 23, (무거동)"], ["박수연소아청소년과의원", "052-260-7288", "대암로 69, (야음동) 301~303호"], ["박창민가정의학과의원", "052-267-0896", "신정로 33, (달동) 3층"], ["삼성연합가정의학과의원", "052-271-4550", "문수로369번길 65, (신정동) 2층"], ["새신화의원", "052-249-2300", "옥현로58번길 4, (무거동) 3층"], ["서울아동병원", "052-922-1100", "북부순환도로 25, (무거동) 지하1,2~6층"], ["서울의원", "052-277-2775", "신복로72번길 28-14, (무거동) 2층"], ["세종의원", "052-267-8500", "거마로134번길 17, (신정동, 국제빌딩) 2층"], ["앞선소아청소년과의원", "052-244-7700", "수암로 130, (야음동, 메디어스빌딩) 7층"], ["오즈소아청소년과의원", "052-271-1400", "삼산로278번길 8, (삼산동) 5층"], ["옥동우리이비인후과의원", "052-258-7588", "문수로 376, (옥동) 3층"], ["울산미즈병원", "052-220-0100", "남산로 2, (무거동)"], ["울산병원", "052-259-5128", "월평로171번길 13, (신정동)"], ["울산제일의원", "052-271-8588", "수암로 230, (야음동) 2층"], ["울산지방법원 부속의원", "052-216-8156", "법대로 55, (옥동) 울산지방법원 9층"], ["위드여성병원", "052-915-8000", "남중로 123, (삼산동)"], ["유호근의원", "052-271-0199", "두왕로190번길 49, (선암동)"], ["윤이비인후과의원", "052-223-8787", "대학로 141, (무거동) 2층"], ["윤태권내과의원", "052-257-3421", "중앙로 14, (야음동, 덕산플라자) 2층 202호"], ["의료법인 은성의료재단 좋은삼정병원", "052-220-7500", "북부순환도로 51, (무거동)"], ["의료법인 정안의료재단 중앙병원", "052-226-1100", "문수로 472, (신정동) 중앙병원"], ["이경민소아과의원", "052-274-2229", "거마로118번길 17, (신정동)"], ["이연경소아청소년과의원", "052-257-7555", "수암로 138, (야음동) 타임스퀘어 5층"], ["이준호내과의원", "052-911-3300", "삼산로278번길 8, (삼산동) 4층"], ["인구보건복지협회 울산광역시지회 가족보건의원", "052-273-4463", "봉월로 63, (신정동) 1,2층"], ["정소아청소년과의원", "052-266-9363", "중앙로 243-1, (신정동) 4층"], ["참조은내과의원", "052-273-7800", "수암로 113, (신정동) 1~2,4층"], ["최정미소아청소년과의원", "052-922-6848", "삼산중로 86, (삼산동) 4, 5층"], ["현대연합의원", "052-223-5130", "대학로147번길 41-42, (무거동) 2층"]]}, "울산 울주군": {"src": "울주군 예방접종 지정기관 현황 공공데이터(2025.6.2, 어린이 국가예방접종 기관만)", "list": [["구영365소아청소년과의원", "052-248-3650", "범서읍 구영로 86, (지엠프라자) 5층 501호"], ["굿모닝이비인후과의원", "052-263-9525", "언양읍 반구대로 815, 3층"], ["김성준내과의원", "052-248-0078", "범서읍 구영로 100, (구영프라자) 4층 401,402호"], ["남혜주의원", "052-211-7682", "범서읍 점촌4길 26 구암빌딩 3층"], ["다솜의원", "052-263-1230", "언양읍 헌양길 84, 2층"], ["대복의원", "052-222-2661", "웅촌면 삼동로 1613, 2층"], ["덕하연합의원", "052-261-0112", "청량읍 삼정로 808, 3층"], ["동해강의원", "052-238-7525", "온산읍 덕신로 259, 1층"], ["미소산부인과의원", "052-239-7133", "온양읍 온양로 80, 효성빌딩 1층"], ["박철산부인과의원", "052-254-2565", "언양읍 헌양길 37, (언양농협) 2층"], ["서생의원", "052-239-7582", "서생면 해맞이로 875, 2층"], ["서울백가정의학과의원", "052-713-7222", "온양읍 대안3길 58, 3층"], ["서울산보람병원", "052-255-7114", "삼남읍 중평로 53"], ["서울튼튼소아청소년과의원", "052-237-1102", "온산읍 덕신로 217, 1층"], ["서준영이비인후과의원", "052-248-5075", "범서읍 구영로 104, 1층"], ["성모이비인후과의원", "052-248-7585", "범서읍 구영로 100, (구영프라자) 3층 302호"], ["아이좋은소아청소년과의원", "052-916-0011", "언양읍 능골길 17-5, 2, 3, 4층"], ["양내과의원", "052-237-8575", "온양읍 대운길 15, 1층"], ["양주동내과의원", "052-238-8275", "온산읍 덕신로 260"], ["오형덕이비인후과의원", "052-262-1716", "언양읍 동문길 65, 2층"], ["온산의원", "052-237-5480", "온산읍 덕신로 258"], ["온산행복이비인후과의원", "052-933-5575", "온산읍 덕신로 262, 2층"], ["온양센텀소아청소년과의원", "052-707-0555", "온양읍 온양로 105, 4~5층"], ["우리병원", "052-716-1365", "언양읍 헌양길 175"], ["울산아이가정의학과의원", "052-221-0900", "범서읍 장검길 79, 소정빌딩 3층"], ["은혜내과의원", "052-248-3375", "범서읍 구영로 142, 3층"], ["의료법인 건강한의료재단 울산연세요양병원", "052-248-8900", "범서읍 천상5길 10-5"], ["이태일의원", "052-239-4778", "온산읍 영남6길 20"], ["정희승가정의원", "052-248-5575", "범서읍 천상길 2, 3층"], ["제일속건강의원", "052-263-7585", "언양읍 헌양길 57-1, 4층"], ["조재민이비인후과의원", "052-245-0353", "범서읍 천상중앙길 95, (한솔빌딩) 2층"], ["하나가정의학과의원", "052-225-7582", "청량읍 삼정로 90, 1층"], ["하나소아청소년과의원", "052-232-0123", "범서읍 장검길 10, 3층"], ["한빛이비인후과의원", "052-239-2713", "온양읍 온양로 102, 2층"], ["한사랑의원", "052-238-8035", "온양읍 연안2길 19, 2층"], ["햇살아동병원", "052-211-8448", "범서읍 천상중앙길 80"], ["황만근내과의원", "052-248-7760", "범서읍 천상길 17, 1층"]]}};
+let HG='울산 남구';try{HG=localStorage.getItem('cp_hg')||'울산 남구'}catch(e){}
 let BABY={bd:'',done:{}};try{BABY=Object.assign(BABY,JSON.parse(localStorage.getItem('cp_baby')||'{}'))}catch(e){}
-function babyHTML(){let h='<div class="box"><div class="t">우리 아기 생일</div><input id="bbd" type="date" value="'+esc(BABY.bd)+'"></div>';
+function babyHTML(){let h='<div class="box"><div class="t">우리 아기 생일</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><input id="bbt" inputmode="numeric" maxlength="10" placeholder="20250613" value="'+esc(BABY.bd.replace(/-/g,''))+'"><input id="bbd" type="date" value="'+esc(BABY.bd)+'"></div><small style="color:#8a7a68">숫자 8자리로 쓰거나 오른쪽 칸 아무 데나 눌러 달력에서 골라</small></div>';
  if(!BABY.bd)return h+'<p class="note">생일 넣으면 지금 맞을 접종이랑 받을 검진만 골라서 보여줘.</p>';
  const m=(Date.now()-new Date(BABY.bd))/2629800000;const row=(k,a,b,n)=>{const st=BABY.done[k]?'done':m>b+1?'late':m>=a?'now':'soon';if(st=='soon'&&a-m>6)return'';
   return '<label style="display:flex;gap:8px;align-items:flex-start;margin:6px 0;font-size:14px;opacity:'+(st=='done'?.45:1)+'"><input type="checkbox" data-k="'+k+'" '+(st=='done'?'checked':'')+' style="width:22px;min-height:22px;flex:none"><span><b>'+n+'</b><br><small style="color:'+(st=='late'?'#b07a3a':st=='now'?'#2e7d4f':'#8a7a68')+'">'+(a==b?a+'개월':a+'~'+b+'개월')+' · '+(st=='late'?'지난 시기 · 맞았으면 체크, 못 맞았으면 남은 차수만 이어서':st=='now'?'지금 받을 때':st=='done'?'완료':'곧')+'</small></span></label>'};
  h+='<div class="box"><div class="t">예방접종 <small>'+Math.floor(m)+'개월 기준 · 무료</small></div>'+VAX.map((v,i)=>row('v'+i,v[0],v[1],v[2])).join('')+'<small style="color:#8a7a68">근거 · 질병관리청 표준예방접종일정(국가예방접종 12세 이하 무료, 전국 위탁의료기관)</small></div>';
  h+='<div class="box"><div class="t">영유아 건강검진 <small>본인부담 없음</small></div>'+CHK.map((v,i)=>row('c'+i,v[0],v[1],v[2])).join('')+'<small style="color:#8a7a68">근거 · 국민건강보험공단 영유아 건강검진(8차·구강 4차), 차수 기간 지나면 그 차수는 못 받아</small></div>';
- h+='<div class="box"><div class="t">가까운 병원 <small>'+esc(RGN)+'</small></div><p class="note" style="margin:0">예방접종 위탁의료기관·영유아검진 기관 목록이랑 전화번호는 공공데이터(건강보험심사평가원 병원정보) 연결하면 여기 바로 떠. 지금 연결 준비 중이야.</p></div>';
+ const hd=HOSP[HG],ls=hd?hd.list.slice().sort((a,b)=>(/소아|아동/.test(b[0])?1:0)-(/소아|아동/.test(a[0])?1:0)):[];
+ h+='<div class="box"><div class="t">무료 예방접종 병원 <small>'+(hd?ls.length+'곳':'')+'</small></div><select id="hgs">'+Object.keys(HOSP).map(k=>'<option'+(k==HG?' selected':'')+'>'+k+'</option>').join('')+'</select><div style="max-height:340px;overflow-y:auto;margin-top:8px">'+ls.map(r=>'<div style="padding:8px 0;border-bottom:1px solid #f0e2cf;font-size:14px"><b>'+esc(r[0])+'</b>'+(/소아|아동/.test(r[0])?' <span class="chip" style="font-size:11px">소아</span>':'')+'<br><small style="color:#8a7a68">'+esc(r[2])+'</small><br><a href="tel:'+esc(r[1])+'" style="color:#c27a00">'+esc(r[1])+'</a></div>').join('')+'</div><p class="note">출처 · '+esc(hd?hd.src:'')+'. 병원마다 있는 백신이 달라서 가기 전에 전화로 확인해줘. 다른 지역은 곧 넣을게.</p></div>';
  return h}
-function bindBaby(){$('bbd').onchange=e=>{BABY.bd=e.target.value;try{localStorage.setItem('cp_baby',JSON.stringify(BABY))}catch(x){}openAide()};
+function bindBaby(){const sv=()=>{try{localStorage.setItem('cp_baby',JSON.stringify(BABY))}catch(x){}const y=sb.scrollTop;openAide();sb.scrollTop=y};
+ const bd=$('bbd');bd.onchange=e=>{BABY.bd=e.target.value;sv()};bd.onclick=()=>{try{bd.showPicker()}catch(x){}};
+ $('bbt').oninput=e=>{const d=e.target.value.replace(/\D/g,'');if(d.length==8){const s=d.slice(0,4)+'-'+d.slice(4,6)+'-'+d.slice(6,8);if(!isNaN(new Date(s))){BABY.bd=s;sv()}}};
+ const hs=$('hgs');if(hs)hs.onchange=e=>{HG=e.target.value;try{localStorage.setItem('cp_hg',HG)}catch(x){}sv()};
  sb.querySelectorAll('[data-k]').forEach(c=>c.onchange=()=>{BABY.done[c.dataset.k]=c.checked;try{localStorage.setItem('cp_baby',JSON.stringify(BABY))}catch(x){}const y=sb.scrollTop;openAide();sb.scrollTop=y})}
 /* ---------- 내 맞춤 진단 (판정표: claude/maternity-case-matrix.md, 2026.11.12 법제처 확인) ---------- */
 const WT=[['emp','회사원','주 15시간 이상'],['short','주 15시간 미만','초단시간'],['day','일용직',''],['fixed','계약직·파견',''],['art','예술인','예술인 고용보험'],['plat','노무제공자','배달·대리·학습지 등'],['self','자영업자','사업자등록'],['free','프리랜서','3.3% 사업소득'],['pub','공무원·교원',''],['none','지금 일 안 함','']];
@@ -707,7 +732,7 @@ function loop(){requestAnimationFrame(loop);const dt=Math.min(.1,clk.getDelta())
   const zn=zoneAt(me.x,me.z);if(zn!==me.zone){me.zone=zn;if(zn[0]=='b')toast('커튼 쳤어 · 다른 엄마들한텐 안 보여');else if(zn=='formula')toast('분유존이야 · 카드에서 분유 타기 시작');pushP();renderCard()}
   if(me.sit)o.a.root.rotation.y=SEATS[me.sit-1].ry;
   o.x=me.x;o.z=me.z;o.st=meState()}
- {const b0=camBase(),f=[b0[0]+PAN.x,b0[1]+PAN.z];camF.x+=(f[0]-camF.x)*Math.min(1,dt*4);camF.z+=(f[1]-camF.z)*Math.min(1,dt*4);cam.position.copy(camF).addScaledVector(CO,zoomK);cam.lookAt(camF.x,.2,camF.z)}
+ {const b0=camBase(),f=[b0[0]+PAN.x,b0[1]+PAN.z];camF.x+=(f[0]-camF.x)*Math.min(1,dt*4);camF.z+=(f[1]-camF.z)*Math.min(1,dt*4);cam.position.copy(camF).addScaledVector(camOff(),zoomK);cam.lookAt(camF.x,.2,camF.z)}
  const occ={};
  Object.entries(AV).forEach(([id,o])=>{if(id!==myId){const dx=o.tx-o.x,dz=o.tz-o.z,d=Math.hypot(dx,dz);if(d>.02){const s=Math.min(d,Math.max(2,d*3)*dt);o.x+=dx/d*s;o.z+=dz/d*s;o.a.root.rotation.y=Math.atan2(dx,dz);o.a.walk=Math.min(1,o.a.walk+dt*6)}else o.a.walk=Math.max(0,o.a.walk-dt*6)}
   {const fm=o.st&&o.st.fm||0,bt=o.st&&o.st.st=='bottle',bf=o.st&&o.st.st=='feed'&&o.st.sit;o.a.bottle.visible=bt||fm>=5&&fm<7;o.a.babyF.visible=bt||bf;
@@ -718,7 +743,7 @@ function loop(){requestAnimationFrame(loop);const dt=Math.min(.1,clk.getDelta())
    if(o.a.shake>0){o.a.shake-=dt;o.a.bottle.position.y+=Math.sin(o.a.t*40)*.06;o.a.arms[1].position.y=.58+Math.sin(o.a.t*40)*.05}}
   const sit=o.st&&o.st.sit?SEATS[o.st.sit-1]:null;o.a.sit=sit?1:0;if(sit&&id!==myId){o.a.root.rotation.y=sit.ry}
   const zb=o.st&&o.st.zone&&o.st.zone[0]=='b'?o.st.zone:'';if(zb)occ[zb]=1;const hid=zb&&id!==myId;o.a.root.visible=!hid;o.e.style.display=hid?'none':'';
-  o.a.root.position.set(o.x,sit?sit.y:0,o.z);animA(o.a,dt);o.e.innerHTML=(id===myId?'나 · ':'')+label(o.st);place(o.e,o.x,2.35+(sit?sit.y:0),o.z)});
+  o.a.root.position.set(o.x,sit?sit.y:0,o.z);animA(o.a,dt);if(id===myId&&me.fm>=3&&me.fm<=4)FPROP.pose(o.a);o.e.innerHTML=(id===myId?'나 · ':'')+label(o.st);place(o.e,o.x,2.35+(sit?sit.y:0),o.z)});
  BOOTHS.forEach((b,i)=>{const k=occ['b'+i]?1:0;b.c+= (k-b.c)*Math.min(1,dt*5);b.L.scale.x=b.R.scale.x=.22+.78*b.c;b.L.position.x=b.x0-.4+.4*b.c*0+(-.78/2)*(1-b.c)*0;b.L.position.x=-.8+.39*(.22+.78*b.c);b.R.position.x=.8-.39*(.22+.78*b.c)});
  fxs.forEach(e=>place(e,e._o.x,2.9,e._o.z));
  if(menuEl&&AV[menuEl.dataset.id]){const o=AV[menuEl.dataset.id];place(menuEl,o.x,2.75,o.z)}
