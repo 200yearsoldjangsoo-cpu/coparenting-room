@@ -57,8 +57,9 @@ function parse(text){
     const r={kind:L[i],place:'',get:'',lose:''};let n=i+1;
     if(L[n]&&!/^취득일$/.test(L[n])&&!KIND.test(L[n])){r.place=L[n];n++}
     for(let m=n;m<Math.min(n+6,L.length);m++){
-      if(L[m]==='취득일'&&D.test(L[m+1]||''))r.get=L[m+1].replace(/[,\-]/g,'.');
-      if(L[m]==='상실일')r.lose=D.test(L[m+1]||'')?L[m+1].replace(/[,\-]/g,'.'):'';
+      if(m>n&&KIND.test(L[m]))break;
+      if(L[m]==='취득일'&&!r.get&&D.test(L[m+1]||''))r.get=L[m+1].replace(/[,\-]/g,'.');
+      if(L[m]==='상실일'){r.lose=D.test(L[m+1]||'')?L[m+1].replace(/[,\-]/g,'.'):'';break}
     }
     if(r.get)rows.push(r);
   }
