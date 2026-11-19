@@ -74,8 +74,9 @@ $('#go').onclick=async()=>{
         else if(e.step==='login'){big('로그인 완료!');st('자격득실 읽는 중…');bar(85)}
         else if(e.step==='data'){bar(100);big('불러오기 완료');st('');$('#wrap').style.display='none';$('#tog').style.display='none';
           const rows=parse(e.text);const o=$('#out');o.style.display='block';
+          if(e.tables&&e.tables.length){o.innerHTML=e.tables.map(t=>'<table style="margin-bottom:10px">'+t.map((r,i)=>'<tr>'+r.map(c=>(i?'<td>':'<th>')+c.replace(/</g,'&lt;')+(i?'</td>':'</th>')).join('')+'</tr>').join('')+'</table>').join('')+'<details><summary style="font-size:12px;margin-top:8px">읽어온 원문 보기</summary><pre></pre></details>';o.querySelector('pre').textContent=JSON.stringify({u:e.u,t:e.t,clicked:e.clicked,al:e.al,btn:e.btn},null,1)+'\n\n'+e.text;}else{
           o.innerHTML=(rows.length?'<table><tr><th>구분</th><th>취득일</th><th>상실일</th></tr>'+rows.map(x=>`<tr><td>${x.kind}</td><td>${x.get}</td><td>${x.lose||'-'}</td></tr>`).join('')+'</table>':'<p>표를 못 찾았어요. 원문:</p>')+'<details><summary style="font-size:12px;margin-top:8px">읽어온 원문 보기</summary><pre></pre></details>';
-          o.querySelector('pre').textContent=e.text}
+          o.querySelector('pre').textContent=JSON.stringify({u:e.u,t:e.t,clicked:e.clicked,al:e.al,btn:e.btn},null,1)+'\n\n'+e.text}}
         else if(e.step==='timeout'){big('');st('승인이 안 와서 닫았어요. 다시 눌러 주세요.');$('#wrap').style.display='none';$('#tog').style.display='none'}
         else if(e.step==='error'){st('오류: '+e.error)}
         else if(e.step==='end'){$('#go').disabled=false;$('#go').textContent='다시 하기'}
