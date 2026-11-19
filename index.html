@@ -707,9 +707,25 @@ function renderCard(){const c=$('card');if(!me.room){c.style.display='none';retu
  else{const n=here.filter(p=>p.state.st=='dunga').length+(me.st=='dunga'?1:0);
   if(me.kind=='preg'){const tm=LS.get('cp_taegyo',{});const td=tm[ymd(new Date())]||0;const w=here.filter(p=>p.state.st=='walk').length+(me.st=='walk'?1:0);c.innerHTML='<b>태교 산책</b>걸은 만큼 오늘 태교 시간이 쌓여<div class="bar"><i style="width:'+Math.min(100,td/30*100)+'%"></i></div>오늘 '+Math.round(td)+'분 · 같이 걷는 예비맘 '+w+'명<br><button id="cb">'+(me.st=='walk'?'산책 끝':'산책 시작')+'</button>';$('cb').onclick=()=>{me.st=me.st=='walk'?'':'walk';pushP();ensure(myId,meState(),true);renderCard()};return}
   c.innerHTML='<b>애기 재우기</b>'+(me.carrier?'아기띠 메고 러그를 걸어봐':'아기띠를 메고 걸으면 아기가 스르륵')+'<div class="bar"><i style="width:'+Math.round(Math.min(100,me.steps))+'%"></i></div>'+(me.steps>=100?'꿀잠 성공 zZ':'꿀잠까지 '+Math.round(Math.max(0,100-me.steps))+'%')+' · 같이 걷는 엄마 '+n+'명'+
-   '<div class="sw">'+['#4a4744','#d9cbb8','#7d8f9e'].map(col=>'<span data-c="'+col+'" class="'+(me.carrier&&me.cc==col?'on':'')+'" style="background:'+col+'"></span>').join('')+'</div><button id="cb">'+(me.carrier?'아기띠 풀기':'아기띠 메기')+'</button>';
+   '<div class="sw">'+['#4a4744','#d9cbb8','#7d8f9e'].map(col=>'<span data-c="'+col+'" class="'+(me.carrier&&me.cc==col?'on':'')+'" style="background:'+col+'"></span>').join('')+'</div><button id="cb">'+(me.carrier?'아기띠 풀기':'아기띠 메기')+'</button>'+sleepSoundsHTML();
   c.querySelectorAll('[data-c]').forEach(s=>s.onclick=()=>{me.cc=s.dataset.c;me.carrier=1;me.st='dunga';me.steps=0;pushP();ensure(myId,meState(),true);renderCard()});
-  $('cb').onclick=()=>{me.carrier=me.carrier?0:1;me.st=me.carrier?'dunga':'';me.steps=0;pushP();ensure(myId,meState(),true);renderCard()}}}
+  $('cb').onclick=()=>{me.carrier=me.carrier?0:1;me.st=me.carrier?'dunga':'';me.steps=0;pushP();ensure(myId,meState(),true);renderCard()};bindSleepSounds()}}
+
+/* 자장가(브람스 자장가, 1868년 작곡 · 저작권 만료)와 백색소음: 기기 안에서 바로 합성, 광고·데이터 없음 */
+let AC=null,LUL=null,WN=null;
+function ac(){if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();if(AC.state=='suspended')AC.resume();return AC}
+const BR=[['E4',.5],['E4',.5],['G4',2],['E4',.5],['E4',.5],['G4',2],['E4',.5],['G4',.5],['C5',1],['B4',1.5],['A4',.5],['A4',1],['G4',1],['D4',.5],['E4',.5],['F4',1],['D4',1],['D4',.5],['E4',.5],['F4',2],['D4',.5],['F4',.5],['B4',.5],['A4',.5],['G4',1],['B4',1],['C5',2],['C4',.5],['C4',.5],['C5',2],['A4',.5],['F4',.5],['G4',2],['E4',.5],['C4',.5],['F4',1],['G4',1],['A4',1],['G4',2],['C4',.5],['C4',.5],['C5',2],['A4',.5],['F4',.5],['G4',2],['E4',.5],['C4',.5],['F4',1],['E4',.5],['D4',.5],['C4',3]];
+const NF=n=>{const k={C:0,D:2,E:4,F:5,G:7,A:9,B:11}[n[0]],o=+n[n.length-1];return 440*Math.pow(2,(k+(o-4)*12-9)/12)};
+function lulStart(){const a=ac();const g=a.createGain();g.gain.value=.22;g.connect(a.destination);const bt=.62;let t0=a.currentTime+.1;
+ const sched=()=>{if(!LUL)return;let t=t0;BR.forEach(([n,d])=>{const f=NF(n);[[1,'sine',.9],[2,'sine',.18],[3,'triangle',.06]].forEach(([m,ty,v])=>{const o=a.createOscillator(),e=a.createGain();o.type=ty;o.frequency.value=f*m;e.gain.setValueAtTime(0,t);e.gain.linearRampToValueAtTime(v,t+.01);e.gain.exponentialRampToValueAtTime(.0008,t+Math.max(1.2,d*bt*1.6));o.connect(e);e.connect(g);o.start(t);o.stop(t+Math.max(1.3,d*bt*1.7))});t+=d*bt});
+  const len=t-t0+1.2;t0+=len;LUL.tm=setTimeout(sched,Math.max(500,(t0-a.currentTime-1.5)*1000))};
+ LUL={g,tm:0};sched()}
+function lulStop(){if(!LUL)return;clearTimeout(LUL.tm);const g=LUL.g;LUL=null;try{g.gain.setTargetAtTime(0,AC.currentTime,.3);setTimeout(()=>g.disconnect(),1500)}catch(e){}}
+function wnStart(){const a=ac();const n=a.sampleRate*3,b=a.createBuffer(1,n,a.sampleRate),d=b.getChannelData(0);let l=0;for(let i=0;i<n;i++){const w=Math.random()*2-1;l=(l+.02*w)/1.02;d[i]=l*3.5}
+ const s=a.createBufferSource();s.buffer=b;s.loop=true;const f=a.createBiquadFilter();f.type='lowpass';f.frequency.value=900;const g=a.createGain();g.gain.setValueAtTime(0,a.currentTime);g.gain.linearRampToValueAtTime(.5,a.currentTime+1.5);s.connect(f);f.connect(g);g.connect(a.destination);s.start();WN={s,g}}
+function wnStop(){if(!WN)return;const w=WN;WN=null;try{w.g.gain.setTargetAtTime(0,AC.currentTime,.4);setTimeout(()=>{w.s.stop()},2000)}catch(e){}}
+function sleepSoundsHTML(){return '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px"><button id="lb" style="'+(LUL?'':'background:#eee;color:#2B2118')+'">'+(LUL?'⏸ 자장가 끄기':'🎵 자장가')+'</button><button id="wnb" style="'+(WN?'':'background:#eee;color:#2B2118')+'">'+(WN?'⏸ 백색소음 끄기':'🌊 백색소음')+'</button></div>'}
+function bindSleepSounds(){const l=$('lb');if(l)l.onclick=()=>{LUL?lulStop():lulStart();renderCard()};const w=$('wnb');if(w)w.onclick=()=>{WN?wnStop():wnStart();renderCard()}}
 
 /* ---------- 시트 ---------- */
 const sheet=$('sheet'),sb=$('sb');$('sx').onclick=closeSheet;
