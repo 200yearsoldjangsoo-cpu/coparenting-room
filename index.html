@@ -769,21 +769,27 @@ function wnStart(){const a=ac();const n=a.sampleRate*3,b=a.createBuffer(1,n,a.sa
 function wnStop(){if(!WN)return;const w=WN;WN=null;try{w.g.gain.setTargetAtTime(0,AC.currentTime,.4);setTimeout(()=>{w.s.stop()},2000)}catch(e){}}
 function sleepSoundsHTML(){return '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px"><button id="lb" style="'+(LUL?'':'background:#eee;color:#2B2118')+'">'+(LUL?'⏸ 자장가 끄기':'🎵 자장가')+'</button><button id="wnb" style="'+(WN?'':'background:#eee;color:#2B2118')+'">'+(WN?'⏸ 백색소음 끄기':'🌊 백색소음')+'</button><button id="enb" style="'+(ENG?'':'background:#eee;color:#2B2118')+'">'+(ENG?'⏸ 영어동요 끄기':'🔤 영어 조기교육')+'</button>'+(LS.get('cp_eng',{}).k||LS.get('cp_eng',{}).id?'<button id="enc" style="background:#eee;color:#2B2118">곡 바꾸기</button>':'')+'</div>'}
 function bindSleepSounds(){const bb=$('bathb');if(bb)bb.onclick=()=>openBath();const l=$('lb');if(l)l.onclick=()=>{LUL?lulStop():lulStart();renderCard()};const w=$('wnb');if(w)w.onclick=()=>{WN?wnStop():wnStart();renderCard()};const ec=$('enc');if(ec)ec.onclick=()=>{engStop();openEng()};const en=$('enb');if(en)en.onclick=()=>{if(ENG)engStop();else{const c=LS.get('cp_eng',{});c.k?engSong(c.k):c.id?engPlay(c.id):openEng()}renderCard()}}
-/* ---------- 아기 씻기기 v2 (러베 탑투토 워시) ---------- */
+/* ---------- 아기 씻기기 v4 (러베 탑투토 워시 · 애니메이션 연출) ---------- */
 const BATH_PROD={brand:'러베 ruuve',name:'히알루론 탑투토 워시',img:'img/ruuve_ttw.png',url:'https://ruuve.kr/product/%EB%9F%AC%EB%B2%A0-%ED%9E%88%EC%95%8C%EB%A3%A8%EB%A1%A0-%ED%83%91%ED%88%AC%ED%86%A0-%EC%9B%8C%EC%8B%9C-400ml/4114/category/55/display/1/',
  feats:[['🧴','머리부터 발끝까지','샴푸·바디 한 통으로'],['💧','약산성 젤 타입','점증제 줄인 퓨어 제형'],['🌿','식물유래 저자극','민감한 아기 피부용'],['🏅','더마테스트 Excellent','2024 피부 테스트']],
  disc:'러베로부터 제품을 제공받아 직접 써보고 소개해요'};
 let BT=null;const NS='http://www.w3.org/2000/svg';
 function sv_(tag,a,par){const e=document.createElementNS(NS,tag);for(const k in a)e.setAttribute(k,a[k]);(par||$('bsv')).appendChild(e);return e}
+const ease={out:k=>1-Math.pow(1-k,3),inout:k=>k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2,back:k=>{const c=1.7;return 1+(c+1)*Math.pow(k-1,3)+c*Math.pow(k-1,2)}};
+function tween(ms,fn,done,ez){const t0=performance.now();const go=n=>{if(!BT||BT.dead)return;const k=Math.min(1,(n-t0)/ms);fn((ez||ease.out)(k),k);if(k<1)requestAnimationFrame(go);else done&&done()};requestAnimationFrame(go)}
+function springTo(from,to,set,done,k,c){let x=from,v=0;k=k||170;c=c||14;const go=()=>{if(!BT||BT.dead)return;for(let i=0;i<2;i++){const a=-k*(x-to)-c*v;v+=a/120;x+=v/120}set(x);if(Math.abs(x-to)<.3&&Math.abs(v)<.3){set(to);done&&done()}else requestAnimationFrame(go)};go()}
+const bwait=ms=>new Promise(r=>setTimeout(r,ms));
+
 function openBath(){if($('bath'))return;closeSheet();const pst=me.st;me.st='bath';pushP();renderCard();
  const d=document.createElement('div');d.id='bath';
  d.innerHTML=`<style>
-#bath{position:fixed;inset:0;z-index:9998;background:#efe7db;display:flex;flex-direction:column;font-family:'Gowun Dodum','Noto Sans KR',sans-serif;color:#2B2118;touch-action:none;user-select:none;-webkit-user-select:none;overflow:hidden}
-#bath .top{position:absolute;top:0;left:0;right:0;padding:calc(12px + env(safe-area-inset-top)) 16px 0;display:flex;align-items:center;z-index:3}
-#bath .ttl{flex:1;font:20px Jua,sans-serif;letter-spacing:-.3px}
+#bath{position:fixed;inset:0;z-index:9998;background:#efe7db;font-family:'Gowun Dodum','Noto Sans KR',sans-serif;color:#2B2118;touch-action:none;user-select:none;-webkit-user-select:none;overflow:hidden}
+#bath .top{position:absolute;top:0;left:0;right:0;padding:calc(12px + env(safe-area-inset-top)) 16px 0;display:flex;align-items:center;z-index:4}
+#bath .ttl{flex:1;font:20px Jua,sans-serif;letter-spacing:-.3px;text-shadow:0 1px 0 #fff}
 #bath .x{border:0;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.75);backdrop-filter:blur(8px);font-size:18px;box-shadow:0 2px 10px rgba(0,0,0,.08)}
-#bath svg{position:absolute;inset:0;width:100%;height:100%}
-#bath .pane{position:absolute;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));background:rgba(255,255,255,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:26px;padding:16px;box-shadow:0 10px 30px rgba(60,40,20,.15);z-index:3;transition:transform .45s cubic-bezier(.2,.9,.3,1.2),opacity .3s}
+#bath svg,#bath canvas{position:absolute;inset:0;width:100%;height:100%}
+#bath canvas{pointer-events:none;z-index:1}
+#bath .pane{position:absolute;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));background:rgba(255,255,255,.84);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:26px;padding:16px;box-shadow:0 10px 30px rgba(60,40,20,.15);z-index:3;transition:transform .5s cubic-bezier(.2,.9,.3,1.15),opacity .3s}
 #bath .pane.hide{transform:translateY(130%);opacity:0}
 #bath .msg{font:18px Jua,sans-serif}#bath .sub{font-size:13.5px;color:#7a6a58;margin-top:3px}
 #bath .prod{display:flex;gap:12px;align-items:center}
@@ -791,151 +797,236 @@ function openBath(){if($('bath'))return;closeSheet();const pst=me.st;me.st='bath
 #bath .chips{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}
 #bath .chip{background:#f7f1e8;border-radius:14px;padding:8px 9px;font-size:12px;line-height:1.3;color:#7a6a58}#bath .chip b{display:block;font:13.5px Jua,sans-serif;color:#2B2118}
 #bath .go{width:100%;margin-top:12px;border:0;border-radius:16px;padding:14px;font:17px Jua,sans-serif;background:#2B2118;color:#FFE27A;box-shadow:0 4px 0 #000}
-#bath .go:active{transform:translateY(2px);box-shadow:0 2px 0 #000}
+#bath .go2{width:100%;margin-top:8px;border:0;border-radius:16px;padding:12px;font:15px Jua,sans-serif;background:#f3ebe0;color:#2B2118}
+#bath .go:active,#bath .go2:active{transform:translateY(2px)}
 #bath .disc{font-size:11px;color:#a0907c;margin-top:8px;text-align:center}
-#bath .ring{position:absolute;left:50%;top:calc(50% + 120px);transform:translate(-50%,-50%);z-index:2;pointer-events:none;font:15px Jua,sans-serif;background:rgba(255,255,255,.85);border-radius:99px;padding:7px 14px;box-shadow:0 4px 14px rgba(0,0,0,.1);transition:opacity .3s}
+#bath .hint{position:absolute;left:50%;top:58%;transform:translate(-50%,-50%);z-index:2;pointer-events:none;font:15px Jua,sans-serif;background:rgba(255,255,255,.88);border-radius:99px;padding:8px 15px;box-shadow:0 4px 14px rgba(0,0,0,.1);transition:opacity .3s;white-space:nowrap}
+#bath .flash{position:absolute;inset:0;background:#fff;z-index:2;pointer-events:none;opacity:0;transition:opacity .35s}
 @keyframes bbob{50%{transform:translateY(-5px)}}
-@keyframes bfl{0%{transform:translateY(0);opacity:0}15%{opacity:1}100%{transform:translateY(-120px);opacity:0}}
-@keyframes bduck{50%{transform:translate(0,-4px) rotate(-6deg)}}
-@keyframes bwob{0%,100%{transform:scale(1,1)}50%{transform:scale(1.06,.94)}}
-#bath .wob{animation:bwob 1.6s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
-@keyframes bpop{0%{transform:scale(0)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
-#bath .fl{animation:bfl 3.2s ease-in infinite}#bath .duck{animation:bduck 2.2s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
-#bath .pop{animation:bpop .35s ease-out both;transform-box:fill-box;transform-origin:center}
 </style>
 <div class="top"><div class="ttl">🛁 아기 목욕 시간</div><button class="x" id="bxx">✕</button></div>
-<svg id="bsv" viewBox="0 0 360 640" preserveAspectRatio="xMidYMid slice"></svg><canvas id="bcv" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1"></canvas>
-<div class="ring" id="bring" style="opacity:0"></div>
+<svg id="bsv" viewBox="0 0 360 640" preserveAspectRatio="xMidYMid slice"></svg><canvas id="bcv"></canvas>
+<div class="hint" id="bhint" style="opacity:0"></div><div class="flash" id="bflash"></div>
 <div class="pane hide" id="bpane"></div>`;
- document.body.appendChild(d);BT={pst,bubbles:0,phase:'fill'};$('bxx').onclick=()=>closeBath(false);
- bathDraw();bathLoopStart();setTimeout(()=>bathFill(),300);
- const sv=$('bsv');const pt=e=>{const q=sv.createSVGPoint();q.x=e.clientX;q.y=e.clientY;return q.matrixTransform(sv.getScreenCTM().inverse())};
- let down=false,last=null;sv.onpointerdown=e=>{down=true;last=pt(e);bathRub(last,30)};sv.onpointerup=sv.onpointercancel=()=>{down=false};
- sv.onpointermove=e=>{if(!down||!BT)return;const p=pt(e);bathRub(p,Math.hypot(p.x-last.x,p.y-last.y));last=p}}
-function closeBath(done){if(BT)BT.dead=1;const d=$('bath');if(d)d.remove();const p=BT?BT.pst:'';BT=null;me.st=p=='bath'?'':p;pushP();renderCard();
- if(done){const st=LS.get('cp_bath',[]);const k=ymd(new Date());if(!st.includes(k))st.push(k);LS.set('cp_bath',st);homeStamp('bath',st);toast('🛁 보송보송 목욕 끝! 도장 쾅')}}
-function bathDraw(){const sv=$('bsv');sv.innerHTML='';
- const df=sv_('defs',{});
- const lg=(id,stops,x2,y2)=>{const g=sv_('linearGradient',{id,x1:0,y1:0,x2:x2||0,y2:y2==null?1:y2},df);stops.forEach(([o,c,a])=>sv_('stop',{offset:o,'stop-color':c,'stop-opacity':a==null?1:a},g))};
- const rg=(id,stops,cx,cy,r)=>{const g=sv_('radialGradient',{id,cx:cx||.5,cy:cy||.5,r:r||.5},df);stops.forEach(([o,c,a])=>sv_('stop',{offset:o,'stop-color':c,'stop-opacity':a==null?1:a},g))};
- lg('gwall',[[0,'#f6f0e7'],[1,'#ebe1d2']]);lg('gfloor',[[0,'#dcccb4'],[1,'#cdbb9f']]);lg('gtub',[[0,'#ffffff'],[1,'#ece6dd']]);lg('gtubin',[[0,'#e9e3da'],[1,'#fbf8f3']]);
- lg('gwat',[[0,'#c8ecf6',.9],[1,'#86cbe3',.95]]);rg('gskin',[[0,'#ffeadb'],[.75,'#ffd9c2'],[1,'#f5c2a4']],.45,.4,.6);rg('gbub',[[0,'#ffffff'],[.7,'#f4fbfe'],[1,'#d6edf7']],.35,.3,.7);
- rg('gglow',[[0,'#fff8e6',.9],[1,'#fff8e6',0]]);rg('gblush',[[0,'#ff9e9e',.55],[1,'#ff9e9e',0]]);lg('gduck',[[0,'#ffe066'],[1,'#ffc21a']]);lg('gtowel',[[0,'#f3d9c8'],[1,'#e8c4ae']]);
- const fs=sv_('filter',{id:'fsh',x:'-20%',y:'-20%',width:'140%',height:'140%'},df);sv_('feDropShadow',{dx:0,dy:6,stdDeviation:7,'flood-color':'#5a4020','flood-opacity':.18},fs);
- // 벽·창문 빛
- sv_('rect',{x:0,y:0,width:360,height:640,fill:'url(#gwall)'});
- const tl=sv_('g',{opacity:.55});for(let y=60;y<420;y+=34)sv_('line',{x1:0,y1:y,x2:360,y2:y,stroke:'#fff','stroke-width':1.4},tl);for(let x=0;x<=360;x+=34)sv_('line',{x1:x,y1:60,x2:x,y2:420,stroke:'#fff','stroke-width':1.4},tl);
- sv_('ellipse',{cx:290,cy:120,rx:140,ry:120,fill:'url(#gglow)'});
- sv_('rect',{x:0,y:420,width:360,height:220,fill:'url(#gfloor)'});
- // 수건걸이
- sv_('rect',{x:228,y:150,width:96,height:5,rx:2.5,fill:'#c8b08e'});const tw=sv_('g',{filter:'url(#fsh)'});sv_('path',{d:'M236 154 h80 v78 q-40 12 -80 0z',fill:'url(#gtowel)'},tw);[176,196].forEach(y=>sv_('line',{x1:236,y1:y,x2:316,y2:y,stroke:'#fff','stroke-width':3,opacity:.7},tw));
- // 선반 + 러베
- sv_('rect',{x:20,y:262,width:110,height:9,rx:4.5,fill:'#c8b08e',filter:'url(#fsh)'});
- BT.bottle=sv_('image',{href:BATH_PROD.img,x:40,y:150,width:66,height:114,preserveAspectRatio:'xMidYMax meet',filter:'url(#fsh)',style:'cursor:pointer'});
- const pl=sv_('g',{});sv_('path',{d:'M108 262 l4 -22 h16 l4 22z',fill:'#e9e2d6'},pl);[[114,236,-30],[120,230,0],[126,236,30]].forEach(([x,y,r])=>sv_('ellipse',{cx:x,cy:y,rx:5,ry:11,fill:'#9cbf8e',transform:'rotate('+r+' '+x+' '+(y+8)+')'},pl));
- // 욕조
- sv_('ellipse',{cx:180,cy:556,rx:160,ry:18,fill:'#5a4020',opacity:.12});
- sv_('path',{d:'M26 372 q0 -6 6 -6 h296 q6 0 6 6 v40 q0 140 -154 140 q-154 0 -154 -140z',fill:'url(#gtub)',filter:'url(#fsh)'});
- sv_('ellipse',{cx:180,cy:372,rx:150,ry:22,fill:'url(#gtubin)'});
- // 아기
- const b=sv_('g',{id:'bbaby',style:'transform-box:fill-box;transform-origin:50% 90%'});BT.baby=b;
- sv_('ellipse',{cx:180,cy:400,rx:58,ry:44,fill:'url(#gskin)'},b);
- [[118,370,-24],[242,370,24]].forEach(([x,y,r])=>{sv_('ellipse',{cx:x,cy:y,rx:15,ry:26,fill:'url(#gskin)',transform:'rotate('+r+' '+x+' '+y+')'},b);sv_('circle',{cx:x+(r<0?-6:6),cy:y-20,r:11,fill:'url(#gskin)'},b)});
- sv_('circle',{cx:132,cy:306,r:13,fill:'url(#gskin)'},b);sv_('circle',{cx:228,cy:306,r:13,fill:'url(#gskin)'},b);
- sv_('circle',{cx:180,cy:304,r:54,fill:'url(#gskin)'},b);
- sv_('path',{d:'M166 254 q8 -22 22 -8 q-10 -2 -10 10',fill:'#8a6248'},b);
- BT.eo=sv_('g',{},b);[160,200].forEach(x=>{sv_('ellipse',{cx:x,cy:306,rx:6.5,ry:8,fill:'#3b2a20'},BT.eo);sv_('circle',{cx:x+2.4,cy:302.5,r:2.4,fill:'#fff'},BT.eo)});
- BT.ec=sv_('g',{opacity:0},b);[160,200].forEach(x=>sv_('path',{d:'M'+(x-8)+' 308 l8 -5 l8 5',fill:'none',stroke:'#3b2a20','stroke-width':3,'stroke-linecap':'round','stroke-linejoin':'round'},BT.ec));
- sv_('ellipse',{cx:146,cy:324,rx:13,ry:8,fill:'url(#gblush)'},b);sv_('ellipse',{cx:214,cy:324,rx:13,ry:8,fill:'url(#gblush)'},b);
- sv_('path',{d:'M171 326 q9 10 18 0',fill:'#e8796f',stroke:'#7a3a2a','stroke-width':2,'stroke-linecap':'round'},b);
- BT.bubG=sv_('g',{});
- // 물
- sv_('clipPath',{id:'ctub'});sv_('path',{d:'M30 372 h300 v40 q0 136 -150 136 q-150 0 -150 -136z'},$('ctub'));
- BT.wat=sv_('rect',{x:20,y:560,width:320,height:200,fill:'url(#gwat)','clip-path':'url(#ctub)'});
- BT.surf=sv_('ellipse',{cx:180,cy:560,rx:148,ry:9,fill:'#e4f6fb',opacity:0});
- // 오리
- BT.duck=sv_('g',{class:'duck',opacity:0});sv_('ellipse',{cx:262,cy:402,rx:20,ry:13,fill:'url(#gduck)'},BT.duck);sv_('circle',{cx:270,cy:388,r:10,fill:'url(#gduck)'},BT.duck);sv_('path',{d:'M279 388 l9 2 -9 4z',fill:'#ff8a3d'},BT.duck);sv_('circle',{cx:272,cy:385,r:1.8,fill:'#3b2a20'},BT.duck);
- // 욕조 앞 테두리
- sv_('path',{d:'M26 372 q0 -6 6 -6 h296 q6 0 6 6 v8 q-12 18 -154 18 q-142 0 -154 -18z',fill:'#fff'});
- BT.fx=sv_('g',{});}
+ document.body.appendChild(d);
+ BT={pst,parts:[],rips:[],t:0,wy:560,wamp:0,lvl:0,foam:[],sudsK:0,blink:2.5,mood:'calm',arm:[0,0],shake:0,phase:'fill',bubbles:0,acc:0,streams:null};
+ $('bxx').onclick=()=>closeBath(false);
+ bathScene();bathLoop();bathInput();bathRun();}
+function closeBath(done,again){if(BT)BT.dead=1;const d=$('bath');if(d)d.remove();const p=BT?BT.pst:'';BT=null;me.st=p=='bath'?'':p;pushP();renderCard();
+ if(done){const st=LS.get('cp_bath',[]);const k=ymd(new Date());if(!st.includes(k))st.push(k);LS.set('cp_bath',st);homeStamp('bath',st);toast('🛁 보송보송 목욕 끝! 도장 쾅')}
+ if(again)setTimeout(openBath,120)}
+function bathMsg(m,s,html){const p=$('bpane');if(!p)return;p.innerHTML='<div class="msg">'+m+'</div>'+(s?'<div class="sub">'+s+'</div>':'')+(html||'');p.classList.remove('hide')}
+function bathHide(){const p=$('bpane');if(p)p.classList.add('hide')}
+function bathHint(t){const h=$('bhint');if(!h)return;if(t){h.textContent=t;h.style.opacity=1}else h.style.opacity=0}
 
-/* 파티클·스프링 엔진: 물방울·튀김·물결·눈깜빡임·숨쉬기 */
-function bathLoopStart(){const cv=$('bcv'),ctx=cv.getContext('2d');BT.parts=[];BT.rip=[];BT.t=0;BT.blink=2.5;BT.sq=0;let last=performance.now();
- const fit=()=>{const r=cv.getBoundingClientRect(),dp=Math.min(2,devicePixelRatio||1);cv.width=r.width*dp;cv.height=r.height*dp;BT.dp=dp};fit();
- const step=now=>{if(!BT||BT.dead)return;const dt=Math.min(.033,(now-last)/1000);last=now;BT.t+=dt;
-  // 숨쉬기 + 고개 까딱
-  const br=1+Math.sin(BT.t*2.2)*.012;let rot=Math.sin(BT.t*1.1)*1.2;if(BT.shake){BT.shake-=dt;rot+=Math.sin(BT.shake*38)*14*Math.max(0,BT.shake)/.9}
-  if(BT.baby)BT.baby.style.transform='rotate('+rot+'deg) scale('+(1/br)+','+br+')';
-  // 눈 깜빡
-  BT.blink-=dt;const cl=BT.squint||BT.blink<.12;if(BT.blink<0)BT.blink=2+Math.random()*2.5;if(BT.eo){BT.eo.setAttribute('opacity',cl?0:1);BT.ec.setAttribute('opacity',cl?1:0)}
+/* ----- 장면 그리기 ----- */
+function bathDefs(sv){const df=sv_('defs',{},sv);
+ const lg=(id,st,x2,y2)=>{const g=sv_('linearGradient',{id,x1:0,y1:0,x2:x2||0,y2:y2==null?1:y2},df);st.forEach(([o,c,a])=>sv_('stop',{offset:o,'stop-color':c,'stop-opacity':a==null?1:a},g))};
+ const rg=(id,st,cx,cy,r)=>{const g=sv_('radialGradient',{id,cx:cx||.5,cy:cy||.5,r:r||.5},df);st.forEach(([o,c,a])=>sv_('stop',{offset:o,'stop-color':c,'stop-opacity':a==null?1:a},g))};
+ lg('gwall',[[0,'#f6f0e7'],[1,'#e9dfcf']]);lg('gfloor',[[0,'#dccbb2'],[1,'#c9b597']]);lg('gtub',[[0,'#ffffff'],[.6,'#f6f2ec'],[1,'#e4ddd2']]);lg('gtubin',[[0,'#e2dbd0'],[1,'#fbf8f3']]);
+ lg('gwat',[[0,'#d6f1f8',.78],[.3,'#a9def0',.82],[1,'#7fc3dd',.92]]);rg('gskin',[[0,'#ffeadb'],[.72,'#ffd8c0'],[1,'#f0b998']],.42,.38,.62);
+ rg('gbub',[[0,'#ffffff'],[.62,'#f7fcff'],[.9,'#dcf0f8'],[1,'#bfe2f0']],.36,.3,.72);rg('gglow',[[0,'#fff8e6',.95],[1,'#fff8e6',0]]);rg('gblush',[[0,'#ff9090',.6],[1,'#ff9090',0]]);
+ lg('gduck',[[0,'#ffe680'],[.6,'#ffcf2e'],[1,'#f5b400']]);lg('gtowel',[[0,'#f3d9c8'],[1,'#e6c0a8']]);lg('gmat',[[0,'#f6efe4'],[1,'#e8dccb']]);
+ lg('grobe',[[0,'#fffaf3'],[.55,'#f6ebdd'],[1,'#e7d6c0']],1,1);lg('grobeS',[[0,'#efe0cc'],[1,'#dcc7ac']]);
+ const pt=sv_('pattern',{id:'pterry',width:5,height:5,patternUnits:'userSpaceOnUse'},df);sv_('circle',{cx:1.2,cy:1.2,r:1,fill:'#cdb79a',opacity:.28},pt);sv_('circle',{cx:3.7,cy:3.6,r:.9,fill:'#ffffff',opacity:.55},pt);
+ const fs=sv_('filter',{id:'fsh',x:'-30%',y:'-30%',width:'160%',height:'160%'},df);sv_('feDropShadow',{dx:0,dy:6,stdDeviation:7,'flood-color':'#5a4020','flood-opacity':.18},fs);
+ const fs2=sv_('filter',{id:'fsoft',x:'-30%',y:'-30%',width:'160%',height:'160%'},df);sv_('feGaussianBlur',{stdDeviation:1.2},fs2);}
+function bathRoom(sv){sv_('rect',{x:0,y:0,width:360,height:640,fill:'url(#gwall)'},sv);
+ const tl=sv_('g',{opacity:.6},sv);for(let y=60;y<420;y+=34)sv_('line',{x1:0,y1:y,x2:360,y2:y,stroke:'#fff','stroke-width':1.4},tl);for(let x=0;x<=360;x+=34)sv_('line',{x1:x,y1:60,x2:x,y2:420,stroke:'#fff','stroke-width':1.4},tl);
+ sv_('ellipse',{cx:290,cy:110,rx:150,ry:130,fill:'url(#gglow)'},sv);sv_('rect',{x:0,y:420,width:360,height:220,fill:'url(#gfloor)'},sv);
+ sv_('rect',{x:228,y:150,width:96,height:5,rx:2.5,fill:'#c8b08e'},sv);const tw=sv_('g',{filter:'url(#fsh)'},sv);sv_('path',{d:'M236 154 h80 v78 q-40 12 -80 0z',fill:'url(#gtowel)'},tw);sv_('rect',{x:236,y:154,width:80,height:80,fill:'url(#pterry)',opacity:.6},tw);[176,196].forEach(y=>sv_('line',{x1:236,y1:y,x2:316,y2:y,stroke:'#fff','stroke-width':3,opacity:.7},tw));
+ sv_('rect',{x:20,y:262,width:110,height:9,rx:4.5,fill:'#c8b08e',filter:'url(#fsh)'},sv);
+ const pl=sv_('g',{},sv);sv_('path',{d:'M108 262 l4 -22 h16 l4 22z',fill:'#e9e2d6'},pl);[[114,236,-30],[120,230,0],[126,236,30]].forEach(([x,y,r])=>sv_('ellipse',{cx:x,cy:y,rx:5,ry:11,fill:'#9cbf8e',transform:'rotate('+r+' '+x+' '+(y+8)+')'},pl));}
+function bathFace(g,cx,cy,r){const f={};f.eo=sv_('g',{},g);[-20,20].forEach(dx=>{sv_('ellipse',{cx:cx+dx,cy:cy+2,rx:6.5,ry:8,fill:'#3b2a20'},f.eo);sv_('circle',{cx:cx+dx+2.4,cy:cy-1.5,r:2.5,fill:'#fff'},f.eo);sv_('circle',{cx:cx+dx-2,cy:cy+5,r:1.1,fill:'#fff',opacity:.8},f.eo)});
+ f.ec=sv_('g',{opacity:0},g);[-20,20].forEach(dx=>sv_('path',{d:'M'+(cx+dx-8)+' '+(cy+3)+' l8 -5 l8 5',fill:'none',stroke:'#3b2a20','stroke-width':3,'stroke-linecap':'round','stroke-linejoin':'round'},f.ec));
+ f.eh=sv_('g',{opacity:0},g);[-20,20].forEach(dx=>sv_('path',{d:'M'+(cx+dx-8)+' '+(cy+4)+' q8 -9 16 0',fill:'none',stroke:'#3b2a20','stroke-width':3,'stroke-linecap':'round'},f.eh));
+ sv_('ellipse',{cx:cx-34,cy:cy+20,rx:13,ry:8,fill:'url(#gblush)'},g);sv_('ellipse',{cx:cx+34,cy:cy+20,rx:13,ry:8,fill:'url(#gblush)'},g);
+ sv_('path',{d:'M'+(cx-3)+' '+(cy+12)+' q3 3 6 0',fill:'none',stroke:'#e2a183','stroke-width':1.6,'stroke-linecap':'round'},g);
+ f.ms=sv_('path',{d:'M'+(cx-9)+' '+(cy+22)+' q9 9 18 0',fill:'none',stroke:'#7a3a2a','stroke-width':2.4,'stroke-linecap':'round'},g);
+ f.mo=sv_('g',{opacity:0},g);sv_('path',{d:'M'+(cx-11)+' '+(cy+19)+' q11 -2 22 0 q-2 16 -11 16 q-9 0 -11 -16z',fill:'#b8433a',stroke:'#7a3a2a','stroke-width':2},f.mo);sv_('ellipse',{cx:cx,cy:cy+30,rx:6,ry:3.5,fill:'#ff8f8a'},f.mo);
+ return f}
+function bathScene(){const sv=$('bsv');sv.innerHTML='';bathDefs(sv);bathRoom(sv);
+ BT.bottle=sv_('image',{href:BATH_PROD.img,x:40,y:150,width:66,height:114,preserveAspectRatio:'xMidYMax meet',filter:'url(#fsh)',style:'transform-box:fill-box;transform-origin:50% 100%'},sv);
+ sv_('ellipse',{cx:180,cy:556,rx:160,ry:18,fill:'#5a4020',opacity:.12},sv);
+ sv_('path',{d:'M26 372 q0 -6 6 -6 h296 q6 0 6 6 v40 q0 140 -154 140 q-154 0 -154 -140z',fill:'url(#gtub)',filter:'url(#fsh)'},sv);
+ sv_('ellipse',{cx:180,cy:372,rx:150,ry:22,fill:'url(#gtubin)'},sv);
+ // 아기(몸·머리) — 팔은 물 위 레이어
+ const b=sv_('g',{style:'transform-box:fill-box;transform-origin:50% 92%'},sv);BT.baby=b;
+ sv_('ellipse',{cx:180,cy:404,rx:58,ry:46,fill:'url(#gskin)'},b);
+ sv_('circle',{cx:126,cy:306,r:13,fill:'url(#gskin)'},b);sv_('circle',{cx:234,cy:306,r:13,fill:'url(#gskin)'},b);sv_('circle',{cx:126,cy:306,r:6,fill:'#f2b89a',opacity:.5},b);sv_('circle',{cx:234,cy:306,r:6,fill:'#f2b89a',opacity:.5},b);
+ sv_('circle',{cx:180,cy:304,r:56,fill:'url(#gskin)'},b);
+ BT.hair=sv_('path',{d:'M166 252 q8 -24 24 -8 q-11 -3 -11 10',fill:'#8a6248'},b);
+ BT.face=bathFace(b,180,304,56);
+ BT.headSuds=sv_('g',{},b);
+ // 물
+ const cp=sv_('clipPath',{id:'ctub'},sv);sv_('path',{d:'M30 368 h300 v44 q0 136 -150 136 q-150 0 -150 -136z'},cp);
+ BT.wat=sv_('path',{d:'',fill:'url(#gwat)','clip-path':'url(#ctub)'},sv);
+ BT.wline=sv_('path',{d:'',fill:'none',stroke:'#ffffff','stroke-width':2.2,opacity:.85,'clip-path':'url(#ctub)'},sv);
+ BT.foamG=sv_('g',{'clip-path':'url(#ctub)'},sv);
+ // 팔(물 위)
+ BT.arms=[0,1].map(i=>{const g=sv_('g',{},sv);const x=i?236:124;sv_('ellipse',{cx:x,cy:388,rx:15,ry:24,fill:'url(#gskin)',transform:'rotate('+(i?28:-28)+' '+x+' 388)'},g);const h=sv_('g',{},g);sv_('circle',{cx:x+(i?10:-10),cy:368,r:12,fill:'url(#gskin)'},h);sv_('path',{d:'M'+(x+(i?4:-16))+' 362 q6 -4 12 0',fill:'none',stroke:'#e9a98a','stroke-width':1.4},h);return g});
+ // 오리
+ BT.duck=sv_('g',{opacity:0},sv);const dk=sv_('g',{},BT.duck);BT.duckIn=dk;
+ sv_('path',{d:'M-24 0 q2 14 24 14 q24 0 26 -12 q-6 -8 -14 -6 q-6 -10 -20 -8 q-12 2 -16 12z',fill:'url(#gduck)'},dk);
+ sv_('circle',{cx:8,cy:-14,r:11,fill:'url(#gduck)'},dk);sv_('path',{d:'M17 -15 q9 0 10 3 q-5 4 -10 2z',fill:'#ff8a3d'},dk);sv_('circle',{cx:11,cy:-17,r:2,fill:'#3b2a20'},dk);sv_('circle',{cx:11.7,cy:-17.7,r:.7,fill:'#fff'},dk);sv_('path',{d:'M-12 0 q6 -6 14 -2',fill:'none',stroke:'#f0b000','stroke-width':2,'stroke-linecap':'round'},dk);
+ BT.duck.style.cursor='pointer';
+ // 욕조 앞 테두리
+ sv_('path',{d:'M26 372 q0 -6 6 -6 h296 q6 0 6 6 v8 q-12 18 -154 18 q-142 0 -154 -18z',fill:'#fff'},sv);
+ sv_('path',{d:'M40 372 q140 16 280 0',fill:'none',stroke:'#fff','stroke-width':2,opacity:.9},sv);
+ BT.fx=sv_('g',{},sv);BT.shower=null;}
+
+/* ----- 물결·파티클 루프 ----- */
+function waveY(x){const t=BT.t,A=BT.wamp;let y=BT.wy+Math.sin(x*.045+t*2.1)*A+Math.sin(x*.11-t*3.3)*A*.45;for(const r of BT.rips){const d=Math.abs(x-r.x),k=r.t;if(d<120)y+=Math.sin(d*.18-k*12)*r.a*Math.exp(-d*.02)*Math.max(0,1-k/1.2)}return y}
+function bathLoop(){const cv=$('bcv'),ctx=cv.getContext('2d');let last=performance.now();
+ const fit=()=>{const r=cv.getBoundingClientRect(),dp=Math.min(2,devicePixelRatio||1);cv.width=r.width*dp;cv.height=r.height*dp;BT&&(BT.dp=dp)};fit();BT.fit=fit;addEventListener('resize',fit);
+ const step=now=>{if(!BT||BT.dead){removeEventListener('resize',fit);return}const dt=Math.min(.033,(now-last)/1000);last=now;BT.t+=dt;const t=BT.t;
+  // 아기: 숨쉬기·흔들·도리도리
+  if(BT.baby){const br=1+Math.sin(t*2.2)*.012;let rot=Math.sin(t*1.1)*1.4+(BT.lean||0);if(BT.shake>0){BT.shake-=dt;rot+=Math.sin(BT.shake*36)*13*Math.min(1,BT.shake/.5)}BT.baby.style.transform='rotate('+rot+'deg) scale('+(1/br)+','+br+')'}
+  // 눈·입
+  if(BT.face){BT.blink-=dt;if(BT.blink<0)BT.blink=2+Math.random()*2.5;const f=BT.face,m=BT.mood;const cl=m=='squint'||(m!='laugh'&&BT.blink<.12);f.eo.setAttribute('opacity',cl||m=='laugh'?0:1);f.ec.setAttribute('opacity',cl&&m!='laugh'?1:0);f.eh.setAttribute('opacity',m=='laugh'?1:0);f.mo.setAttribute('opacity',m=='laugh'||m=='squint'?1:0);f.ms.setAttribute('opacity',m=='laugh'||m=='squint'?0:1)}
+  // 팔
+  if(BT.arms)BT.arms.forEach((g,i)=>{const a=BT.arm[i]||0;g.setAttribute('transform','translate(0 '+(-a*34)+') rotate('+((i?-1:1)*a*-18)+' '+(i?236:124)+' 400)')});
+  // 물 표면
+  BT.rips=BT.rips.filter(r=>(r.t+=dt)<1.2);
+  if(BT.wat){let d='M20 640 L20 '+waveY(20).toFixed(1),l='M20 '+waveY(20).toFixed(1);for(let x=30;x<=340;x+=10){const y=waveY(x).toFixed(1);d+=' L'+x+' '+y;l+=' L'+x+' '+y}d+=' L340 640Z';BT.wat.setAttribute('d',d);BT.wline.setAttribute('d',l)}
+  // 거품 떠다니기
+  BT.foam.forEach(f=>{f.x+=f.vx*dt;if(f.x<44||f.x>316)f.vx*=-1;f.el.setAttribute('cx',f.x.toFixed(1));f.el.setAttribute('cy',(waveY(f.x)-f.r*.35).toFixed(1))});
+  // 오리
+  if(BT.dk){const D=BT.dk;D.vx+=(Math.sin(t*.7+D.ph)*14-D.vx*.4)*dt;D.x+=D.vx*dt;if(D.x<60){D.x=60;D.vx=Math.abs(D.vx)}if(D.x>300){D.x=300;D.vx=-Math.abs(D.vx)}D.hop=Math.max(0,D.hop-dt);const hy=D.hop>0?Math.sin((1-D.hop/.6)*Math.PI)*-34:0;
+   const y=waveY(D.x),sl=(waveY(D.x+6)-waveY(D.x-6))/12;const face=D.vx<0?-1:1;BT.duck.setAttribute('transform','translate('+D.x.toFixed(1)+' '+(y-4+hy).toFixed(1)+') rotate('+(Math.atan(sl)*57+Math.sin(t*2.6)*4).toFixed(1)+')');BT.duckIn.setAttribute('transform','scale('+face+',1)')}
   if(BT.onTick)BT.onTick(dt);
-  const m=$('bsv').getScreenCTM(),r=cv.getBoundingClientRect(),dp=BT.dp;if(!m)return requestAnimationFrame(step);
-  ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,cv.width,cv.height);ctx.setTransform(m.a*dp,0,0,m.d*dp,(m.e-r.left)*dp,(m.f-r.top)*dp);
-  const WY=BT.wy||999;
-  // 물결
-  BT.rip=BT.rip.filter(q=>{q.t+=dt;const k=q.t/.7;if(k>=1)return false;ctx.strokeStyle='rgba(255,255,255,'+(.8*(1-k))+')';ctx.lineWidth=1.6;ctx.beginPath();ctx.ellipse(q.x,q.y,6+k*26,2+k*6,0,0,7);ctx.stroke();return true});
-  BT.parts=BT.parts.filter(p=>{p.vy+=(p.g==null?900:p.g)*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;if(p.life<=0)return false;
-   if(p.k=='drop'){const dx=p.x-180,dy=p.y-304;if(dx*dx+dy*dy<54*54&&p.vy>0){bathSplash(p.x,p.y,2,p.vx);return false}if(p.y>WY){BT.rip.push({x:p.x,y:WY,t:0});if(Math.random()<.5)bathSplash(p.x,WY,2,0);return false}
-    const sp=Math.hypot(p.vx,p.vy),L=Math.min(14,sp*.022);ctx.strokeStyle='rgba(150,215,240,.9)';ctx.lineWidth=2.6;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x-p.vx/sp*L,p.y-p.vy/sp*L);ctx.stroke();
-    ctx.strokeStyle='rgba(255,255,255,.9)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(p.x-.6,p.y);ctx.lineTo(p.x-.6-p.vx/sp*L*.6,p.y-p.vy/sp*L*.6);ctx.stroke();return true}
-   if(p.k=='spl'){if(p.y>WY+2&&p.vy>0)return false;const a=Math.min(1,p.life/.25);ctx.fillStyle='rgba(170,225,245,'+a+')';ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,7);ctx.fill();ctx.fillStyle='rgba(255,255,255,'+a+')';ctx.beginPath();ctx.arc(p.x-p.r*.35,p.y-p.r*.35,p.r*.35,0,7);ctx.fill();return true}
-   if(p.k=='foam'){const s=1+Math.sin((1-p.life)*20)*.08;ctx.fillStyle='#fff';ctx.beginPath();ctx.ellipse(p.x,p.y,p.r*s,p.r/s,0,0,7);ctx.fill();ctx.strokeStyle='#d6edf7';ctx.lineWidth=1.2;ctx.stroke();if(p.y>=p.ty&&p.vy>0){p.land&&p.land();return false}return true}
-   if(p.k=='steam'){const a=Math.min(1,p.life)*.35;ctx.fillStyle='rgba(255,255,255,'+a+')';ctx.beginPath();ctx.arc(p.x,p.y,p.r+(2-p.life)*6,0,7);ctx.fill();return true}
-   return true});
-  requestAnimationFrame(step)};requestAnimationFrame(step);addEventListener('resize',fit)}
-function bathSplash(x,y,n,vx){for(let i=0;i<n;i++)BT.parts.push({k:'spl',x,y:y-2,vx:(vx||0)*.2+(Math.random()-.5)*140,vy:-120-Math.random()*160,r:1.4+Math.random()*1.8,life:.5+Math.random()*.3})}
-function springTo(from,to,set,done,k,c){let x=from,v=0;k=k||170;c=c||14;const go=()=>{if(!BT||BT.dead)return;for(let i=0;i<2;i++){const a=-k*(x-to)-c*v;v+=a/120;x+=v/120}set(x);if(Math.abs(x-to)<.3&&Math.abs(v)<.3){set(to);done&&done()}else requestAnimationFrame(go)};go()}
-function bathFill(){const t0=performance.now();bathMsg('따뜻한 물 받는 중…','손목 안쪽으로 온도 먼저 체크!');
- const tick=t=>{if(!BT)return;const k=Math.min(1,(t-t0)/1500),e=1-Math.pow(1-k,3),y=560-150*e;BT.wat.setAttribute('y',y);BT.surf.setAttribute('cy',y);BT.surf.setAttribute('opacity',k>.05?.9:0);BT.wy=y;BT.duck.setAttribute('opacity',e);BT.duck.setAttribute('transform','translate(0 '+(410-y)+')');
-  if(k<1)requestAnimationFrame(tick);else{bathSteam();setTimeout(bathProduct,500)}};requestAnimationFrame(tick)}
-function bathSteam(){BT.onTick=dt=>{if(Math.random()<dt*3)BT.parts.push({k:'steam',x:60+Math.random()*240,y:BT.wy-4,vx:(Math.random()-.5)*10,vy:-22,g:-6,r:3+Math.random()*4,life:2})}}
-function bathMsg(m,s,html){const p=$('bpane');p.innerHTML='<div class="msg">'+m+'</div>'+(s?'<div class="sub">'+s+'</div>':'')+(html||'');p.classList.remove('hide')}
+  // 캔버스
+  const m=$('bsv').getScreenCTM(),r=cv.getBoundingClientRect(),dp=BT.dp||1;if(m){ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,cv.width,cv.height);ctx.setTransform(m.a*dp,0,0,m.d*dp,(m.e-r.left)*dp,(m.f-r.top)*dp);
+   if(BT.streams)bathDrawStreams(ctx,dt);
+   BT.parts=BT.parts.filter(p=>{p.vy+=(p.g==null?980:p.g)*dt;p.vx*=p.drag||1;p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;if(p.life<=0)return false;
+    if(p.k=='drop'){if(p.vy>0&&p.y>waveY(p.x)){bathRipple(p.x,.6);if(Math.random()<.35)bathCrown(p.x,waveY(p.x),3,.7);return false}bathTear(ctx,p);return true}
+    if(p.k=='steam'){const a=Math.min(1,p.life*.8)*.32;ctx.fillStyle='rgba(255,255,255,'+a+')';ctx.beginPath();ctx.arc(p.x,p.y,p.r+(2.4-p.life)*7,0,7);ctx.fill();return true}
+    if(p.k=='blob'){const s=1+Math.sin(p.life*30)*.1;ctx.fillStyle='#fff';ctx.strokeStyle='#cfe8f3';ctx.lineWidth=1.2;for(const [ox,oy,rr] of [[0,0,p.r],[-p.r*.7,p.r*.3,p.r*.7],[p.r*.7,p.r*.25,p.r*.65]]){ctx.beginPath();ctx.ellipse(p.x+ox,p.y+oy,rr*s,rr/s,0,0,7);ctx.fill();ctx.stroke()}if(p.vy>0&&p.y>=p.ty){p.land&&p.land();return false}return true}
+    if(p.k=='pop'){const k=1-p.life/.25;ctx.strokeStyle='rgba(200,235,248,'+(1-k)+')';ctx.lineWidth=1.4;ctx.beginPath();ctx.arc(p.x,p.y,p.r*(1+k*.8),0,7);ctx.stroke();return true}
+    if(p.k=='txt'){ctx.save();ctx.globalAlpha=Math.min(1,p.life*2);ctx.font='bold 15px Jua, sans-serif';ctx.textAlign='center';ctx.fillStyle='#fff';ctx.strokeStyle='#2B2118';ctx.lineWidth=4;ctx.lineJoin='round';ctx.strokeText(p.s,p.x,p.y);ctx.fillStyle=p.c||'#ff7a8a';ctx.fillText(p.s,p.x,p.y);ctx.restore();return true}
+    return true})}
+  requestAnimationFrame(step)};requestAnimationFrame(step)}
+// 물방울(눈물 모양: 진행 방향 반대로 꼬리)
+function bathTear(ctx,p){const sp=Math.hypot(p.vx,p.vy)||1,ux=p.vx/sp,uy=p.vy/sp,r=p.r,L=r*(1.6+Math.min(2.2,sp/260));
+ ctx.fillStyle='rgba(140,208,236,.88)';ctx.beginPath();ctx.moveTo(p.x-ux*L,p.y-uy*L);ctx.quadraticCurveTo(p.x-ux*r*.4+uy*r*1.05,p.y-uy*r*.4-ux*r*1.05,p.x+uy*r,p.y-ux*r);ctx.arc(p.x,p.y,r,Math.atan2(-ux,uy),Math.atan2(ux,-uy));ctx.quadraticCurveTo(p.x-ux*r*.4-uy*r*1.05,p.y-uy*r*.4+ux*r*1.05,p.x-ux*L,p.y-uy*L);ctx.fill();
+ ctx.fillStyle='rgba(255,255,255,.95)';ctx.beginPath();ctx.ellipse(p.x-r*.35,p.y-r*.35,r*.32,r*.22,-.6,0,7);ctx.fill()}
+function bathRipple(x,a){BT.rips.push({x,t:0,a:a||1});if(BT.rips.length>14)BT.rips.shift()}
+// 왕관 튀김(물이 부딪히면 위로 동그랗게 튀어오름)
+function bathCrown(x,y,n,s){s=s||1;for(let i=0;i<n;i++){const a=-Math.PI/2+(i/(n-1||1)-.5)*1.6+(Math.random()-.5)*.25,v=(150+Math.random()*120)*s;BT.parts.push({k:'drop',x:x+(Math.random()-.5)*4,y:y-1,vx:Math.cos(a)*v,vy:Math.sin(a)*v,r:1.6+Math.random()*1.4,life:.9})}}
+// 샤워 물줄기: 구멍마다 이어진 줄기 + 흐르는 하이라이트(애니 기법)
+function bathDrawStreams(ctx,dt){const S=BT.streams;S.off+=dt*520;const hx=S.x,hy=S.y,rad=S.ang*Math.PI/180;
+ for(let i=0;i<S.n;i++){const o=(i-(S.n-1)/2)*7,sx=hx+o*Math.cos(rad),sy=hy+8+o*Math.sin(rad);const tx=sx-Math.sin(rad)*60+o*.5;
+  // 줄기가 닿는 곳: 머리 or 물
+  let ty=waveY(tx),hitHead=false;const dx=tx-180;if(Math.abs(dx)<54){const hyh=304-Math.sqrt(54*54-dx*dx);if(hyh>sy&&hyh<ty){ty=hyh;hitHead=true}}
+  const len=(ty-sy)*S.k;if(len<4)continue;const ey=sy+len,ex=sx+(tx-sx)*S.k;
+  const g=ctx.createLinearGradient(sx,sy,ex,ey);g.addColorStop(0,'rgba(170,225,245,.95)');g.addColorStop(1,'rgba(150,215,240,.55)');
+  ctx.strokeStyle=g;ctx.lineWidth=3.2;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(sx,sy);ctx.quadraticCurveTo((sx+ex)/2-Math.sin(rad)*6,(sy+ey)/2,ex,ey);ctx.stroke();
+  ctx.setLineDash([5,13]);ctx.lineDashOffset=-(S.off+i*7);ctx.strokeStyle='rgba(255,255,255,.95)';ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(sx-.7,sy);ctx.quadraticCurveTo((sx+ex)/2-Math.sin(rad)*6-.7,(sy+ey)/2,ex-.7,ey);ctx.stroke();ctx.setLineDash([]);
+  if(S.k>=1&&Math.random()<dt*(hitHead?10:7)){if(hitHead){const a=Math.atan2(ey-304,ex-180);for(let j=0;j<2;j++){const aa=a+(Math.random()-.5)*1.2,v=120+Math.random()*90;BT.parts.push({k:'drop',x:ex,y:ey,vx:Math.cos(aa)*v,vy:Math.sin(aa)*v-60,r:1.5+Math.random()*1.3,life:1})}}else{bathRipple(ex,.9);bathCrown(ex,ey,3,.8)}}}}
+
+/* ----- 입력 ----- */
+function bathInput(){const sv=$('bsv');const pt=e=>{const q=sv.createSVGPoint();q.x=e.clientX;q.y=e.clientY;return q.matrixTransform(sv.getScreenCTM().inverse())};
+ let down=false,last=null;sv.onpointerdown=e=>{down=true;last=pt(e);bathTap(last);bathRub(last,30)};sv.onpointerup=sv.onpointercancel=()=>{down=false};
+ sv.onpointermove=e=>{if(!down||!BT)return;const p=pt(e);bathRub(p,Math.hypot(p.x-last.x,p.y-last.y));last=p}}
+function bathTap(p){if(!BT||BT.phase!='play')return;const D=BT.dk;if(D&&Math.hypot(p.x-D.x,p.y-waveY(D.x))<34){bathSqueak();return}
+ const wy=waveY(p.x);if(p.y>wy-20&&p.y<wy+60){bathRipple(p.x,2.2);bathCrown(p.x,wy,6,1.1);BT.mood='laugh';clearTimeout(BT.mT);BT.mT=setTimeout(()=>{if(BT&&BT.phase=='play')BT.mood='calm'},700)}}
+function bathSqueak(){const D=BT.dk;D.hop=.6;D.vx+=(Math.random()<.5?-1:1)*40;BT.parts.push({k:'txt',s:'삑!',x:D.x,y:waveY(D.x)-40,vx:0,vy:-30,g:0,life:.9,c:'#ffb000'});bathRipple(D.x,1.6);BT.mood='laugh';clearTimeout(BT.mT);BT.mT=setTimeout(()=>{if(BT&&BT.phase=='play')BT.mood='calm'},800)}
+function bathBub(x,y,r,par){const c=sv_('circle',{cx:x,cy:y,r:0,fill:'url(#gbub)'},par||BT.headSuds);const R=r||(5+Math.random()*9);springTo(0,R,v=>c.setAttribute('r',Math.max(0,v).toFixed(2)),null,260,10);BT.bubbles++;return c}
+function bathRub(p,dd){if(!BT||BT.phase!='rub')return;if(Math.hypot((p.x-180)/1.15,(p.y-320))>105)return;
+ BT.acc+=dd;let n=0;while(BT.acc>13){BT.acc-=13;n++;const a=Math.random()*6.28,rr=Math.random()*14;bathBub(p.x+Math.cos(a)*rr,p.y+Math.sin(a)*rr)}
+ BT.mood='squint';clearTimeout(BT.mT);BT.mT=setTimeout(()=>{if(BT&&BT.phase=='rub')BT.mood='laugh'},220);
+ const k=Math.min(1,BT.bubbles/50);bathHint(k<1?'🫧 뽀글뽀글 '+Math.round(k*100)+'%':'✨ 거품 가득!');if(k>=1&&!BT.rubDone){BT.rubDone=1;BT.phase='auto';setTimeout(bathPlay,600)}}
+
+/* ----- 진행 ----- */
+async function bathRun(){await bwait(350);if(!BT)return;bathMsg('따뜻한 물 받는 중…','손목 안쪽으로 온도 먼저 체크!');
+ // 물 받기: 수도꼭지 물줄기 대신 바닥부터 찰랑찰랑 차오름
+ BT.wamp=3.2;tween(1900,k=>{if(BT){BT.wy=560-150*k;if(Math.random()<.4)bathRipple(80+Math.random()*200,.8)}},null,ease.inout);
+ BT.onTick=dt=>{if(Math.random()<dt*2.4)BT.parts.push({k:'steam',x:60+Math.random()*240,y:BT.wy-4,vx:(Math.random()-.5)*10,vy:-20,g:-5,r:3+Math.random()*4,life:2.4})};
+ await bwait(1500);if(!BT)return;
+ BT.duck.setAttribute('opacity',1);BT.dk={x:300,vx:-30,ph:Math.random()*6,hop:.6};bathRipple(300,2);
+ await bwait(700);if(!BT)return;BT.wamp=1.6;bathProduct()}
 function bathProduct(){if(!BT)return;BT.phase='pump';const P=BATH_PROD;
  bathMsg('오늘 목욕은 '+P.brand,'',`<div class="prod" style="margin-top:8px"><img src="${P.img}" alt=""><div><div style="font:17px Jua,sans-serif">${P.name}</div><div class="sub">400ml · 샴푸 겸용 올인원 워시</div></div></div>
  <div class="chips">${P.feats.map(([e,t,s])=>'<div class="chip"><b>'+e+' '+t+'</b>'+s+'</div>').join('')}</div>
  <button class="go" id="bpump">펌프 꾹! 거품 내기</button><div class="disc">${P.disc}</div>`);
  $('bpump').onclick=bathPump}
-function bathPump(){if(!BT)return;$('bpane').classList.add('hide');const bo=BT.bottle;bo.style.transformBox='fill-box';bo.style.transformOrigin='50% 100%';
- // 꾹 눌렀다(스쿼시) 튕겨 오르기(스트레치)
- springTo(1,.86,v=>bo.style.transform='scale('+((2-v)*.5+.5)+','+v+')',()=>springTo(.86,1,v=>bo.style.transform='scale('+((2-v)*.5+.5)+','+v+')',null,260,9),900,30);
- setTimeout(()=>{if(!BT)return;for(let i=0;i<3;i++){const tx=160+i*20,ty=262+(i==1?-8:0);BT.parts.push({k:'foam',x:92,y:160,vx:(tx-92)/.55,vy:-260-i*30,g:900,r:9-i,life:2,ty,land:()=>{bathBub(tx,ty,13);bathBub(tx-10,ty+6,8);BT.squint=.35;setTimeout(()=>{if(BT)BT.squint=0},350)}})}},140);
- setTimeout(()=>{if(!BT)return;BT.phase='rub';const r=$('bring');r.textContent='👆 아기를 문질문질 해줘';r.style.opacity=1},900)}
-function bathBub(x,y,r){const c=sv_('circle',{cx:x,cy:y,r:r||(5+Math.random()*9),fill:'url(#gbub)',class:'pop'},BT.bubG);setTimeout(()=>{if(c.isConnected){c.setAttribute('class','wob');c.style.animationDelay=(-Math.random()*1.6)+'s'}},360);BT.bubbles++;return c}
-function bathRub(p,dd){if(!BT||BT.phase!='rub')return;if(Math.hypot((p.x-180)/1.1,(p.y-330))>110)return;
- BT.acc=(BT.acc||0)+dd;while(BT.acc>14){BT.acc-=14;const a=Math.random()*Math.PI*2,rr=Math.random()*14;bathBub(p.x+Math.cos(a)*rr,p.y+Math.sin(a)*rr)}BT.squint=.2;clearTimeout(BT.sqT);BT.sqT=setTimeout(()=>{if(BT)BT.squint=0},250);
- const k=Math.min(1,BT.bubbles/45);$('bring').textContent=k<1?'🫧 거품 '+Math.round(k*100)+'%':'✨ 뽀득뽀득!';
- if(k>=1){BT.phase='auto';setTimeout(bathFinish,500)}}
-function bathFinish(){if(!BT)return;$('bring').style.opacity=0;bathMsg('샤워기로 쏴아아','');
- // 샤워기: 오른쪽 위에서 스프링으로 쑥 들어와 살랑살랑
- const sh=sv_('g',{},BT.fx);sv_('path',{id:'bhose',d:'M360 120 q-40 -10 -70 30',fill:'none',stroke:'#c9d2d8','stroke-width':7,'stroke-linecap':'round'},sh);
- const hd=sv_('g',{},sh);sv_('rect',{x:-8,y:-46,width:16,height:46,rx:8,fill:'#e3e9ec',stroke:'#c3ccd2','stroke-width':2},hd);sv_('ellipse',{cx:0,cy:4,rx:26,ry:11,fill:'#eef2f4',stroke:'#c3ccd2','stroke-width':2},hd);
- [-14,-7,0,7,14].forEach(x=>sv_('circle',{cx:x,cy:6,r:1.6,fill:'#9fb0b9'},hd));
- let hx=420,hy=60,ang=0,flow=0,tt=0;const place=()=>{hd.setAttribute('transform','translate('+hx+' '+hy+') rotate('+ang+')');$('bhose').setAttribute('d','M380 60 q-30 '+(hy-90)+' '+(hx-380)+' '+(hy-60))};place();
- springTo(420,182,v=>{hx=v;place()},()=>{flow=1},120,13);springTo(60,170,v=>{hy=v;place()},null,120,13);
- const bubs=()=>[...BT.bubG.children];
- BT.onTick=dt=>{tt+=dt;if(flow){ang=Math.sin(tt*2.4)*12;hx=182+Math.sin(tt*2.4)*26;place();
-   const n=Math.floor(dt*140+Math.random());for(let i=0;i<n;i++){const o=(Math.random()-.5)*36,rad=ang*Math.PI/180;BT.parts.push({k:'drop',x:hx+o*Math.cos(rad),y:hy+8+o*Math.sin(rad),vx:-Math.sin(rad)*120+(Math.random()-.5)*30,vy:260+Math.random()*80,life:1.4})}
-   // 물줄기 근처 거품은 주르륵 미끄러지다 톡 터짐
-   bubs().forEach(c=>{if(c.dataset.go)return;const cx=+c.getAttribute('cx');if((Math.abs(cx-hx)<90||tt>3.2)&&Math.random()<dt*(tt>3.2?20:6)){c.dataset.go=1;c.removeAttribute('class');const y0=+c.getAttribute('cy'),r0=+c.getAttribute('r');let y=y0,v=0;const fall=()=>{if(!BT)return;v+=500/60;y+=v/60;c.setAttribute('cy',y);if(y-y0>18+Math.random()*12){c.remove();bathSplash(cx,y,3,0);BT.rip.push({x:cx,y:BT.wy,t:0})}else requestAnimationFrame(fall)};fall()}});
-   BT.squint=1}};
- const wait=()=>{if(!BT)return;if(flow&&tt>1.2&&!bubs().filter(c=>!c.dataset.go).length){flow=0;BT.squint=0;BT.onTick=null;
-   springTo(hx,430,v=>{hx=v;place()},()=>sh.remove(),90,12);springTo(hy,40,v=>{hy=v;place()},null,90,12);
-   // 고개 도리도리로 물 털기
-   setTimeout(()=>{if(!BT)return;BT.shake=.9;for(let i=0;i<16;i++){const a=-Math.PI*(.1+.8*Math.random());BT.parts.push({k:'spl',x:180+Math.cos(a)*50,y:300+Math.sin(a)*50,vx:Math.cos(a)*220,vy:Math.sin(a)*220-80,r:1.5+Math.random()*2,life:.8})}bathMsg('도리도리 물 털기','')},350);
-   setTimeout(bathTowel,1700)}else setTimeout(wait,120)};setTimeout(wait,400)}
-function bathTowel(){if(!BT)return;bathSteam();
- bathMsg('수건으로 폭 감싸기','');
-  // 후드 수건 + 반짝이
-  const w=sv_('g',{},BT.fx);springTo(-360,0,v=>w.setAttribute('transform','translate(0 '+v+')'),null,150,11);sv_('path',{d:'M110 300 q70 -110 140 0 l10 120 q-80 30 -160 0z',fill:'#fff6ec',stroke:'#efd9c2','stroke-width':3,filter:'url(#fsh)'},w);
-  sv_('circle',{cx:140,cy:232,r:14,fill:'#fff6ec',stroke:'#efd9c2','stroke-width':3},w);sv_('circle',{cx:220,cy:232,r:14,fill:'#fff6ec',stroke:'#efd9c2','stroke-width':3},w);
-  const f=sv_('g',{},w);sv_('circle',{cx:180,cy:310,r:44,fill:'url(#gskin)'},f);[[164],[196]].forEach(([x])=>{sv_('path',{d:'M'+(x-6)+' 312 q6 -7 12 0',fill:'none',stroke:'#3b2a20','stroke-width':3,'stroke-linecap':'round'},f)});
-  sv_('ellipse',{cx:150,cy:326,rx:11,ry:7,fill:'url(#gblush)'},f);sv_('ellipse',{cx:210,cy:326,rx:11,ry:7,fill:'url(#gblush)'},f);sv_('path',{d:'M173 328 q7 8 14 0',fill:'#e8796f',stroke:'#7a3a2a','stroke-width':2},f);
-  BT.baby.setAttribute('opacity',0);
-  ['✨','💛','🫧','⭐','✨','🫧'].forEach((e,i)=>{const t=sv_('text',{x:70+i*44,y:200+(i%2)*40,'font-size':20,class:'pop',style:'animation-delay:'+(i*.08)+'s'},BT.fx);t.textContent=e});
-  bathMsg('보송보송 목욕 끝!','오늘도 깨끗하게 씻겼다. 수고했어 엄마',
-   `<div class="prod" style="margin-top:10px;background:#f7f1e8;border-radius:16px;padding:8px 10px"><img src="${BATH_PROD.img}" style="width:40px;height:64px" alt=""><div style="flex:1"><div style="font:14px Jua,sans-serif">${BATH_PROD.brand} ${BATH_PROD.name}</div><div class="sub" style="font-size:12px">머리부터 발끝까지 한 통으로</div></div><a href="${BATH_PROD.url}" target="_blank" rel="noopener" style="font:13px Jua,sans-serif;color:#2B2118;background:#fff;border-radius:99px;padding:7px 11px;text-decoration:none;white-space:nowrap">제품 보기</a></div>
-   <button class="go" id="bfin">🛁 목욕 도장 받기</button><div class="disc">${BATH_PROD.disc}</div>`);
-  $('bfin').onclick=()=>closeBath(true)}
+function bathPump(){if(!BT||BT.phase!='pump')return;BT.phase='auto';bathHide();const bo=BT.bottle;
+ // 예비동작(살짝 늘었다) → 꾹(스쿼시) → 탱(오버슈트)
+ tween(120,k=>bo.style.transform='scale('+(1-.03*k)+','+(1+.04*k)+')',()=>tween(110,k=>bo.style.transform='scale('+(.97+.1*k)+','+(1.04-.16*k)+')',()=>{bathShootFoam();springTo(.88,1,v=>bo.style.transform='scale('+(2.06-1.06*v)+','+v+')',null,300,8)}));}
+function bathShootFoam(){[[164,256,12],[192,250,10],[210,262,8]].forEach(([tx,ty,r],i)=>{const T=.62+i*.05;BT.parts.push({k:'blob',x:96,y:158,vx:(tx-96)/T,vy:(ty-158)/T-.5*980*T,r,life:3,ty,land:()=>{bathBub(tx,ty,r+3);bathBub(tx-r,ty+5,r*.7);bathBub(tx+r*.8,ty+4,r*.6);BT.mood='squint';setTimeout(()=>{if(BT)BT.mood='laugh'},380)}})});
+ setTimeout(()=>{if(!BT)return;BT.phase='rub';bathHint('👆 아기 머리랑 몸을 문질문질');setTimeout(()=>{if(BT&&BT.mood=='laugh'&&BT.phase=='rub')BT.mood='calm'},600)},1100)}
+async function bathPlay(){if(!BT)return;bathHint(null);BT.phase='play';BT.mood='laugh';
+ // 물 위 거품이 퍼져나감(거품 목욕)
+ for(let i=0;i<34;i++){setTimeout(()=>{if(!BT)return;const x=60+Math.random()*240,r=5+Math.random()*10;const el=sv_('circle',{cx:x,cy:BT.wy,r:0,fill:'url(#gbub)'},BT.foamG);springTo(0,r,v=>el.setAttribute('r',Math.max(0,v).toFixed(2)),null,220,11);BT.foam.push({x,vx:(Math.random()-.5)*8,r,el})},i*45)}
+ bathMsg('거품 목욕 놀이 중 🫧','오리를 톡 누르거나 물을 찰박 쳐봐',`<button class="go" id="bnext">이제 헹굴래</button>`);$('bnext').onclick=()=>{BT.playEnd=1};
+ // 아기 혼자 놀기: 양손 번갈아 첨벙, 오리 잡으러 기울기
+ let tt=0,beat=0;BT.onTick=dt=>{tt+=dt;const c=tt%1.6;const L=c<.8?Math.sin(c/.8*Math.PI):0,R=c>=.8?Math.sin((c-.8)/.8*Math.PI):0;BT.arm=[L,R];
+  const ph=Math.floor(tt/.8);if(ph!==beat){beat=ph;const x=ph%2?236:124;const wy=waveY(x);bathRipple(x,2.4);bathCrown(x,wy,6,1);if(BT.dk&&Math.abs(BT.dk.x-x)<50)bathSqueak()}
+  BT.lean=BT.dk?Math.max(-6,Math.min(6,(BT.dk.x-180)*.05)):0;
+  if(Math.random()<dt*1.5)BT.parts.push({k:'steam',x:60+Math.random()*240,y:BT.wy-4,vx:(Math.random()-.5)*10,vy:-20,g:-5,r:3+Math.random()*4,life:2.2});
+  if(Math.random()<dt*.7)BT.parts.push({k:'txt',s:['꺄르르','첨벙!','히히'][Math.floor(Math.random()*3)],x:150+Math.random()*60,y:230,vx:(Math.random()-.5)*20,vy:-26,g:0,life:1.1,c:'#ff7a8a'})};
+ const t0=performance.now();while(BT&&!BT.playEnd&&performance.now()-t0<9000)await bwait(100);if(!BT)return;
+ BT.onTick=null;BT.arm=[0,0];BT.lean=0;bathRinse()}
+async function bathRinse(){if(!BT)return;BT.phase='auto';bathHide();BT.mood='calm';
+ // 샤워기: 화면 밖에서 스프링으로 들어옴
+ const sh=sv_('g',{},BT.fx);const hose=sv_('path',{d:'',fill:'none',stroke:'#c9d2d8','stroke-width':7,'stroke-linecap':'round'},sh);const hd=sv_('g',{},sh);
+ sv_('rect',{x:-8,y:-50,width:16,height:50,rx:8,fill:'#e6ecef',stroke:'#c3ccd2','stroke-width':2},hd);sv_('ellipse',{cx:0,cy:4,rx:28,ry:12,fill:'#f2f5f7',stroke:'#c3ccd2','stroke-width':2},hd);sv_('ellipse',{cx:-8,cy:0,rx:10,ry:3,fill:'#fff',opacity:.9},hd);
+ [-15,-7.5,0,7.5,15].forEach(x=>sv_('circle',{cx:x,cy:7,r:1.6,fill:'#9fb0b9'},hd));
+ const S={x:420,y:60,ang:0,n:5,k:0,off:0};const place=()=>{hd.setAttribute('transform','translate('+S.x.toFixed(1)+' '+S.y.toFixed(1)+') rotate('+S.ang.toFixed(1)+')');hose.setAttribute('d','M380 40 Q'+(S.x+60)+' '+(S.y-80)+' '+S.x.toFixed(1)+' '+(S.y-46).toFixed(1))};place();
+ springTo(420,184,v=>{S.x=v;place()},null,110,12);springTo(60,168,v=>{S.y=v;place()},null,110,12);await bwait(700);if(!BT)return;
+ BT.streams=S;tween(250,k=>S.k=k);BT.mood='squint';bathMsg('쏴아아 헹구는 중','눈에 물 안 들어가게 살살~');
+ let tt=0;const heads=()=>[...BT.headSuds.children];
+ BT.onTick=dt=>{tt+=dt;S.ang=Math.sin(tt*2)*14;S.x=184+Math.sin(tt*2)*30;place();
+  heads().forEach(c=>{if(c.dataset.go)return;const cx=+c.getAttribute('cx');if((Math.abs(cx-S.x)<60||tt>2.6)&&Math.random()<dt*(tt>2.6?14:3)){c.dataset.go=1;const y0=+c.getAttribute('cy'),r0=+c.getAttribute('r');let y=y0,v=0,sx=cx;const fall=()=>{if(!BT)return;v+=7;y+=v/60;sx+=(cx>180?.4:-.4);c.setAttribute('cy',y.toFixed(1));c.setAttribute('cx',sx.toFixed(1));c.setAttribute('r',(r0*(1-(y-y0)/80)).toFixed(2));if(y-y0>26+Math.random()*20){c.remove();BT.parts.push({k:'pop',x:sx,y,vx:0,vy:0,g:0,r:r0,life:.25});bathCrown(sx,y,2,.5)}else requestAnimationFrame(fall)};fall()}});
+  BT.foam.forEach(f=>{if(tt>1&&!f.gone&&Math.random()<dt*1.5){f.gone=1;springTo(f.r,0,v=>f.el.setAttribute('r',Math.max(0,v).toFixed(2)),()=>f.el.remove(),200,16)}})};
+ while(BT&&(tt<3||heads().some(c=>!c.dataset.go)))await bwait(120);if(!BT)return;
+ tween(200,k=>S.k=1-k,()=>{if(BT)BT.streams=null});BT.onTick=null;BT.foam=[];await bwait(250);
+ springTo(S.x,440,v=>{S.x=v;place()},()=>sh.remove(),80,12);springTo(S.y,30,v=>{S.y=v;place()},null,80,12);
+ // 도리도리 물 털기
+ BT.mood='laugh';await bwait(300);if(!BT)return;BT.shake=1;bathMsg('도리도리 물 털기','');
+ for(let i=0;i<8;i++){setTimeout(()=>{if(!BT)return;for(let j=0;j<3;j++){const a=-Math.PI*(.05+.9*Math.random()),v=180+Math.random()*120;BT.parts.push({k:'drop',x:180+Math.cos(a)*56,y:304+Math.sin(a)*56,vx:Math.cos(a)*v,vy:Math.sin(a)*v-60,r:1.6+Math.random()*1.6,life:1.2})}},i*90)}
+ await bwait(1300);if(!BT)return;bathRobe()}
+async function bathRobe(){const fl=$('bflash');fl.style.opacity=.95;await bwait(380);if(!BT)return;
+ // 새 장면: 뽀송한 매트 위 후드 목욕가운
+ const sv=$('bsv');sv.innerHTML='';bathDefs(sv);bathRoom(sv);BT.wat=null;BT.arms=null;BT.dk=null;BT.foam=[];BT.parts=[];BT.rips=[];
+ sv_('image',{href:BATH_PROD.img,x:40,y:150,width:66,height:114,preserveAspectRatio:'xMidYMax meet',filter:'url(#fsh)'},sv);
+ sv_('ellipse',{cx:180,cy:548,rx:150,ry:40,fill:'url(#gmat)',filter:'url(#fsh)'},sv);sv_('ellipse',{cx:180,cy:548,rx:150,ry:40,fill:'url(#pterry)',opacity:.9},sv);sv_('ellipse',{cx:180,cy:546,rx:132,ry:30,fill:'none',stroke:'#fff',opacity:.6,'stroke-width':2,'stroke-dasharray':'2 5'},sv);
+ const R=sv_('g',{style:'transform-box:fill-box;transform-origin:50% 100%'},sv);BT.baby=R;
+ const T=(d,f,o)=>{const e=sv_('path',Object.assign({d,fill:f},o||{}),R);return e};
+ // 발
+ [158,202].forEach(x=>{sv_('ellipse',{cx:x,cy:540,rx:15,ry:9,fill:'url(#gskin)'},R)});
+ // 몸판(가운) + 테리 질감
+ const body='M128 360 q-14 70 -22 168 q74 22 148 0 q-8 -98 -22 -168 q-52 -22 -104 0z';T(body,'url(#grobe)',{stroke:'#e2cfb6','stroke-width':2});T(body,'url(#pterry)');
+ T('M180 372 q4 70 -2 160',null,{fill:'none',stroke:'#e0ccb2','stroke-width':2,opacity:.8});
+ // 소매
+ [[1],[-1]].forEach(([s])=>{const x=180+s*52;const d='M'+x+' 366 q'+(s*30)+' 30 '+(s*36)+' 96 q'+(-s*14)+' 10 '+(-s*30)+' 2 q'+(-s*4)+' -50 '+(-s*14)+' -76z';T(d,'url(#grobe)',{stroke:'#e2cfb6','stroke-width':2});T(d,'url(#pterry)');
+  sv_('rect',{x:x+s*36-(s>0?30:0)-2,y:452,width:32,height:12,rx:6,fill:'url(#grobeS)',transform:'rotate('+(s*-8)+' '+(x+s*20)+' 458)'},R);sv_('circle',{cx:x+s*22,cy:470,r:11,fill:'url(#gskin)'},R)});
+ // 깃(V넥 겹침)
+ T('M150 362 q30 24 34 92 l-8 4 q-8 -62 -38 -90z','#fbf3e8',{stroke:'#e2cfb6','stroke-width':2});T('M210 362 q-30 24 -34 92 l8 4 q8 -62 38 -90z','#f8eee1',{stroke:'#e2cfb6','stroke-width':2});
+ // 허리끈 + 리본
+ sv_('path',{d:'M110 452 q70 12 140 0 l1 13 q-71 12 -142 0z',fill:'url(#grobeS)',stroke:'#d6c0a2','stroke-width':1.5},R);
+ const bw=sv_('g',{style:'transform-box:fill-box;transform-origin:50% 50%'},R);BT.bow=bw;sv_('path',{d:'M206 458 q-18 -14 -22 2 q4 14 22 -2z',fill:'#efdcc4',stroke:'#d6c0a2','stroke-width':1.5},bw);sv_('path',{d:'M206 458 q18 -14 22 2 q-4 14 -22 -2z',fill:'#efdcc4',stroke:'#d6c0a2','stroke-width':1.5},bw);sv_('circle',{cx:206,cy:458,r:4.5,fill:'#e6cfb2'},bw);sv_('path',{d:'M204 462 q-4 18 -12 28 M208 462 q4 18 14 26',fill:'none',stroke:'#e2cbb0','stroke-width':5,'stroke-linecap':'round'},bw);
+ // 후드(뒤) → 얼굴 → 후드 테두리(앞) → 곰 귀
+ sv_('circle',{cx:180,cy:300,r:72,fill:'url(#grobeS)'},R);sv_('circle',{cx:180,cy:300,r:72,fill:'url(#pterry)'},R);
+ [[124,240],[236,240]].forEach(([x,y])=>{sv_('circle',{cx:x,cy:y,r:20,fill:'url(#grobe)',stroke:'#e2cfb6','stroke-width':2},R);sv_('circle',{cx:x,cy:y,r:11,fill:'#f6cfc3'},R)});
+ sv_('circle',{cx:180,cy:308,r:52,fill:'url(#gskin)'},R);
+ sv_('path',{d:'M162 268 q10 -14 22 -4 q8 -10 18 2 q-12 -2 -16 8 q-10 -10 -24 -6z',fill:'#8a6248'},R);
+ BT.face=bathFace(R,180,312,52);BT.mood='calm';
+ sv_('path',{d:'M108 300 a72 72 0 1 1 144 0 a72 72 0 0 1 -144 0 M126 306 a54 58 0 1 0 108 0 a54 58 0 1 0 -108 0z',fill:'url(#grobe)','fill-rule':'evenodd',stroke:'#e2cfb6','stroke-width':2},R);
+ sv_('path',{d:'M108 300 a72 72 0 1 1 144 0 a72 72 0 0 1 -144 0 M126 306 a54 58 0 1 0 108 0 a54 58 0 1 0 -108 0z',fill:'url(#pterry)','fill-rule':'evenodd'},R);
+ BT.fx=sv_('g',{},sv);
+ fl.style.opacity=0;
+ // 등장: 아래서 쏙 올라오며 통통
+ R.style.transform='translateY(80px) scale(.9,1.08)';springTo(80,0,v=>{R.style.transform='translateY('+v+'px) scale('+(1-v/800)+','+(1+v/1000)+')'},null,180,10);
+ await bwait(500);if(!BT)return;
+ BT.mood='laugh';['✨','💛','🫧','⭐','✨','🫧','💛'].forEach((e,i)=>setTimeout(()=>{if(!BT)return;const P=[[52,190],[300,186],[70,262],[292,270],[40,330],[318,340],[88,150]][i];const t=sv_('text',{x:P[0],y:P[1],'font-size':0,'text-anchor':'middle'},BT.fx);t.textContent=e;springTo(0,22,v=>t.setAttribute('font-size',Math.max(0,v).toFixed(1)),null,220,9)},i*90));
+ setTimeout(()=>{if(BT)BT.mood='calm'},1400);
+ // 리본 살랑 + 몸 살짝 흔들
+ BT.onTick=dt=>{if(BT.bow)BT.bow.style.transform='rotate('+(Math.sin(BT.t*3)*6).toFixed(1)+'deg)';if(Math.random()<dt*1.2)BT.parts.push({k:'steam',x:150+Math.random()*60,y:250,vx:(Math.random()-.5)*8,vy:-16,g:-4,r:2+Math.random()*3,life:2})};
+ bathMsg('보송보송 목욕 끝!','오늘도 깨끗하게 씻겼다. 수고했어 엄마',
+  `<div class="prod" style="margin-top:10px;background:#f7f1e8;border-radius:16px;padding:8px 10px"><img src="${BATH_PROD.img}" style="width:40px;height:64px" alt=""><div style="flex:1"><div style="font:14px Jua,sans-serif">${BATH_PROD.brand} ${BATH_PROD.name}</div><div class="sub" style="font-size:12px">머리부터 발끝까지 한 통으로</div></div><a href="${BATH_PROD.url}" target="_blank" rel="noopener" style="font:13px Jua,sans-serif;color:#2B2118;background:#fff;border-radius:99px;padding:7px 11px;text-decoration:none;white-space:nowrap">제품 보기</a></div>
+  <button class="go" id="bfin">🛁 목욕 도장 받기</button><button class="go2" id="bagain">🔁 한 번 더 씻기기</button><div class="disc">${BATH_PROD.disc}</div>`);
+ $('bfin').onclick=()=>closeBath(true);$('bagain').onclick=()=>closeBath(false,true)}
 
 let ENG=false;
 function ytId(v){const m=(v||'').match(/(?:youtu\.be\/|v=|\/embed\/|\/shorts\/|\/live\/)([A-Za-z0-9_-]{11})/);return m?m[1]:(/^[A-Za-z0-9_-]{11}$/.test((v||'').trim())?v.trim():'')}
