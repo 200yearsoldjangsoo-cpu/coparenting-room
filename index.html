@@ -490,7 +490,7 @@ function clampXZ(x,z){x=Math.max(-RW/2+.35,Math.min(RW/2-.3,x));z=Math.max(-RD/2
 
 /* 아바타 관리 */
 const AV={};
-const AK=k=>({carrier:'carrier',home:'stroller',work:'work',newborn:'newborn',preg:'preg',toddler:'toddler'}[k]||'preg');
+const AK=k=>({carrier:'carrier',home:'home',work:'work',newborn:'newborn',preg:'preg',toddler:'toddler'}[k]||'preg');
 function makeAv(st){const kind=st.carrier==2?'stroller':st.carrier?'none':AK(st.kind);const a=avatar({kind,top:(KINDS[st.kind]||KINDS.preg).top,hair:st.hair||'#3b2a20'});if(st.carrier==1)konny(a,st.cc||'#4a4744','#efe6d8');a.sig=kind+'|'+st.carrier+'|'+st.cc;return a}
 function ensure(id,st,isMe){let o=AV[id];const sig=(st.carrier==2?'stroller':st.carrier?'none':AK(st.kind))+'|'+st.carrier+'|'+st.cc;
  if(o&&o.a.sig!==sig){S.remove(o.a.root);o.a=makeAv(st);o.a.root.position.set(o.x,0,o.z);S.add(o.a.root)}
@@ -1053,7 +1053,7 @@ async function bathRobe(){const fl=$('bflash');fl.style.opacity=.95;await bwait(
   FB.forEach(b=>{b.y-=b.v*dt;if(b.y<80)b.y=660;b.c.setAttribute('cy',b.y.toFixed(1));b.c.setAttribute('cx',(b.x+Math.sin(zt*1.5+b.ph)*8).toFixed(1))})};
  await bwait(700);if(!BT)return;
  bathMsg('보송보송 목욕 끝!','오늘도 깨끗하게 씻겼다. 수고했어 엄마',
-  `<div class="prod" style="margin-top:10px;background:#f7f1e8;border-radius:16px;padding:8px 10px"><img src="${BATH_PROD.img}" style="width:40px;height:64px" alt=""><div style="flex:1"><div style="font:14px Jua,sans-serif">${BATH_PROD.brand} ${BATH_PROD.name}</div><div class="sub" style="font-size:12px">머리부터 발끝까지 한 통으로</div></div><a href="${BATH_PROD.url}" target="_blank" rel="noopener" style="font:13px Jua,sans-serif;color:#2B2118;background:#fff;border-radius:99px;padding:7px 11px;text-decoration:none;white-space:nowrap">제품 보기</a></div>
+  `<div class="prod" style="margin-top:10px;background:#f7f1e8;border-radius:16px;padding:8px 10px"><img src="${BATH_PROD.img}" style="width:40px;height:64px" alt=""><div style="flex:1"><div style="font:14px Jua,sans-serif">${BATH_PROD.brand} ${BATH_PROD.name}</div><div class="sub" style="font-size:12px">머리부터 발끝까지 한 통으로</div></div><a href="${BATH_PROD.url}" target="_blank" rel="noopener" style="font:13px Jua,sans-serif;color:#2B2118;background:#fff;border-radius:99px;padding:7px 11px;text-decoration:none;white-space:nowrap">제품 보기</a></div><div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;justify-content:center">${['💧 물처럼 맑은 약산성 젤','🌿 식물유래 저자극','👀 안자극 대체시험 완료','🚫 향료 무첨가'].map(s=>'<span style="background:#fff;border:1px solid #efe3d2;border-radius:99px;padding:4px 9px;font-size:12px;color:#5a4a3a">'+s+'</span>').join('')}</div>
   <button class="go" id="bfin">🛁 목욕 도장 받기</button><button class="go2" id="bagain">🔁 한 번 더 씻기기</button><div class="disc">${BATH_PROD.disc}</div>`);
  $('bfin').onclick=()=>closeBath(true);$('bagain').onclick=()=>closeBath(false,true)}
 
