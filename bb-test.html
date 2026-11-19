@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>찬이 · 건강보험 불러오기 테스트</title>
+<title>육아비서 · 내 정보 불러오기 테스트</title>
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:-apple-system,"Apple SD Gothic Neo",sans-serif;background:#f4f1ec;color:#222}
 header{padding:14px 16px;background:#fff;border-bottom:1px solid #e5e0d8}
@@ -23,8 +23,8 @@ table{width:100%;border-collapse:collapse;background:#fff;font-size:13px}
 th,td{border-top:1px solid #ddd;border-bottom:1px solid #ddd;padding:7px 6px;text-align:left}th{background:#e9e9e9}
 pre{white-space:pre-wrap;font-size:11px;background:#fff;padding:10px;border-radius:8px;max-height:300px;overflow:auto}
 </style></head><body>
-<header><h1>찬이 · 내 정보 불러오기 (테스트)</h1>
-<p>이름·생년월일·휴대폰만 적어 주시면 찬이가 건강보험공단 간편인증을 대신 요청해요. 폰에 온 알림에서 <b>승인</b>만 눌러 주세요. 저장은 이 폰에만 돼요.</p></header>
+<header><h1>육아비서 · 내 정보 불러오기 (테스트)</h1>
+<p>이름·생년월일·휴대폰만 적어 주시면 비서가 건강보험공단 간편인증을 대신 요청해요. 폰에 온 알림에서 <b>승인</b>만 눌러 주세요. 저장은 이 폰에만 돼요.</p></header>
 <div id="form">
 <label>이름<input id="nm" autocomplete="name"></label>
 <label>생년월일 8자리<input id="bd" inputmode="numeric" maxlength="8" placeholder="19940201"></label>
@@ -36,7 +36,7 @@ pre{white-space:pre-wrap;font-size:11px;background:#fff;padding:10px;border-radi
 <div id="bar"><i></i></div>
 <div id="st"></div>
 <div id="big"></div>
-<button id="tog" style="display:none">찬이가 보는 화면 보기</button>
+<button id="tog" style="display:none">비서가 보는 화면 보기</button>
 <div id="wrap"><div id="sc"><iframe id="lv" allow="clipboard-read; clipboard-write"></iframe></div></div>
 <div id="dbg" style="margin:6px 16px;font-size:11px;color:#888;word-break:break-all"></div>
 <div id="out"></div>
@@ -94,13 +94,13 @@ function judge(rows){
 }
 const LS='cp_nhis_test';try{const v=JSON.parse(localStorage.getItem(LS)||'{}');['nm','bd','ph','pv'].forEach(k=>{if(v[k])$('#'+k).value=v[k]})}catch(e){}
 function fit(){const w=$('#wrap').clientWidth||innerWidth-32;const k=w/1024;$('#sc').style.transform='scale('+k+')';$('#wrap').style.height=(800*k)+'px'}
-$('#tog').onclick=()=>{const on=$('#wrap').style.display!=='block';$('#wrap').style.display=on?'block':'none';$('#tog').textContent=on?'화면 숨기기':'찬이가 보는 화면 보기';if(on)fit()};
+$('#tog').onclick=()=>{const on=$('#wrap').style.display!=='block';$('#wrap').style.display=on?'block':'none';$('#tog').textContent=on?'화면 숨기기':'비서가 보는 화면 보기';if(on)fit()};
 function big(t){$('#big').textContent=t}
 $('#go').onclick=async()=>{
   const nm=$('#nm').value.trim(),bd=$('#bd').value.replace(/\D/g,''),ph=$('#ph').value.replace(/\D/g,''),pv=$('#pv').value;
   if(!nm||bd.length!==8||ph.length<10){st('이름, 생년월일 8자리, 휴대폰을 확인해 주세요');return}
   try{localStorage.setItem(LS,JSON.stringify({nm,bd,ph,pv}))}catch(e){}
-  $('#go').disabled=true;big('');window.__stop=0;$('#out').style.display='none';st('찬이가 건강보험공단 여는 중…');bar(5);
+  $('#go').disabled=true;big('');window.__stop=0;$('#out').style.display='none';st('비서가 건강보험공단 여는 중…');bar(5);
   try{
     const r=await fetch(FN,{method:'POST',headers:{'Content-Type':'application/json',apikey:KEY,Authorization:'Bearer '+KEY},
       body:JSON.stringify({action:'flow',site:$('#st2').value,name:nm,birth:bd,phone:ph,prov:pv})});
@@ -109,9 +109,9 @@ $('#go').onclick=async()=>{
       let i;while((i=buf.indexOf('\n\n'))>=0){const line=buf.slice(0,i);buf=buf.slice(i+2);
         if(!line.startsWith('data: '))continue;const e=JSON.parse(line.slice(6));
         if(e.step==='live'){$('#lv').src=e.live.replace('&debug=true','')+'&navbar=false';$('#tog').style.display='block';st('이름·생년월일·휴대폰 넣고 인증 요청하는 중…');bar(12)}
-        else if(e.step==='requested'){if(e.r==='ok'&&!e.msg){big('📱 폰에 온 '+pv+' 알림에서 승인을 눌러 주세요');st('승인하면 찬이가 알아서 다음으로 넘어가요');bar(20)}else{big('자동 입력이 막혔어요 ('+(e.r==='ok'?e.msg:e.r)+')');window.__stop=1}}
+        else if(e.step==='requested'){if(e.r==='ok'&&!e.msg){big('📱 폰에 온 '+pv+' 알림에서 승인을 눌러 주세요');st('승인하면 비서가 알아서 다음으로 넘어가요');bar(20)}else{big('자동 입력이 막혔어요 ('+(e.r==='ok'?e.msg:e.r)+')');window.__stop=1}}
         else if(e.step==='wait'){if(window.__stop)st('화면 보기로 직접 진행해 주세요 · '+e.s+'초');else st('승인 기다리는 중 · '+e.s+'초 (130초까지)');bar(20+Math.min(60,e.s/2))}
-        else if(e.step==='dbg'){$('#dbg').textContent='찬이 확인: '+e.dr}
+        else if(e.step==='dbg'){$('#dbg').textContent='비서 확인: '+e.dr}
         else if(e.step==='login'){big('로그인 완료!');st('자격득실 읽는 중…');bar(85)}
         else if(e.step==='data'){bar(100);big('불러오기 완료');st('');$('#wrap').style.display='none';$('#tog').style.display='none';
           const o=$('#out');o.style.display='block';

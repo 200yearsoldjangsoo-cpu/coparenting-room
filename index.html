@@ -164,7 +164,7 @@ a.kakao{display:block;margin-top:10px;text-align:center;font:15px Jua,sans-serif
   <button data-t="dunga"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.5-7-9.5A3.8 3.8 0 0 1 12 8a3.8 3.8 0 0 1 7 2.5C19 15.5 12 20 12 20z" fill="none" stroke="currentColor" stroke-width="2"/></svg>애기재우기</button>
   <button data-t="grow"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>내 시간</button>
   <button data-t="home"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z" fill="none" stroke="currentColor" stroke-width="2"/></svg>미니홈피</button>
-  <button data-t="aide"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z" fill="none" stroke="currentColor" stroke-width="2"/></svg>육아비서 찬이</button>
+  <button data-t="aide"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z" fill="none" stroke="currentColor" stroke-width="2"/></svg>육아비서</button>
  </div>
  <div class="sheet" id="sheet"><div class="sh"><b id="stt"></b><button id="sx">닫기</button></div><div class="sb" id="sb"></div></div>
  <div class="gate" id="gate">
@@ -825,7 +825,7 @@ function autoWT(){if(DG.wt)return DG.wt;return (me.ex&&me.ex.ms||'')=='home'||me
 function diagHTML(){if(!DG.wt){DG.wt=autoWT();DG.auto=true}
  const wn=WT.find(x=>x[0]==DG.wt)[1];
  let h='<div class="box"><div class="t">내 맞춤 진단 <small>'+esc(mySt&&myMs?STAGES[mySt]+' · '+MSTATS[myMs]:KINDS[me.kind].label)+' 기준으로 미리 채웠어</small></div><div style="font-size:14px">지금 <b>'+esc(wn)+'</b>으로 봤어. <a id="dchg" style="color:#c27a00;text-decoration:underline">아니면 바꾸기</a></div><div class="kpick" id="dwt" style="display:none;margin-top:8px">'+WT.map(([k,n,s])=>'<button data-w="'+k+'" class="'+(DG.wt==k?'on':'')+'">'+n+'</button>').join('')+'</div>'+
-  '<div class="lk" style="margin-top:8px"><a id="dfetch"><b>내 정보 자동으로 불러오기</b> · 간편인증 한 번이면 고용보험·건강보험 기록으로 찬이가 채워줘 <small style="display:block;color:#8a7a68">정식 오픈 준비 중</small></a></div></div>';
+  '<div class="lk" style="margin-top:8px"><a id="dfetch"><b>내 정보 자동으로 불러오기</b> · 간편인증 한 번이면 고용보험·건강보험 기록으로 비서가 채워줘 <small style="display:block;color:#8a7a68">정식 오픈 준비 중</small></a></div></div>';
  if(!DG.wt)return h;
  const emp=['emp','day','fixed'].includes(DG.wt);
  h+='<div class="box calc"><div class="t">조금만 더</div>'+
@@ -849,7 +849,7 @@ function bindDiag(){const re=()=>{saveDG();const y=sb.scrollTop;openAide();sb.sc
  $('dfetch').onclick=()=>{const a=$('dfetch');if(a.dataset.o)return;a.dataset.o=1;a.insertAdjacentHTML('afterend','<div class="box" style="margin-top:6px;background:#fff7d6">간편인증으로 고용24·건강보험 기록을 불러오는 기능은 지금 만드는 중이야. 열리면 버튼 한 번에 채워질 거야. 그 전까지는 위 칸이 시기에 맞춰 자동으로 채워져 있으니 다른 것만 바꿔줘.</div>')};
  const q=$('dreq');if(q)q.onclick=openReq}
 function openReq(){const [R]=judge();openSheet('바로 신청하기');
- sb.innerHTML='<div class="box"><div class="t">간편인증 한 번이면 끝</div><ol style="font-size:14px;line-height:1.7;padding-left:18px;margin:6px 0"><li>간편인증</li><li>찬이가 신청서 채움</li><li>확인하고 제출</li></ol><small style="color:#8a7a68;display:block">내 이름으로 신청돼. 인증 정보는 저장 안 해.</small></div>'+
+ sb.innerHTML='<div class="box"><div class="t">간편인증 한 번이면 끝</div><ol style="font-size:14px;line-height:1.7;padding-left:18px;margin:6px 0"><li>간편인증</li><li>비서가 신청서 채움</li><li>확인하고 제출</li></ol><small style="color:#8a7a68;display:block">내 이름으로 신청돼. 인증 정보는 저장 안 해.</small></div>'+
  '<div class="box" style="background:#fff7d6"><div class="t">지금 만드는 중이야</div><div style="font-size:13px">간편인증 자동 신청은 곧 열려. 열리면 바로 알려줄게.</div>'+
  '<label>알림 받을 곳 (카톡 아이디나 휴대폰)</label><input id="rq_c" maxlength="40" autocapitalize="off"><input id="rq_n" type="hidden" value="'+esc(me.nick)+'"><input id="rq_m" type="hidden" value="self-apply 알림">'+
  '<label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--ink);margin:10px 0"><input type="checkbox" id="rq_ok" style="width:22px;min-height:22px;flex:none"> 오픈 알림을 위해 연락처와 진단 결과를 보관하는 데 동의해. 알림 보내면 지워줘.</label><button class="btn" id="rq_s" style="width:100%">열리면 알려줘</button><p class="note">회사랑 얘기가 꼬였거나 애매하면 노동법 상담소에서 먼저 물어봐.</p></div>';
@@ -859,7 +859,7 @@ function openReq(){const [R]=judge();openSheet('바로 신청하기');
   if(r.error){toast('접수가 안 됐어. 카톡 상담으로 연락줘');return}
   sb.innerHTML='<div class="box"><div class="t">알림 신청 완료</div>바로 신청이 열리면 제일 먼저 알려줄게. 그 전에 궁금한 건 노동법 상담소에서 물어봐.</div>'}}
 function leaveCalc(w,n,six){const r=[];let tot=0;const cap6=[250,250,300,350,400,450];for(let k=1;k<=n;k++){let v;if(k<=6&&six)v=Math.min(w,cap6[k-1]);else if(k<=3)v=Math.min(w,250);else if(k<=6)v=Math.min(w,200);else v=Math.min(Math.round(w*.8*10)/10,160);v=Math.max(v,Math.min(70,w));r.push([k,v]);tot+=v}return[r,Math.round(tot*10)/10]}
-function openAide(){openSheet('육아비서 찬이');const t=TODO[me.kind]||TODO.carrier;
+function openAide(){openSheet('육아비서');const t=TODO[me.kind]||TODO.carrier;
  const tabs=[['todo','내 시기 할 일'],['law','모성보호 전체'],['diag','내 맞춤 진단'],['region','지역 지원금'],['baby','예방접종·검진'],['ask','노동법 상담소']];
  let body='';
  if(aTab=='todo')body='<div class="box"><div class="t">지금 시기에 챙길 것 <small>'+esc(KINDS[me.kind].label)+' 기준</small></div>'+t.map(x=>'<div class="todo"><span class="dd">'+x[0]+'</span><div><b>'+x[1]+'</b><small>'+x[2]+'</small></div></div>').join('')+'<p class="note">시기는 미니홈피 꾸미기에서 바꿀 수 있어.</p></div>';
@@ -867,9 +867,9 @@ function openAide(){openSheet('육아비서 찬이');const t=TODO[me.kind]||TODO
  if(aTab=='diag')body=diagHTML();
  if(aTab=='region')body=regionHTML();
  if(aTab=='baby')body=babyHTML();
- if(aTab=='ask')body='<div class="box chat"><div class="t">노동법 상담소 <small>'+(SAMPLE?'AI 답변 · 근거 조문 포함':'자주 묻는 질문부터')+'</small></div><div id="log">'+(chat.length?chat.map(m=>m.role=='user'?'<div class="q"><span>'+esc(m.content)+'</span></div>':'<div class="a"><span>'+esc(m.content)+'</span></div>').join(''):'<div class="a"><span>안녕, 노무사엄마가 만든 육아비서 찬이야. 회사·제도 뭐든 물어봐.</span></div>')+'</div>'+
- '<div class="chips">'+['육아휴직 회사가 거절할 수 있어?','복직하는데 다른 부서로 가래','단축근무하면 월급 깎여?'].map(q=>'<button>'+q+'</button>').join('')+'</div><div class="ask"><input id="aq" placeholder="찬이한테 물어보기" maxlength="300"><button class="btn k" id="asend">보내기</button></div>'+
- '<a class="kakao" href="http://pf.kakao.com/_xmxmxjxeX" target="_blank" rel="noopener">카톡으로 노무사 상담</a><p class="note">찬이 답변은 참고용이야. 내 사건에 맞는 판단은 노무사 상담으로.</p></div>';
+ if(aTab=='ask')body='<div class="box chat"><div class="t">노동법 상담소 <small>'+(SAMPLE?'AI 답변 · 근거 조문 포함':'자주 묻는 질문부터')+'</small></div><div id="log">'+(chat.length?chat.map(m=>m.role=='user'?'<div class="q"><span>'+esc(m.content)+'</span></div>':'<div class="a"><span>'+esc(m.content)+'</span></div>').join(''):'<div class="a"><span>안녕, 노무사 엄마가 만든 육아비서야. 회사·제도 뭐든 물어봐.</span></div>')+'</div>'+
+ '<div class="chips">'+['육아휴직 회사가 거절할 수 있어?','복직하는데 다른 부서로 가래','단축근무하면 월급 깎여?'].map(q=>'<button>'+q+'</button>').join('')+'</div><div class="ask"><input id="aq" placeholder="육아비서한테 물어보기" maxlength="300"><button class="btn k" id="asend">보내기</button></div>'+
+ '<a class="kakao" href="http://pf.kakao.com/_xmxmxjxeX" target="_blank" rel="noopener">카톡으로 노무사 상담</a><p class="note">육아비서 답변은 참고용이야. 내 사건에 맞는 판단은 노무사 상담으로.</p></div>';
  sb.innerHTML='<div class="atabs">'+tabs.map(([k,n])=>'<button data-a="'+k+'" class="'+(aTab==k?'on':'')+'">'+n+'</button>').join('')+'</div>'+body;sb.scrollTop=0;
  sb.querySelectorAll('.atabs button').forEach(b=>b.onclick=()=>{aTab=b.dataset.a;openAide()});
  if(aTab=='diag')bindDiag();
@@ -879,7 +879,7 @@ function openAide(){openSheet('육아비서 찬이');const t=TODO[me.kind]||TODO
 const FAQ={'육아휴직 회사가 거절할 수 있어?':'요건을 갖춘 근로자가 신청하면 회사는 허용해야 해. 거절하면 벌칙 대상이야. 회사가 미루거나 눈치 주면 신청서를 서면으로 남겨두고 노무사랑 상의해.\n근거 · 남녀고용평등법 제19조①','복직하는데 다른 부서로 가래':'휴직 전과 같은 업무 또는 같은 수준 임금을 받는 직무로 복귀시키는 게 원칙이야. 휴직했다는 이유로 불리하게 대하면 안 돼. 발령 문서를 받아두고 바로 상담해.\n근거 · 남녀고용평등법 제19조③④','단축근무하면 월급 깎여?':'임신기 근로시간 단축은 임금을 깎을 수 없어. 육아기 근로시간 단축은 줄어든 시간에 비례해서만 임금이 줄 수 있고, 그 밖에 단축을 이유로 근로조건을 불리하게 하면 안 돼.\n근거 · 근로기준법 제74조 제8항 · 남녀고용평등법 제19조의3 제1항'};
 async function ask(q){q=(q||'').trim();if(!q||busy)return;if(!SAMPLE){chat.push({role:'user',content:q});chat.push({role:'assistant',content:FAQ[q]||'이 질문은 아직 찬이가 바로 답을 못 해. AI 답변은 곧 열려! 급하면 아래 카톡으로 노무사한테 바로 물어봐.'});openAide();return}
  busy=true;chat.push({role:'user',content:q});const log=$('log');log.insertAdjacentHTML('beforeend','<div class="q"><span>'+esc(q)+'</span></div><div class="a"><span id="live">생각 중…</span></div>');$('aq').value='';log.parentElement.scrollIntoView(false);
- const sys='너는 "육아비서 찬이"야. 공인노무사이자 워킹맘이 만든 모성보호 비서. 한국 노동법(근로기준법, 남녀고용평등과 일·가정 양립 지원에 관한 법률, 고용보험법)과 임신·출산·육아 지원제도를 쉽게 설명해. 반말로 다정하게, 4~6문장 안으로 짧게. 확실한 조문만 "근거 · 법령명 제○조"로 끝에 붙이고, 확실하지 않으면 조문 번호를 지어내지 말고 "정확한 조문은 확인 필요"라고 써. 금액·기간 숫자는 확실할 때만 말하고 최신 금액은 정부24·고용24에서 확인하라고 안내해. 분쟁·불이익이 걸린 상황이면 마지막에 노무사 상담을 권해. 사용자 시기: '+KINDS[me.kind].label+'.';
+ const sys='너는 "육아비서"야. 공인노무사이자 워킹맘이 만든 모성보호 비서. 한국 노동법(근로기준법, 남녀고용평등과 일·가정 양립 지원에 관한 법률, 고용보험법)과 임신·출산·육아 지원제도를 쉽게 설명해. 반말로 다정하게, 4~6문장 안으로 짧게. 확실한 조문만 "근거 · 법령명 제○조"로 끝에 붙이고, 확실하지 않으면 조문 번호를 지어내지 말고 "정확한 조문은 확인 필요"라고 써. 금액·기간 숫자는 확실할 때만 말하고 최신 금액은 정부24·고용24에서 확인하라고 안내해. 분쟁·불이익이 걸린 상황이면 마지막에 노무사 상담을 권해. 사용자 시기: '+KINDS[me.kind].label+'.';
  const msgs=[{role:'user',content:sys+'\n\n질문: '+chat[0].content}].concat(chat.slice(1));
  try{abort=new AbortController();const r=await SAMPLE(msgs,{signal:abort.signal,cache:false,modelTier:'default',onText:({text})=>{const e=$('live');if(e)e.textContent=text}});
   chat.push({role:'assistant',content:r.text});const e=$('live');if(e){e.textContent=r.text;e.removeAttribute('id')}}
