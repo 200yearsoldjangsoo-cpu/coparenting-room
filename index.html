@@ -284,13 +284,20 @@ function animA(a,dt){a.t+=dt;const w=a.walk,s=Math.sin(a.t*10);
 const GL=(col,size)=>{const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d');const gr=g.createRadialGradient(32,32,0,32,32,32);gr.addColorStop(0,col);gr.addColorStop(1,'rgba(255,200,120,0)');g.fillStyle=gr;g.fillRect(0,0,64,64);const s=new T.Sprite(new T.SpriteMaterial({map:new T.CanvasTexture(c),transparent:true,depthWrite:false,blending:T.AdditiveBlending}));s.scale.set(size,size,1);return s};
 const ctex=(w,h,fn,rx,ry)=>{const c=document.createElement('canvas');c.width=w;c.height=h;fn(c.getContext('2d'),w,h);const t=new T.CanvasTexture(c);t.encoding=T.sRGBEncoding;t.wrapS=t.wrapT=T.RepeatWrapping;t.repeat.set(rx||1,ry||1);return t};
 /* 빛 */
-S.add(new T.HemisphereLight(0x8f9cff,0x3a2a30,.55));
-const moon=new T.DirectionalLight(0x9fb0ff,.55);moon.position.set(-6,8,-2);moon.castShadow=true;moon.shadow.mapSize.set(1024,1024);Object.assign(moon.shadow.camera,{left:-12,right:12,top:12,bottom:-12});S.add(moon);
+S.add(new T.HemisphereLight(0xb7c0ff,0x4a3326,.38));
+const moon=new T.DirectionalLight(0x9fb0ff,.55);moon.position.set(-6,8,-2);moon.castShadow=true;moon.shadow.mapSize.set(2048,2048);moon.shadow.bias=-.0004;moon.shadow.normalBias=.02;Object.assign(moon.shadow.camera,{left:-12,right:12,top:12,bottom:-12});S.add(moon);
 const warm=(x,y,z,i,d,ns)=>{const L=new T.PointLight(0xffb86a,i,d,1.6);L.position.set(x,y,z);L.castShadow=!ns;L.shadow.mapSize.set(512,512);S.add(L)};
 warm(3.2,2.2,-2,1.6,9);warm(-3,1.8,1.5,.9,7);warm(6.2,2.4,-5.6,1.1,6,1);warm(-7,2.2,-5.6,1.1,6,1);warm(-6,2,3,.8,8,1);warm(6,2,4,.8,8,1);
 /* 방: 둥근 모서리 섬 */
 const RW=18,RD=14;
-const fl=box(RW,.4,RD,new T.MeshStandardMaterial({map:ctex(512,512,(g,w,h)=>{const c=['#d9a877','#d29e6c','#ddb083','#cc975f'];for(let i=0;i<8;i++){g.fillStyle=c[i%4];g.fillRect(0,i*64,w,64);g.fillStyle='rgba(90,55,25,.25)';g.fillRect(0,i*64,w,2);g.fillRect((i*173)%w,i*64,2,64)}},4,3),roughness:.7}),0,-.2,0);S.add(fl);
+const fl=box(RW,.4,RD,new T.MeshStandardMaterial({map:ctex(1024,1024,(g,w,h)=>{
+  const base=['#d6a473','#cf9b68','#dcae80','#c9925c','#d4a06d','#e0b487'];let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+  const ph=64;for(let r=0;r<h/ph;r++){let x=-Math.floor(rnd()*300);while(x<w){const L=260+rnd()*360;g.fillStyle=base[Math.floor(rnd()*base.length)];g.fillRect(x,r*ph,L,ph);
+    for(let k=0;k<9;k++){g.strokeStyle='rgba(110,65,30,'+(.05+rnd()*.09)+')';g.lineWidth=1+rnd()*1.5;g.beginPath();const y0=r*ph+4+rnd()*(ph-8);g.moveTo(x,y0);g.bezierCurveTo(x+L*.3,y0+(rnd()-.5)*8,x+L*.7,y0+(rnd()-.5)*8,x+L,y0+(rnd()-.5)*6);g.stroke()}
+    if(rnd()<.25){g.fillStyle='rgba(95,55,25,.18)';g.beginPath();g.ellipse(x+L*rnd(),r*ph+ph/2,6,3,0,0,7);g.fill()}
+    g.fillStyle='rgba(70,40,18,.35)';g.fillRect(x,r*ph,2,ph);x+=L}
+    g.fillStyle='rgba(70,40,18,.32)';g.fillRect(0,r*ph,w,2);g.fillStyle='rgba(255,240,215,.12)';g.fillRect(0,r*ph+2,w,1)}
+ },3,2.4),roughness:.55,metalness:0}),0,-.2,0);S.add(fl);
 const wm=new T.MeshStandardMaterial({map:ctex(256,256,(g,w,h)=>{g.fillStyle='#f3e6d6';g.fillRect(0,0,w,h);for(let x=0;x<w;x+=32){g.fillStyle='#ead9c4';g.fillRect(x,0,14,h)}for(let i=0;i<40;i++){g.fillStyle='#f6c7b4';g.beginPath();g.arc(Math.random()*w,Math.random()*h,3,0,7);g.fill()}},3,1),roughness:.95});
 S.add(mesh(new T.BoxGeometry(RW,3.2,.25),wm,0,1.6,-RD/2-.12));S.add(mesh(new T.BoxGeometry(.25,3.2,RD),wm,-RW/2-.12,1.6,0));
 S.add(box(RW,.14,.06,'#e7d5bf',0,.07,-RD/2+.02));
@@ -368,7 +375,7 @@ function sofa(x,z,ry,col,n){const g=new T.Group();const w=n*.75+.3;g.add(box(w,.
  const hw=w/2,hd=.45,ax=Math.abs(c)*hw+Math.abs(s)*hd,az=Math.abs(s)*hw+Math.abs(c)*hd;XBLOCK.push([x-ax,z-az,x+ax,z+az])}
 sofa(-7.6,1.6,Math.PI/2,'#b9a6d9',3);sofa(7.7,3,-Math.PI/2,'#9fc9b8',3);
 /* 러그 둘레 푸프 */
-[[-1.6,4.6],[.4,5.1],[2.4,4.6],[-1.2,-3.6]].forEach(([x,z])=>{S.add(cyl(.3,.32,.4,'#ffd2b8',x,.2,z));addSeat(x,z,Math.atan2(.4-x,.6-z),.3,.6,.6)});
+[[-1.6,4.6],[.4,5.1],[2.4,4.6],[-1.2,-3.6]].forEach(([x,z],i)=>{const pc=['#f2b26b','#a9c6a0','#f0a8a0','#b9aee0'][i];S.add(cyl(.3,.32,.36,pc,x,.18,z,28,{roughness:.95}));{const c=new T.Mesh(new T.SphereGeometry(.3,28,14,0,Math.PI*2,0,Math.PI/2),M(pc,{roughness:1}));c.scale.y=.35;c.position.set(x,.36,z);c.castShadow=true;S.add(c)}addSeat(x,z,Math.atan2(.4-x,.6-z),.3,.6,.6)});
 /* 흔들의자 3개도 앉기 */
 [[-2.6,-1.6,.5],[2.4,-1.7,-.5],[-3.2,1.6,1.3]].forEach(([x,z,ry])=>addSeat(x,z,ry,.4,.9,.8));
 /* 큰 러그 하나 더 + 화분 */
@@ -425,6 +432,27 @@ const FPROP=(()=>{const z0=-RD/2,bx=-6.75,bz=z0+1.68,by=.66;
   endPour(){ph=null;st.visible=false;KET.g.position.copy(kHome);KET.g.rotation.set(0,0,0)},
   endScoop(){ph=null;pw.forEach(p=>p.visible=false);sc.position.copy(scHome);sc.rotation.set(0,0,0)},
   hideBottle(){wb.visible=false;lv(.01)}}})();
+
+/* ── 화질 손질 (11/19): 환경광 반사 · 접지 그림자 · 배경 그라데이션 ── */
+(function(){try{
+ const pm=new T.PMREMGenerator(R);const es=new T.Scene();es.background=new T.Color('#2a2440');
+ const add=(c,i,x,y,z,sx,sy,sz)=>{const m=new T.Mesh(new T.BoxGeometry(sx,sy,sz),new T.MeshBasicMaterial({color:new T.Color(c).multiplyScalar(i)}));m.position.set(x,y,z);es.add(m)};
+ add('#ffd6a8',1.3,0,7,0,8,.2,8);add('#a9b8ff',1.1,-9,3,0,.2,5,7);add('#ffb878',1.2,9,2.5,2,.2,3,5);add('#c9b49c',.45,0,-1.5,0,24,.1,24);add('#fff0e0',.6,0,3,-9,8,3,.2);
+ const env=pm.fromScene(es,.04).texture;S.environment=env;pm.dispose();
+ S.traverse(o=>{if(o.isMesh&&o.material&&o.material.isMeshStandardMaterial&&o.material.envMapIntensity===1)o.material.envMapIntensity=.28});
+ // 배경: 위는 보랏빛 밤, 아래는 깊은 남색
+ S.background=ctex(4,256,(g,w,h)=>{const gr=g.createLinearGradient(0,0,0,h);gr.addColorStop(0,'#3a2f5c');gr.addColorStop(.55,'#22203f');gr.addColorStop(1,'#0f0e1f');g.fillStyle=gr;g.fillRect(0,0,w,h)});
+ S.fog=new T.Fog('#1d1a33',26,48);
+ // 접지 그림자: 바닥에 닿은 작은 물건 밑에 부드러운 그림자
+ const bt=ctex(128,128,(g,w,h)=>{const gr=g.createRadialGradient(64,64,6,64,64,64);gr.addColorStop(0,'rgba(45,25,12,.42)');gr.addColorStop(.6,'rgba(45,25,12,.16)');gr.addColorStop(1,'rgba(45,25,12,0)');g.fillStyle=gr;g.fillRect(0,0,w,h)});
+ const bm=new T.MeshBasicMaterial({map:bt,transparent:true,depthWrite:false,fog:false});const bb=new T.Box3();
+ S.children.slice().forEach(o=>{if(!(o.isMesh||o.isGroup)||o===fl)return;bb.setFromObject(o);const sx=bb.max.x-bb.min.x,sz=bb.max.z-bb.min.z,sy=bb.max.y-bb.min.y;
+  if(!isFinite(sx)||bb.min.y>.12||bb.min.y<-.05||sx>3.2||sz>3.2||sx<.15||sz<.15||sy<.12)return;
+  const p=new T.Mesh(new T.PlaneGeometry(sx*1.55,sz*1.55),bm);p.rotation.x=-Math.PI/2;p.position.set((bb.min.x+bb.max.x)/2,.012,(bb.min.z+bb.max.z)/2);p.renderOrder=1;S.add(p)});
+// 방 아래 바닥 받침: 섬이 허공에 뜬 느낌 대신 디오라마처럼
+ const gt=ctex(256,256,(g,w,h)=>{const gr=g.createRadialGradient(128,128,10,128,128,128);gr.addColorStop(0,'rgba(120,80,60,.55)');gr.addColorStop(.55,'rgba(70,50,70,.35)');gr.addColorStop(1,'rgba(30,26,55,0)');g.fillStyle=gr;g.fillRect(0,0,w,h)});
+ const gp=new T.Mesh(new T.PlaneGeometry(46,40),new T.MeshBasicMaterial({map:gt,transparent:true,depthWrite:false,fog:false}));gp.rotation.x=-Math.PI/2;gp.position.y=-.42;S.add(gp);
+}catch(e){console.warn('quality',e)}})();
 
 function konny(av,col,col2){const b=av.bod;
  /* 크로스 어깨끈 (뒤에서 X) */
