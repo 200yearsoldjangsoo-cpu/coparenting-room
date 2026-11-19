@@ -567,7 +567,7 @@ function openMenu(id){const o=AV[id];closeMenu();menuEl=document.createElement('
  const [b1,b2]=menuEl.querySelectorAll('button');b1.onclick=()=>{sendPat(id);closeMenu()};b2.onclick=()=>{closeMenu();openHome(id,o.st.nick)}}
 function sendPat(id,ty){const o=AV[id];if(!o)return;const fdg=o.st&&(o.st.st=='feed'||o.st.st=='bottle');me.patTo=id;me.patAt=Date.now();me.ex=Object.assign({},me.ex,{pt:ty||''});pushP();const L={cheer:['응원 ♥',' 응원 보냄'],toast:['짠 🍺','이랑 건배'],work:['화이팅 ✊',' 화이팅 보냄']}[ty]||(fdg?['토닥 ♥',' 토닥토닥 보냄']:['쓰담 ♥','에게 쓰담 보냄']);fx(id,L[0]);toast(o.st.nick+L[1])}
 let seenCheer={};function roomCheer(){me.ex=Object.assign({},me.ex,{cheerAt:Date.now()});pushP();fx(myId,'♡');toast('방 엄마들한테 말없이 응원 보냈어')}
-function feedersHTML(){const fs=others().filter(p=>p.state.room===me.room&&(p.state.st=='feed'||p.state.st=='bottle'));if(!fs.length)return'';
+function feedersHTML(){const fs=others().filter(p=>p.state.room===me.room&&(p.state.st=='feed'||p.state.st=='bottle'));if(!fs.length)return'<div style="font-size:13px;color:#8a7a68;margin:6px 0">지금 같이 수유 중인 엄마는 없어. 다른 엄마가 들어오면 여기서 토닥 보낼 수 있어</div>';
  return '<div style="margin:6px 0 2px;max-height:120px;overflow-y:auto">'+fs.map(p=>{const s=p.state,id=s.id||p.id;return '<div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin:3px 0"><span>'+esc(s.nick)+' <small style="color:#8a7a68">'+Math.max(1,Math.round((Date.now()-s.stAt)/60000))+'분</small></span><button class="patb" data-pat="'+esc(id)+'" style="margin:0">'+(me.kind=='preg'?'응원':'토닥')+'</button></div>'}).join('')+'</div>'}
 function bindPats(c){c.querySelectorAll('[data-pat]').forEach(b=>b.onclick=()=>{sendPat(b.dataset.pat,b.dataset.ty||(me.kind=='preg'?'cheer':''));b.textContent='♥';b.disabled=true})}
 function babyPat(){const a=AV[myId];if(a)a.a.tap=1.2;fx(myId,'토닥토닥');babyPats++;if(babyPats%5==0)toast('끄억~ 트림 나왔다')}
@@ -1339,10 +1339,10 @@ function judge(){const R=[],N=[];const w=Math.max(0,+DG.w||0),wt=DG.wt,emp=['emp
  R.push(['아동수당','9세 미만 월 10만 원 (2026년 기준, 비수도권 월 5천 원·인구감소지역 1만~2만 원 추가)','아동수당법 제4조 제1항·제6항, 부칙(2026.3.20) 제2조, 시행령 제2조 제2항']);
  R.push(['첫만남이용권',(DG.first?'첫째 200만 원':'둘째부터 300만 원')+' 바우처, 출생일부터 2년 안에 사용','아동수당법 시행령 제10조의3']);
  return [R,N]}
-function autoWT(){if(DG.wt)return DG.wt;return (me.ex&&me.ex.ms||'')=='home'||me.kind=='home'?'none':'emp'}
+function autoWT(){if(DG.wt)return DG.wt;const m=(me.ex&&me.ex.ms)||myMs||'';return m=='home'||me.kind=='home'?'none':m=='biz'?'self':'emp'}
 function diagHTML(){if(!DG.wt){DG.wt=autoWT();DG.auto=true}
  const wn=WT.find(x=>x[0]==DG.wt)[1];
- let h='<div class="box"><div class="t">내 맞춤 진단 <small>'+esc(mySt&&myMs?STAGES[mySt]+' · '+MSTATS[myMs]:KINDS[me.kind].label)+' 기준으로 미리 채웠어</small></div><div style="font-size:14px">지금 <b>'+esc(wn)+'</b>으로 봤어. <a id="dchg" style="color:#c27a00;text-decoration:underline">아니면 바꾸기</a></div><div class="kpick" id="dwt" style="display:none;margin-top:8px">'+WT.map(([k,n,s])=>'<button data-w="'+k+'" class="'+(DG.wt==k?'on':'')+'">'+n+'</button>').join('')+'</div>'+
+ let h='<div class="box"><div class="t">내 맞춤 진단 <small>눌러서 바로 바꿀 수 있어</small></div>'+'<label style="font-size:13px;color:#8a7a68">아기 상태</label><div class="kpick" id="dst">'+Object.entries(STAGES).map(([k,n])=>'<button data-v="'+k+'" class="'+(mySt==k?'on':'')+'">'+n+'</button>').join('')+'</div><label style="font-size:13px;color:#8a7a68">내 상태</label><div class="kpick" id="dms">'+Object.entries(MSTATS).map(([k,n])=>'<button data-v="'+k+'" class="'+(myMs==k?'on':'')+'">'+n+'</button>').join('')+'</div><div style="font-size:14px;margin-top:8px">일하는 형태는 <b>'+esc(wn)+'</b>으로 봤어. <button id="dchg" style="font:13px Jua,sans-serif;border:2px solid var(--ink);background:var(--y);border-radius:999px;padding:4px 12px;min-height:34px">일하는 형태 바꾸기</button></div><div class="kpick" id="dwt" style="display:none;margin-top:8px">'+WT.map(([k,n,s])=>'<button data-w="'+k+'" class="'+(DG.wt==k?'on':'')+'">'+n+'</button>').join('')+'</div>'+
   '<div class="lk" style="margin-top:8px"><a id="dfetch"><b>내 정보 자동으로 불러오기</b> · 간편인증 한 번이면 고용보험·건강보험 기록으로 비서가 채워줘 <small style="display:block;color:#8a7a68">베타 · 초대코드가 있는 엄마만</small></a></div></div>';
  if(!DG.wt)return h;
  const emp=['emp','day','fixed'].includes(DG.wt);
@@ -1358,6 +1358,8 @@ function diagHTML(){if(!DG.wt){DG.wt=autoWT();DG.auto=true}
  return h}
 function bindDiag(){const re=()=>{saveDG();const y=sb.scrollTop;openAide();sb.scrollTop=y};
  sb.querySelectorAll('#dwt button').forEach(b=>b.onclick=()=>{DG.wt=b.dataset.w;DG.auto=false;re()});
+ const setK=(st,ms)=>{mySt=st;myMs=ms;try{localStorage.setItem('cp_st',mySt);localStorage.setItem('cp_ms',myMs)}catch(e){}if(mySt&&myMs){me.kind=kindOf(mySt,myMs);me.ex=Object.assign({},me.ex,{ms:myMs,sg:mySt});try{localStorage.setItem('cp_kind',me.kind)}catch(e){}try{pushP()}catch(e){}}if(DG.auto){DG.wt={biz:'self',home:'none'}[myMs]||'emp'}DG.child=mySt=='todd'?1:0;re();toast('바꿨어! 진단도 새로 계산했어')};
+ sb.querySelectorAll('#dst button').forEach(b=>b.onclick=()=>setK(b.dataset.v,myMs));sb.querySelectorAll('#dms button').forEach(b=>b.onclick=()=>setK(mySt,b.dataset.v));
  const dc=$('dchg');if(dc)dc.onclick=()=>{const w=$('dwt');w.style.display=w.style.display=='none'?'flex':'none'};
  [['dins','ins'],['dbig','big']].forEach(([id,k])=>{const e=$(id);if(e)e.querySelectorAll('button').forEach(b=>b.onclick=()=>{DG[k]=b.dataset.v;re()})});
  const ch=$('dch');if(ch)ch.querySelectorAll('button').forEach(b=>b.onclick=()=>{DG.child=+b.dataset.v;re()});
