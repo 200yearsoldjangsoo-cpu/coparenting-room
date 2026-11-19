@@ -12,6 +12,7 @@
 <meta property="og:image" content="https://coparenting-room.vercel.app/og.jpg">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
+<script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.5/kakao.min.js" crossorigin="anonymous" defer></script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -1110,7 +1111,7 @@ function snsNorm(t,v){v=(v||'').trim();if(!v)return'';
  const m=v.match(/blog\.naver\.com\/([A-Za-z0-9_-]+)/i);if(m)return m[1];if(/^https?:\/\//i.test(v)||/\.[a-z]{2,}(\/|$)/i.test(v))return(/^https?:/i.test(v)?v:'https://'+v).slice(0,200);return v.replace(/^@/,'').replace(/\s/g,'').slice(0,40)}
 function snsLink(t,v){if(!v)return'';if(/^https?:/i.test(v))return v;if(t=='ig')return'https://www.instagram.com/'+encodeURIComponent(v)+'/';if(t=='yt')return'https://www.youtube.com/'+(v[0]=='@'?v:'@'+v);return'https://blog.naver.com/'+encodeURIComponent(v)}
 function snsShow(t,v){if(!v)return'-';if(/^https?:/i.test(v))return v.replace(/^https?:\/\/(www\.|m\.)?/i,'').slice(0,24);return t=='ig'?'@'+v:v}
-const KAKAO_JS='';/* 카카오 개발자 JavaScript 키 받으면 넣기 */
+const KAKAO_JS='e8bff713e3ff247a98cdb61dd91a2883';/* 카카오 디벨로퍼스 앱 1658218 · JS SDK 도메인 coparenting-room.vercel.app *//* 카카오 개발자 JavaScript 키 받으면 넣기 */
 const CP_LINK='';/* 쿠팡 파트너스 링크 받으면 여기에 넣기 */
 let vTab=0;
 function openVoice(){openSheet('엄마의 소리');
