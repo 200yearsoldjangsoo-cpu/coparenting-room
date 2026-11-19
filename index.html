@@ -225,7 +225,7 @@ if(mySt&&myMs){me.kind=kindOf(mySt,myMs);me.ex=Object.assign({},me.ex,{ms:myMs,s
 $('nick').textContent=(me.kind?'지난번 선택 그대로야 · 바뀌었으면 다시 눌러 · ':'별명은 자동으로 붙어 · ')+me.nick;
 function others(){return peers.filter(p=>!p.you&&p.state&&p.state.nick)}
 function roomCounts(){const c={};others().forEach(p=>{const r=p.state.room;if(r)c[r]=(c[r]||0)+1});return c}
-const MAXR=2;
+const MAXR=2,TO_VISIT='00000000-0000-0000-0000-00000000a001',TO_MEAL='00000000-0000-0000-0000-00000000a002';
 function pickRoom(){const c=roomCounts();for(let r=1;r<=MAXR;r++)if((c[r]||0)<CAP)return r;return 0}
 function queuePos(){const w=others().filter(p=>p.state.wait&&p.state.ws<me.ws).length;return w+1}
 function renderGate(){const c=roomCounts(),tot=others().length+1;$('gtot').textContent=tot+'명';
@@ -528,7 +528,7 @@ function updateTop(){const c=roomCounts();$('tot').textContent=(others().length+
 function enterFx(r,back){const o=document.createElement('div');o.id='efx';const n=(roomCounts()[r]||0)+1;
  o.innerHTML=back?'<div class="e1">엄마! 바람 쐬고<br>다시 왔구나?</div><div class="e2">육아하러 다시 가자~</div>':'<div class="e0">🏠</div><div class="e1">온라인 공동육아방으로<br>입장 중입니다</div><div class="e2">'+r+'호방 · 지금 엄마 '+n+'명<span class="dots"><i>.</i><i>.</i><i>.</i></span></div>';
  document.body.appendChild(o);setTimeout(()=>o.classList.add('out'),back?1700:2100);setTimeout(()=>o.remove(),back?2300:2700)}
-function enter(r){let back=0;try{back=localStorage.getItem('cp_entered');localStorage.setItem('cp_entered','1')}catch(e){}enterFx(r,back);{let k=0;const lv=()=>{try{if(hasSB()&&uid){sbPost('visit','r'+r+'|'+(me.kind||'')+'|'+(back?'back':'new'));return}}catch(e){}if(++k<10)setTimeout(lv,1500)};lv()}me.room=r;me.wait=0;const p=clampXZ((Math.random()-.5)*6,3+Math.random()*2.5);camF.set(p[0],0,p[1]);me.x=p[0];me.z=p[1];
+function enter(r){let back=0;try{back=localStorage.getItem('cp_entered');localStorage.setItem('cp_entered','1')}catch(e){}enterFx(r,back);{let k=0;const lv=()=>{try{if(hasSB()&&uid){sbPost(TO_VISIT,'r'+r+'|'+(me.kind||'')+'|'+(back?'back':'new'));return}}catch(e){}if(++k<10)setTimeout(lv,1500)};lv()}me.room=r;me.wait=0;const p=clampXZ((Math.random()-.5)*6,3+Math.random()*2.5);camF.set(p[0],0,p[1]);me.x=p[0];me.z=p[1];
  $('gate').style.display='none';ensure(myId,meState(),true);pushP();onPeers(peers);renderCard();
  toast(r+'호방에 들어왔어 · 바닥을 탭하면 걸어가');loadHome().then(dawnStamp);loadCeil();weekStamp();loadMeals();feedLabel()}
 const meState=()=>({nick:me.nick,kind:me.kind,x:me.x,z:me.z,st:me.st,stAt:me.stAt,carrier:me.carrier,cc:me.cc,steps:me.steps,zone:me.zone,sit:me.sit,note:me.note,noteAt:me.noteAt,ex:me.ex,fm:me.fm});
@@ -675,7 +675,7 @@ function renderPreg(c,here){const w=pregWeek(),due=LS.get('cp_due',''),st=LS.get
 /* ---------- 유아식 이후: 오늘의 유아식 · 등원 준비 ---------- */
 const FOODS=['🍚 밥','🥣 국','🥦 브로콜리','🥕 당근','🐟 생선','🥚 계란','🍗 닭고기','🥩 소고기','🍠 고구마','🧀 치즈','🍌 바나나','🍝 국수','🥟 만두','🍙 주먹밥','🥛 우유','🍓 딸기'];
 let mealBoard=[];
-async function loadMeals(){if(hasSB()){mealBoard=(await sbNotes('meal')).map(n=>({nick:n.nick,m:String(n.text).split(',').map(Number).filter(i=>FOODS[i]),at:n.at}));return}if(!DB)return;try{const q=await DB.collection('notes').get();const L=[];(q.docs||q||[]).forEach(d=>{const v=d.data?d.data():d;(v.items||[]).forEach(it=>{if((it.to||'')=='meal'&&Date.now()-it.at<864e5)L.push({nick:v.nick,m:it.m||[],at:it.at})})});mealBoard=L.sort((a,b)=>b.at-a.at).slice(0,20)}catch(e){}}
+async function loadMeals(){if(hasSB()){mealBoard=(await sbNotes(TO_MEAL)).map(n=>({nick:n.nick,m:String(n.text).split(',').map(Number).filter(i=>FOODS[i]),at:n.at}));return}if(!DB)return;try{const q=await DB.collection('notes').get();const L=[];(q.docs||q||[]).forEach(d=>{const v=d.data?d.data():d;(v.items||[]).forEach(it=>{if((it.to||'')=='meal'&&Date.now()-it.at<864e5)L.push({nick:v.nick,m:it.m||[],at:it.at})})});mealBoard=L.sort((a,b)=>b.at-a.at).slice(0,20)}catch(e){}}
 const FE=i=>(FOODS[i]||'').split(' ')[0],FN=i=>(FOODS[i]||'').split(' ').slice(1).join(' ');
 function mealMyHTML(m){const day=ymd(new Date()),rx=LS.get('cp_mealrx',{}),r=rx[day]||{},first=LS.get('cp_first',{});
  const pos=[[50,22],[78,50],[50,78],[22,50]];
@@ -703,7 +703,7 @@ function openMeal(){openSheet('오늘의 유아식');const mine=LS.get('cp_meal'
   bindMealMy(draw);
   sb.querySelectorAll('[data-copy]').forEach(e=>e.onclick=()=>{const fav=LS.get('cp_mealfav',[]);fav.push(e.dataset.copy);LS.set('cp_mealfav',fav.slice(-30));toast('내일 메뉴로 찜했어')});
   $('mok').onclick=async()=>{if(!pick.length){toast('하나는 골라줘');return}LS.set('cp_meal',{day:ymd(new Date()),m:pick});const hi=LS.get('cp_mealhist',{});hi[ymd(new Date())]=pick.slice();const ks=Object.keys(hi).sort().slice(-60);const h2={};ks.forEach(k=>h2[k]=hi[k]);LS.set('cp_mealhist',h2);me.ex=Object.assign({},me.ex,{meal:pick,mealAt:Date.now()});pushP();toast('🍽 식탁에 올렸어');draw();sb.scrollTop=0;renderCard();
-   if(hasSB())await sbPost('meal',pick.join(','));else if(DB&&uid){try{const ref=DB.doc('notes/'+uid);let cur={};try{const d=await ref.get();cur=d&&d.exists!==false?(d.data?d.data():d):{}}catch(e){}const items=(cur.items||[]).filter(x=>x.to!='meal').slice(-40);items.push({to:'meal',m:pick,at:Date.now()});await ref.set({nick:me.nick,items})}catch(e){}}}};draw()}
+   if(hasSB())await sbPost(TO_MEAL,pick.join(','));else if(DB&&uid){try{const ref=DB.doc('notes/'+uid);let cur={};try{const d=await ref.get();cur=d&&d.exists!==false?(d.data?d.data():d):{}}catch(e){}const items=(cur.items||[]).filter(x=>x.to!='meal').slice(-40);items.push({to:'meal',m:pick,at:Date.now()});await ref.set({nick:me.nick,items})}catch(e){}}}};draw()}
 const SCHOOL=['기저귀','여벌옷','물병·빨대컵','수저통','손수건','낮잠이불','알림장 확인','투약의뢰서(필요하면)'];
 function homeStamp(key,list){const h0=Object.assign({nick:me.nick},myHome||{});h0[key]=list.slice(-120);myHome=h0;
  (async()=>{try{if(typeof putHome=='function'&&typeof SB!='undefined'&&SB&&uid)await putHome(h0);else if(DB&&uid)await DB.doc('homes/'+uid).set(h0)}catch(e){}})()}
