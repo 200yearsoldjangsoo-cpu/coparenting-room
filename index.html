@@ -801,7 +801,28 @@ function regionHTML(){const sg=SGG[RGN]||[];
  '<div style="margin:10px 0 4px;font-size:14px"><b>'+RGN+' 전체</b> · '+esc(SIDO_INFO[RGN]||'')+'</div>'+
  (sg.length?'<div class="calc"><table><tr><th>구·군</th><th>출산지원금</th></tr>'+sg.map(r=>'<tr><td>'+r[0]+'</td><td style="text-align:left">'+r[1]+(r[2]?'<br><a href="tel:'+r[2]+'" style="color:#c27a00">'+r[2]+'</a>':'')+'</td></tr>').join('')+'</table></div>':'')+
  '<p class="note">'+(RGN=='울산'?'출처 · 울산광역시청 복지 2026 출산지원금 (출생일 1개월 전부터 울산 거주)':'출처 · 복지로·보건복지부 자료를 모은 맘자람 정리(2026.11.7). 여기 없는 구·군은 공공데이터 연결하면 바로 채워져.')+'</p></div>'}
-function bindRegion(){$('rsd').onchange=e=>{RGN=e.target.value;try{localStorage.setItem('cp_rg',RGN)}catch(x){}openAide()}}
+
+/* 정부24 실시간 지원금 (공공데이터포털 '대한민국 공공서비스 정보' gov24 v3 · public-data 함수 경유) */
+const SIDOF={서울:'서울특별시',부산:'부산광역시',대구:'대구광역시',인천:'인천광역시',광주:'광주광역시',대전:'대전광역시',울산:'울산광역시',세종:'세종특별자치시',경기:'경기도',강원:'강원특별자치도',충북:'충청북도',충남:'충청남도',전북:'전북특별자치도',전남:'전라남도',경북:'경상북도',경남:'경상남도',제주:'제주특별자치도'};
+const G24={};let G24F='';
+async function g24Load(rg){if(G24[rg])return G24[rg];const PD='https://hiqekjtjtycoisjgyrrh.supabase.co/functions/v1/public-data';
+ const q=async f=>{const r=await fetch(PD,{method:'POST',headers:{'Content-Type':'application/json',apikey:BBKEY,Authorization:'Bearer '+BBKEY},body:JSON.stringify({host:0,path:'/gov24/v3/serviceList',params:{page:1,perPage:300,'cond[소관기관명::LIKE]':SIDOF[rg]||rg,'cond[서비스분야::LIKE]':f}})});const j=await r.json();return j.data||[]};
+ const [a,b]=await Promise.all([q('임신'),q('보육')]);
+ const kw=/출산|임신|임산부|산모|신생아|영유아|아동|양육|육아|보육|어린이집|난임|다자녀|아이/;
+ const all=a.concat(b.filter(x=>kw.test(x['서비스명']+x['지원대상'])));const seen={};
+ G24[rg]=all.filter(x=>!seen[x['서비스ID']]&&(seen[x['서비스ID']]=1)).map(x=>({id:x['서비스ID'],n:x['서비스명'].replace(/^\+/,''),o:x['소관기관명'],c:(x['지원내용']||'').replace(/\s+/g,' ').replace(/^○\s*/,'').slice(0,90),u:x['상세조회URL'],t:x['전화문의']||'',f:x['서비스분야'],d:(x['수정일시']||'').slice(0,10)}));
+ return G24[rg]}
+function g24HTML(rg){const L=G24[rg];if(!L)return '<div class="box" id="g24"><div class="t">정부24 실시간 <small>불러오는 중…</small></div></div>';
+ const orgs=[...new Set(L.map(x=>x.o))].sort((a,b)=>a.length-b.length||a.localeCompare(b));const f=orgs.includes(G24F)?G24F:'';const ls=L.filter(x=>!f||x.o==f);
+ return '<div class="box" id="g24"><div class="t">정부24 실시간 · '+rg+' 엄마 지원 <small>'+L.length+'개</small></div>'+
+  '<select id="g24o"><option value="">전체 ('+L.length+')</option>'+orgs.map(o=>'<option value="'+esc(o)+'"'+(o==f?' selected':'')+'>'+esc(o.replace((SIDOF[rg]||'')+' ','')||o)+' ('+L.filter(x=>x.o==o).length+')</option>').join('')+'</select>'+
+  '<div style="max-height:420px;overflow-y:auto;margin-top:8px">'+ls.map(x=>'<div style="padding:9px 0;border-bottom:1px solid #f0e2cf;font-size:14px"><b>'+esc(x.n)+'</b> <small style="color:#8a7a68">'+esc(x.o.replace((SIDOF[rg]||'')+' ','')||x.o)+'</small><br><span style="color:#5a4c3e">'+esc(x.c)+(x.c.length>=90?'…':'')+'</span><br><a href="'+esc(x.u)+'" target="_blank" rel="noopener" style="color:#c27a00;font-size:13px">정부24에서 자세히 · 신청</a></div>').join('')+'</div>'+
+  '<p class="note">출처 · 행정안전부 대한민국 공공서비스(혜택) 정보, 공공데이터포털 오픈API(정부24). 금액·대상은 바뀔 수 있으니 신청 전 정부24 상세에서 확인해.</p></div>'}
+
+function bindRegion(){$('rsd').onchange=e=>{RGN=e.target.value;G24F='';try{localStorage.setItem('cp_rg',RGN)}catch(x){}openAide()};
+ const host=$('rsd').closest('.box');host.insertAdjacentHTML('afterend',g24HTML(RGN));
+ const bindG=()=>{const s=$('g24o');if(s)s.onchange=e=>{G24F=e.target.value;$('g24').outerHTML=g24HTML(RGN);bindG()}};bindG();
+ if(!G24[RGN]){const rg=RGN;g24Load(rg).then(()=>{const b=$('g24');if(b&&RGN==rg){b.outerHTML=g24HTML(rg);bindG()}}).catch(()=>{const b=$('g24');if(b)b.innerHTML='<div class="t">정부24 실시간</div><p class="note">지금 불러오지 못했어. 잠시 뒤 다시 열어줘.</p>'})}}
 /* 예방접종·영유아검진 (질병관리청 표준예방접종일정, 국민건강보험공단 영유아 건강검진 8차) */
 const VAX=[[0,0,'B형간염 1차'],[0,1,'BCG(결핵) · 생후 4주 안'],[1,1,'B형간염 2차'],[2,2,'DTaP·IPV·Hib·폐렴구균·로타 1차'],[4,4,'DTaP·IPV·Hib·폐렴구균·로타 2차'],[6,6,'DTaP·IPV·Hib·폐렴구균 3차 · B형간염 3차 · 로타 3차(5가만)'],[6,6,'인플루엔자 (6개월부터 매년, 가을)'],[12,15,'Hib·폐렴구균 4차 · MMR 1차 · 수두'],[12,23,'A형간염 1·2차 · 일본뇌염 1·2차'],[15,18,'DTaP 4차'],[24,35,'일본뇌염 3차(불활성화) 또는 2차(생백신)'],[48,72,'DTaP 5차 · IPV 4차 · MMR 2차'],[72,83,'일본뇌염 4차(불활성화)']];
 const CHK=[[0.5,1.15,'영유아검진 1차 (생후 14~35일)'],[4,6,'영유아검진 2차'],[9,12,'영유아검진 3차'],[18,24,'영유아검진 4차 · 구강검진 1차(18~29개월)'],[30,36,'영유아검진 5차 · 구강검진 2차(30~41개월)'],[42,48,'영유아검진 6차 · 구강검진 3차(42~53개월)'],[54,60,'영유아검진 7차 · 구강검진 4차(54~65개월)'],[66,71,'영유아검진 8차']];
