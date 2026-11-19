@@ -771,7 +771,7 @@ function sleepSoundsHTML(){return '<div style="display:flex;gap:4px;flex-wrap:wr
 function bindSleepSounds(){const bb=$('bathb');if(bb)bb.onclick=()=>openBath();const l=$('lb');if(l)l.onclick=()=>{LUL?lulStop():lulStart();renderCard()};const w=$('wnb');if(w)w.onclick=()=>{WN?wnStop():wnStart();renderCard()};const ec=$('enc');if(ec)ec.onclick=()=>{engStop();openEng()};const en=$('enb');if(en)en.onclick=()=>{if(ENG)engStop();else{const c=LS.get('cp_eng',{});c.k?engSong(c.k):c.id?engPlay(c.id):openEng()}renderCard()}}
 /* ---------- 아기 씻기기 v4 (러베 탑투토 워시 · 애니메이션 연출) ---------- */
 const BATH_PROD={brand:'러베 ruuve',name:'히알루론 탑투토 워시',img:'img/ruuve_ttw.png',url:'https://ruuve.kr/product/%EB%9F%AC%EB%B2%A0-%ED%9E%88%EC%95%8C%EB%A3%A8%EB%A1%A0-%ED%83%91%ED%88%AC%ED%86%A0-%EC%9B%8C%EC%8B%9C-400ml/4114/category/55/display/1/',
- feats:[['🧴','머리부터 발끝까지','샴푸·바디 한 통으로'],['💧','약산성 젤 타입','점증제 줄인 퓨어 제형'],['🌿','식물유래 저자극','민감한 아기 피부용'],['🏅','더마테스트 Excellent','2024 피부 테스트']],
+ feats:[['🧴','머리부터 발끝까지','샴푸·바디 한 통으로'],['💧','약산성 젤 타입','점증제 줄인 퓨어 제형'],['🌿','식물유래 저자극','민감한 아기 피부용'],['🏅','더마테스트 Excellent','안자극 대체시험도 완료']],
  disc:'러베로부터 제품을 제공받아 직접 써보고 소개해요'};
 let BT=null;const NS='http://www.w3.org/2000/svg';
 function sv_(tag,a,par){const e=document.createElementNS(NS,tag);for(const k in a)e.setAttribute(k,a[k]);(par||$('bsv')).appendChild(e);return e}
@@ -801,10 +801,12 @@ function openBath(){if($('bath'))return;closeSheet();const pst=me.st;me.st='bath
 #bath .go:active,#bath .go2:active{transform:translateY(2px)}
 #bath .disc{font-size:11px;color:#a0907c;margin-top:8px;text-align:center}
 #bath .hint{position:absolute;left:50%;top:21%;transform:translate(-50%,-50%);z-index:2;pointer-events:none;font:19px Jua,sans-serif;background:#fff;border:2px solid #2B2118;border-radius:99px;padding:10px 18px;box-shadow:0 4px 14px rgba(0,0,0,.1);transition:opacity .3s;white-space:nowrap}
-#bath .say{position:absolute;left:50%;top:15%;z-index:2;pointer-events:none;max-width:78%;background:#fff;border:2px solid #2B2118;border-radius:22px;padding:11px 16px;font:16px/1.45 'Gowun Dodum',sans-serif;font-weight:700;text-align:center;box-shadow:0 6px 0 rgba(43,33,24,.12);transform:translate(-50%,0) scale(0);transform-origin:50% 120%;transition:transform .45s cubic-bezier(.3,1.6,.5,1)}
-#bath .say.on{transform:translate(-50%,0) scale(1)}
-#bath .say:after{content:'';position:absolute;left:50%;bottom:-9px;width:14px;height:14px;background:#fff;border-right:2px solid #2B2118;border-bottom:2px solid #2B2118;transform:translateX(-50%) rotate(45deg)}
-#bath .say small{display:block;font:12px Jua,sans-serif;color:#b08a5a;margin-bottom:2px}
+#bath .say{position:absolute;left:50%;top:12.5%;z-index:2;pointer-events:none;max-width:82vw;background:#fff;border-radius:30px;padding:13px 20px 12px;font:16px/1.5 'Gowun Dodum',sans-serif;font-weight:700;color:#3a2a1a;text-align:center;white-space:nowrap;box-shadow:0 10px 28px rgba(90,64,32,.16);transform:translate(-50%,8px) scale(.6);opacity:0;transform-origin:50% 130%;transition:transform .5s cubic-bezier(.3,1.5,.5,1),opacity .25s}
+#bath .say.on{transform:translate(-50%,0) scale(1);opacity:1;animation:bsay 3s ease-in-out .5s infinite}
+@keyframes bsay{0%,100%{transform:translate(-50%,0) scale(1)}50%{transform:translate(-50%,-4px) scale(1.01)}}
+#bath .say:before,#bath .say:after{content:'';position:absolute;background:#fff;border-radius:50%;box-shadow:0 4px 10px rgba(90,64,32,.12)}
+#bath .say:before{width:16px;height:16px;left:46%;bottom:-20px}#bath .say:after{width:9px;height:9px;left:43%;bottom:-34px}
+#bath .say .fn{display:block;margin-top:4px;font:11px 'Gowun Dodum',sans-serif;color:#a8977f;font-weight:400}
 #bath .flash{position:absolute;inset:0;background:#fff;z-index:2;pointer-events:none;opacity:0;transition:opacity .35s}
 @keyframes bbob{50%{transform:translateY(-5px)}}
 </style>
@@ -985,14 +987,17 @@ async function bathPlay(){if(!BT)return;bathHint(null);BT.phase='play';BT.mood='
  // 물 위 거품이 퍼져나감(거품 목욕)
  for(let i=0;i<34;i++){setTimeout(()=>{if(!BT)return;const x=60+Math.random()*240,r=5+Math.random()*10;const el=sv_('circle',{cx:x,cy:BT.wy,r:0,fill:'url(#gbub)'},BT.foamG);springTo(0,r,v=>el.setAttribute('r',Math.max(0,v).toFixed(2)),null,220,11);BT.foam.push({x,vx:(Math.random()-.5)*8,r,el})},i*45)}
  bathMsg('거품 목욕 놀이 중','오리를 톡 누르거나 물을 찰박 쳐봐',`<button class="go" id="bnext">이제 헹굴래</button>`);
- const SAY=['이거 물 같아!<br>콧물보다 맑고 물보다 살짝 쫀쫀해','어? 눈에 들어갔는데<br>하나도 안 따가워','순해서 내 피부도 편안해','향이 없어서 코도 편해<br>향료를 안 넣었대'];let si=0;const say=()=>{const s=$('bsay');if(!s||!BT||BT.phase!='play')return;s.classList.remove('on');setTimeout(()=>{if(!BT||BT.phase!='play')return;s.innerHTML='<small>아기 속마음</small>'+SAY[si%SAY.length];s.classList.add('on');si++},250)};say();BT.sayT=setInterval(say,3200);$('bnext').onclick=()=>{BT.playEnd=1};
+ const SAY=[['이거 물 같아!|콧물보다 맑고|물보다는 살짝 쫀쫀해',''],['눈가 씻을 때도|하나도 안 따가웠어','안자극 대체시험 완료 제품'],['순해서|내 피부도 편안해','피부 일차자극 인체적용시험 완료'],['향 냄새가 안 나서|코도 편해','전성분에 향료 없음']];let si=0;
+ const say=()=>{const s=$('bsay');if(!s||!BT||BT.phase!='play')return;s.classList.remove('on');setTimeout(()=>{if(!BT||BT.phase!='play')return;const [tx,fn]=SAY[si%SAY.length];si++;const ch=[...tx];s.innerHTML='<span></span>'+(fn?'<span class="fn" style="opacity:0;transition:opacity .4s">'+fn+'</span>':'');const sp=s.firstChild;
+  // 글자 크기 미리 잡아두고(투명) 한 글자씩 보이게 → 말풍선 크기가 흔들리지 않음
+  sp.innerHTML=ch.map(c=>c=='|'?'<br>':'<i style="font-style:normal;opacity:0;transition:opacity .12s">'+c+'</i>').join('');s.classList.add('on');const is=[...sp.querySelectorAll('i')];let k=0;const ty=setInterval(()=>{if(!BT||k>=is.length){clearInterval(ty);const f=s.querySelector('.fn');if(f)f.style.opacity=1;return}is[k++].style.opacity=1},45)},300)};say();BT.sayT=setInterval(say,3600);$('bnext').onclick=()=>{BT.playEnd=1};
  // 아기 혼자 놀기: 양손 번갈아 첨벙, 오리 잡으러 기울기
  let tt=0,beat=0;BT.onTick=dt=>{tt+=dt;const c=tt%1.6;const L=c<.8?Math.sin(c/.8*Math.PI)*.7:0,R=c>=.8?Math.sin((c-.8)/.8*Math.PI)*.7:0;BT.arm=[L,R];
   const ph=Math.floor(tt/.8);if(ph!==beat){beat=ph;const x=ph%2?236:124;const wy=waveY(x);bathRipple(x,2.4);bathCrown(x,wy,6,1);if(BT.dk&&Math.abs(BT.dk.x-x)<50)bathSqueak()}
   BT.lean=BT.dk?Math.max(-6,Math.min(6,(BT.dk.x-180)*.05)):0;
   if(Math.random()<dt*1.5)BT.parts.push({k:'steam',x:60+Math.random()*240,y:BT.wy-4,vx:(Math.random()-.5)*10,vy:-20,g:-5,r:3+Math.random()*4,life:2.2});
 };
- const t0=performance.now();while(BT&&!BT.playEnd&&performance.now()-t0<13500)await bwait(100);if(!BT)return;clearInterval(BT.sayT);$('bsay').classList.remove('on');
+ const t0=performance.now();while(BT&&!BT.playEnd&&performance.now()-t0<15000)await bwait(100);if(!BT)return;clearInterval(BT.sayT);$('bsay').classList.remove('on');
  BT.onTick=null;BT.arm=[0,0];BT.lean=0;bathRinse()}
 async function bathRinse(){if(!BT)return;BT.phase='auto';bathHide();BT.mood='calm';
  // 샤워기: 화면 밖에서 스프링으로 들어옴
