@@ -11,18 +11,32 @@ h1{font-size:17px;margin:0 0 4px}p{margin:0;font-size:13px;color:#666;line-heigh
 #st{margin:0 16px 8px;font-size:13px;color:#444;min-height:18px}
 #bar{margin:0 16px 10px;height:4px;background:#e5e0d8;border-radius:2px;overflow:hidden}#bar i{display:block;height:100%;width:0;background:#222;transition:width .5s}
 #wrap{margin:0 16px;border-radius:14px;overflow:hidden;background:#fff;border:1px solid #e5e0d8;display:none}
-iframe{width:100%;height:72vh;border:0;display:block}
+#form{margin:12px 16px 0;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#form label{font-size:12px;color:#555;display:flex;flex-direction:column;gap:4px}
+#form input,#form select{font-size:16px;padding:10px;border:1px solid #d8d2c8;border-radius:10px;background:#fff}
+#big{margin:6px 16px 10px;padding:0;font-size:17px;font-weight:700;line-height:1.5;text-align:center}
+#tog{margin:0 16px 10px;background:none;border:0;color:#777;font-size:12px;text-decoration:underline}
+#sc{width:1024px;height:800px;transform-origin:0 0}
+iframe{width:1024px;height:800px;border:0;display:block}
 #out{margin:12px 16px 30px;display:none}
 table{width:100%;border-collapse:collapse;background:#fff;font-size:13px}
 th,td{border-top:1px solid #ddd;border-bottom:1px solid #ddd;padding:7px 6px;text-align:left}th{background:#e9e9e9}
 pre{white-space:pre-wrap;font-size:11px;background:#fff;padding:10px;border-radius:8px;max-height:300px;overflow:auto}
 </style></head><body>
 <header><h1>건강보험 자격 불러오기 (테스트)</h1>
-<p>아래 화면은 찬이가 띄운 건강보험공단 진짜 사이트예요. 간편인증으로 로그인만 해 주시면 찬이가 자격득실 내역을 읽어 와요. 입력한 값은 찬이가 받지 않아요. 제한 시간 약 2분.</p></header>
-<button id="go">건강보험 열기</button>
+<p>이름·생년월일·휴대폰만 적어 주시면 찬이가 건강보험공단 간편인증을 대신 요청해요. 폰에 온 알림에서 <b>승인</b>만 눌러 주세요. 저장은 이 폰에만 돼요.</p></header>
+<div id="form">
+<label>이름<input id="nm" autocomplete="name"></label>
+<label>생년월일 8자리<input id="bd" inputmode="numeric" maxlength="8" placeholder="19940201"></label>
+<label>휴대폰<input id="ph" inputmode="numeric" maxlength="11" placeholder="01012345678"></label>
+<label>인증 앱<select id="pv"><option>네이버</option><option>카카오톡</option><option>토스</option><option>통신사PASS</option><option>국민인증서</option><option>삼성패스</option></select></label>
+</div>
+<button id="go">간편인증 요청하기</button>
 <div id="bar"><i></i></div>
 <div id="st"></div>
-<div id="wrap"><iframe id="lv" allow="clipboard-read; clipboard-write"></iframe></div>
+<div id="big"></div>
+<button id="tog" style="display:none">찬이가 보는 화면 보기</button>
+<div id="wrap"><div id="sc"><iframe id="lv" allow="clipboard-read; clipboard-write"></iframe></div></div>
 <div id="out"></div>
 <script>
 const FN="https://hiqekjtjtycoisjgyrrh.supabase.co/functions/v1/bb-session";
@@ -36,23 +50,31 @@ function parse(text){
   let m;while((m=re.exec(text))){rows.push({kind:m[1],line:m[0].replace(/\s+/g,' ').trim(),get:m[2],lose:m[3]||''})}
   return rows;
 }
+const LS='cp_nhis_test';try{const v=JSON.parse(localStorage.getItem(LS)||'{}');['nm','bd','ph','pv'].forEach(k=>{if(v[k])$('#'+k).value=v[k]})}catch(e){}
+function fit(){const w=$('#wrap').clientWidth||innerWidth-32;const k=w/1024;$('#sc').style.transform='scale('+k+')';$('#wrap').style.height=(800*k)+'px'}
+$('#tog').onclick=()=>{const on=$('#wrap').style.display!=='block';$('#wrap').style.display=on?'block':'none';$('#tog').textContent=on?'화면 숨기기':'찬이가 보는 화면 보기';if(on)fit()};
+function big(t){$('#big').textContent=t}
 $('#go').onclick=async()=>{
-  $('#go').disabled=true;st('클라우드 브라우저 여는 중…');bar(5);
+  const nm=$('#nm').value.trim(),bd=$('#bd').value.replace(/\D/g,''),ph=$('#ph').value.replace(/\D/g,''),pv=$('#pv').value;
+  if(!nm||bd.length!==8||ph.length<10){st('이름, 생년월일 8자리, 휴대폰을 확인해 주세요');return}
+  try{localStorage.setItem(LS,JSON.stringify({nm,bd,ph,pv}))}catch(e){}
+  $('#go').disabled=true;big('');$('#out').style.display='none';st('찬이가 건강보험공단 여는 중…');bar(5);
   try{
     const r=await fetch(FN,{method:'POST',headers:{'Content-Type':'application/json',apikey:KEY,Authorization:'Bearer '+KEY},
-      body:JSON.stringify({action:'flow',site:'nhis',w:Math.min(430,innerWidth-32),h:Math.round(innerHeight*.72)})});
+      body:JSON.stringify({action:'flow',site:'nhis',name:nm,birth:bd,phone:ph,prov:pv})});
     const rd=r.body.getReader();const dec=new TextDecoder();let buf='';
     for(;;){const {value,done}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true});
       let i;while((i=buf.indexOf('\n\n'))>=0){const line=buf.slice(0,i);buf=buf.slice(i+2);
         if(!line.startsWith('data: '))continue;const e=JSON.parse(line.slice(6));
-        if(e.step==='live'){$('#lv').src=e.live.replace('&debug=true','')+'&navbar=false';$('#wrap').style.display='block';st('간편인증으로 로그인해 주세요');bar(15)}
-        else if(e.step==='wait'){st('로그인 기다리는 중 · '+e.s+'초 (130초까지)');bar(15+Math.min(60,e.s/2))}
-        else if(e.step==='login'){st('로그인 확인! 자격득실 읽는 중…');bar(85)}
-        else if(e.step==='data'){bar(100);st('불러오기 완료');$('#wrap').style.display='none';
+        if(e.step==='live'){$('#lv').src=e.live.replace('&debug=true','')+'&navbar=false';$('#tog').style.display='block';st('이름·생년월일·휴대폰 넣고 인증 요청하는 중…');bar(12)}
+        else if(e.step==='requested'){if(e.r==='ok'&&!e.msg){big('📱 폰에 온 '+pv+' 알림에서 승인을 눌러 주세요');st('승인하면 찬이가 알아서 다음으로 넘어가요');bar(20)}else{big('자동 입력이 막혔어요');st('사유: '+(e.msg||e.r)+' · 아래 화면 보기로 직접 해 주세요')}}
+        else if(e.step==='wait'){st('승인 기다리는 중 · '+e.s+'초 (130초까지)');bar(20+Math.min(60,e.s/2))}
+        else if(e.step==='login'){big('로그인 완료!');st('자격득실 읽는 중…');bar(85)}
+        else if(e.step==='data'){bar(100);big('불러오기 완료');st('');$('#wrap').style.display='none';$('#tog').style.display='none';
           const rows=parse(e.text);const o=$('#out');o.style.display='block';
           o.innerHTML=(rows.length?'<table><tr><th>구분</th><th>취득일</th><th>상실일</th></tr>'+rows.map(x=>`<tr><td>${x.kind}</td><td>${x.get}</td><td>${x.lose||'-'}</td></tr>`).join('')+'</table>':'<p>표를 못 찾았어요. 원문:</p>')+'<details><summary style="font-size:12px;margin-top:8px">읽어온 원문 보기</summary><pre></pre></details>';
           o.querySelector('pre').textContent=e.text}
-        else if(e.step==='timeout'){st('시간이 지나 닫았어요. 다시 눌러 주세요.');$('#wrap').style.display='none'}
+        else if(e.step==='timeout'){big('');st('승인이 안 와서 닫았어요. 다시 눌러 주세요.');$('#wrap').style.display='none';$('#tog').style.display='none'}
         else if(e.step==='error'){st('오류: '+e.error)}
         else if(e.step==='end'){$('#go').disabled=false;$('#go').textContent='다시 하기'}
       }}
