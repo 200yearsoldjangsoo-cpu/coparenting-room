@@ -231,6 +231,10 @@ function renderGate(){const c=roomCounts(),tot=others().length+1;$('gtot').textC
  $('queue').innerHTML=(c[1]||0)>=CAP&&me.kind?'<button id="q1">1호방은 대기 줄 서기</button>':'';
  const q1=$('q1');if(q1)q1.onclick=()=>{me.wait=1;me.ws=Date.now();pushP();renderGate()}}
 $('go').onclick=()=>{if(me.kind)enter(pickRoom())};
+/* 한 번 들어온 엄마는 다음부터 시기 고르기 없이 바로 입장 (바꾸려면 미니홈피에서) */
+let autoDone=false;function tryAuto(){if(autoDone||me.room||!me.kind)return;let ok=0;try{ok=localStorage.getItem('cp_entered')}catch(e){}if(!ok)return;autoDone=true;enter(pickRoom())}
+try{if(localStorage.getItem('cp_entered')&&me.kind){$('go').textContent='지난번 그대로 들어가는 중…';$('go').disabled=true}}catch(e){}
+setTimeout(tryAuto,2200);
 
 /* ---------- 3D ---------- */
 const T=THREE;
@@ -507,7 +511,7 @@ function onPeers(list){peers=list||[];
 function updateTop(){const c=roomCounts();$('tot').textContent=(others().length+1)+'명';const nIn=(c[me.room]||0)+1,wq=others().filter(p=>p.state.wait).length;$('rm').textContent=me.room?me.room+'호방 '+nIn+'/'+CAP+(wq?' · 대기 '+wq+'명':nIn>=CAP*.8?' · '+Math.max(0,CAP-nIn)+'자리 남음':''):'입장 전'}
 
 /* ---------- 입장 ---------- */
-function enter(r){me.room=r;me.wait=0;const p=clampXZ((Math.random()-.5)*6,3+Math.random()*2.5);camF.set(p[0],0,p[1]);me.x=p[0];me.z=p[1];
+function enter(r){try{localStorage.setItem('cp_entered','1')}catch(e){}me.room=r;me.wait=0;const p=clampXZ((Math.random()-.5)*6,3+Math.random()*2.5);camF.set(p[0],0,p[1]);me.x=p[0];me.z=p[1];
  $('gate').style.display='none';ensure(myId,meState(),true);pushP();onPeers(peers);renderCard();
  toast(r+'호방에 들어왔어 · 바닥을 탭하면 걸어가');loadHome().then(dawnStamp);loadCeil();weekStamp();loadMeals();feedLabel()}
 const meState=()=>({nick:me.nick,kind:me.kind,x:me.x,z:me.z,st:me.st,stAt:me.stAt,carrier:me.carrier,cc:me.cc,steps:me.steps,zone:me.zone,sit:me.sit,note:me.note,noteAt:me.noteAt,ex:me.ex,fm:me.fm});
