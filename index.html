@@ -853,7 +853,7 @@ function autoWT(){if(DG.wt)return DG.wt;return (me.ex&&me.ex.ms||'')=='home'||me
 function diagHTML(){if(!DG.wt){DG.wt=autoWT();DG.auto=true}
  const wn=WT.find(x=>x[0]==DG.wt)[1];
  let h='<div class="box"><div class="t">내 맞춤 진단 <small>'+esc(mySt&&myMs?STAGES[mySt]+' · '+MSTATS[myMs]:KINDS[me.kind].label)+' 기준으로 미리 채웠어</small></div><div style="font-size:14px">지금 <b>'+esc(wn)+'</b>으로 봤어. <a id="dchg" style="color:#c27a00;text-decoration:underline">아니면 바꾸기</a></div><div class="kpick" id="dwt" style="display:none;margin-top:8px">'+WT.map(([k,n,s])=>'<button data-w="'+k+'" class="'+(DG.wt==k?'on':'')+'">'+n+'</button>').join('')+'</div>'+
-  '<div class="lk" style="margin-top:8px"><a id="dfetch"><b>내 정보 자동으로 불러오기</b> · 간편인증 한 번이면 고용보험·건강보험 기록으로 비서가 채워줘 <small style="display:block;color:#8a7a68">정식 오픈 준비 중</small></a></div></div>';
+  '<div class="lk" style="margin-top:8px"><a id="dfetch"><b>내 정보 자동으로 불러오기</b> · 간편인증 한 번이면 고용보험·건강보험 기록으로 비서가 채워줘 <small style="display:block;color:#8a7a68">베타 · 초대코드가 있는 엄마만</small></a></div></div>';
  if(!DG.wt)return h;
  const emp=['emp','day','fixed'].includes(DG.wt);
  h+='<div class="box calc"><div class="t">조금만 더</div>'+
@@ -874,8 +874,72 @@ function bindDiag(){const re=()=>{saveDG();const y=sb.scrollTop;openAide();sb.sc
  const fi=$('dfi');if(fi)fi.querySelectorAll('button').forEach(b=>b.onclick=()=>{DG.first=b.dataset.v=='1';re()});
  const upd=()=>{const r=$('dres');if(!r)return;const tmp=document.createElement('div');tmp.innerHTML=diagHTML();const nr=tmp.querySelector('#dres');if(nr){r.innerHTML=nr.innerHTML;const q=$('dreq');if(q)q.onclick=openReq}saveDG()};
  if($('dw'))$('dw').oninput=e=>{DG.w=+e.target.value||0;upd()};if($('dm'))$('dm').oninput=e=>{DG.m=Math.max(1,Math.min(18,+e.target.value||1));upd()};if($('dsix'))$('dsix').onchange=e=>{DG.six=e.target.checked;upd()};
- $('dfetch').onclick=()=>{const a=$('dfetch');if(a.dataset.o)return;a.dataset.o=1;a.insertAdjacentHTML('afterend','<div class="box" style="margin-top:6px;background:#fff7d6">간편인증으로 고용24·건강보험 기록을 불러오는 기능은 지금 만드는 중이야. 열리면 버튼 한 번에 채워질 거야. 그 전까지는 위 칸이 시기에 맞춰 자동으로 채워져 있으니 다른 것만 바꿔줘.</div>')};
+ $('dfetch').onclick=openFetch;
  const q=$('dreq');if(q)q.onclick=openReq}
+
+/* ── 내 정보 불러오기 (베타): 간편인증 → 건보 자격득실 · 홈택스 사업자 ── */
+const BBFN='https://hiqekjtjtycoisjgyrrh.supabase.co/functions/v1/bb-session',BBKEY='sb_publishable_E025XGPHRwWuKHm-Z7DL4A_YARBUw2l';
+let FX={};try{FX=JSON.parse(localStorage.getItem('cp_fetch')||'{}')}catch(e){}
+let FR={nhis:null,ht:null};try{FR=JSON.parse(localStorage.getItem('cp_fetch_r')||'{"nhis":null,"ht":null}')}catch(e){}
+window.__fxSet=r=>{FR=r;fxSave();openFetch()};
+function fxSave(){try{localStorage.setItem('cp_fetch',JSON.stringify(FX));localStorage.setItem('cp_fetch_r',JSON.stringify(FR))}catch(e){}}
+function nhParse(text){const KIND=/^(직장가입자|직장피부양자|지역세대주|지역세대원|지역가입자|임의계속가입자|의료급여수급권자|피부양자)$/,D=/^\d{4}[.,\-]\d{2}[.,\-]\d{2}$/;
+ const L=text.split(/\n/).map(x=>x.trim()).filter(Boolean);let k=L.indexOf('자격득실내역');if(k<0)k=0;const rows=[];
+ for(let i=k;i<L.length;i++){if(!KIND.test(L[i]))continue;const r={kind:L[i],place:'',get:'',lose:''};let n=i+1;
+  if(L[n]&&L[n]!=='취득일'&&!KIND.test(L[n])){r.place=L[n];n++}
+  for(let m=n;m<Math.min(n+6,L.length);m++){if(m>n&&KIND.test(L[m]))break;if(L[m]==='취득일'&&!r.get&&D.test(L[m+1]||''))r.get=L[m+1].replace(/[,\-]/g,'.');if(L[m]==='상실일'){r.lose=D.test(L[m+1]||'')?L[m+1].replace(/[,\-]/g,'.'):'';break}}
+  if(r.get)rows.push(r)}return rows}
+function htParse(text){const L=text.split(/\n/).map(x=>x.trim()).filter(Boolean),out=[],seen={};
+ L.forEach((l,i)=>{const m=l.match(/\d{3}-\d{2}-\d{5}/);if(m&&!seen[m[0]]){seen[m[0]]=1;const nm=[L[i+1],L[i-1],l.replace(m[0],'').trim()].find(x=>x&&!/\d{3}-\d{2}-\d{5}/.test(x)&&!/^[\d\s\/]+$/.test(x)&&x.length<30)||'';out.push({no:m[0],name:nm})}});return out}
+function fxVerdict(){const nh=FR.nhis,ht=FR.ht;if(!nh&&!ht)return null;
+ const now=nh&&nh.length?(nh.find(r=>!r.lose)||nh[0]):null,biz=ht?ht.length:null;
+ let wt=null,t='';
+ if(now&&now.kind==='직장가입자'){wt='emp';t='지금 직장에 다니는 근로자로 봤어 ('+esc(now.place)+', '+now.get+'부터)'+(biz?' · 사업자 등록도 있어':'')}
+ else if(biz){wt='self';t='지금은 직장가입이 아니고 사업자 등록이 있어서 자영업자로 봤어'}
+ else if(now&&biz===0){wt='none';t='지금 직장가입도 사업자 등록도 없어'}
+ else if(now)t='지금 건강보험 자격: '+now.kind+(now.get?' ('+now.get+'부터)':'')+' · 홈택스도 불러오면 정확해져';
+ else t='홈택스 사업자 '+biz+'개 · 건강보험도 불러오면 정확해져';
+ return {wt,t,now,work:nh?nh.filter(r=>r.kind==='직장가입자').length:null}}
+function openFetch(){openSheet('내 정보 불러오기 · 베타');const v=fxVerdict();
+ sb.innerHTML='<div class="box"><div class="t">간편인증만 하면 비서가 불러와</div><ol style="font-size:14px;line-height:1.7;padding-left:18px;margin:6px 0"><li>이름·생년월일·휴대폰 적기</li><li>폰에 온 인증 알림에서 승인</li><li>건강보험 자격 → 홈택스 사업자 순서로 불러옴</li></ol></div>'+
+ '<div class="box calc"><label>초대코드</label><input id="fxc" value="'+esc(FX.c||'')+'" placeholder="베타 초대코드">'+
+ '<div class="row"><div><label>이름</label><input id="fxn" value="'+esc(FX.n||'')+'" autocomplete="name"></div><div><label>생년월일 8자리</label><input id="fxb" inputmode="numeric" maxlength="8" value="'+esc(FX.b||'')+'" placeholder="19940201"></div></div>'+
+ '<div class="row"><div><label>휴대폰</label><input id="fxp" inputmode="numeric" maxlength="11" value="'+esc(FX.p||'')+'" placeholder="01012345678"></div><div><label>인증 앱</label><select id="fxa" style="width:100%;font-size:16px;padding:10px;border-radius:10px;border:1px solid #e5dccd;background:#fff">'+['네이버','카카오톡','토스','통신사PASS','국민인증서','삼성패스'].map(a=>'<option'+(FX.a==a?' selected':'')+'>'+a+'</option>').join('')+'</select></div></div>'+
+ '<details style="margin-top:8px;font-size:12.5px;color:#6b5d4f;line-height:1.6"><summary style="font-weight:700;color:#2B2118">개인정보 수집·이용 동의 (필수) 펼쳐보기</summary>'+
+ '<p>· 수집 항목: 이름, 생년월일, 휴대폰번호<br>· 이용 목적: 국민건강보험공단·국세청 홈택스 간편인증 요청, 자격득실·사업자 정보 조회 결과를 이 화면에 보여주기<br>· 보유 기간: 저장하지 않아. 조회가 끝나면 클라우드 브라우저를 바로 닫고, 입력값과 결과는 이 폰에만 남아(지우기 버튼으로 삭제)<br>· 처리 위탁·국외 이전: 조회는 클라우드 브라우저 Browserbase(미국 회사, 싱가포르 서버)와 Supabase를 거쳐 실행돼<br>· 각 사이트 간편인증 화면의 약관 동의는 비서가 대신 체크해. 사이트 약관은 원 사이트에서 볼 수 있어<br>· 동의하지 않을 수 있고, 그러면 이 기능만 못 쓰고 다른 기능은 그대로 쓸 수 있어</p></details>'+
+ '<label style="display:flex;gap:8px;align-items:center;font-size:14px;color:var(--ink);margin-top:6px"><input type="checkbox" id="fxok" style="width:22px;min-height:22px" '+(FX.ok?'checked':'')+'> 위 내용에 동의해</label>'+
+ '<button class="btn k" id="fxgo" style="width:100%;margin-top:10px">'+(FR.nhis?'다시 불러오기':'건강보험부터 불러오기')+'</button>'+
+ '<div id="fxst" style="margin-top:10px;font-size:14px;font-weight:700;text-align:center"></div><div id="fxsub" style="font-size:12px;color:#8a7a68;text-align:center"></div></div>'+
+ '<div id="fxres">'+fxResHTML()+'</div>'+
+ '<button class="btn" id="fxdel" style="width:100%;background:#eee;color:#2B2118;margin-top:6px">이 폰에 저장된 내 정보 지우기</button>';
+ $('fxgo').onclick=()=>fxRun(FR.nhis&&!FR.ht?'hometax':'nhis');bindFxRes();
+ $('fxdel').onclick=()=>{FX={};FR={nhis:null,ht:null};try{localStorage.removeItem('cp_fetch');localStorage.removeItem('cp_fetch_r')}catch(e){}toast('지웠어');openFetch()}}
+function fxResHTML(){let h='';const v=fxVerdict();
+ if(v)h+='<div class="box law"><div class="t">비서 판단</div><div style="font-size:14px">'+v.t+'</div>'+(v.wt?'<button class="btn k" id="fxuse" style="width:100%;margin-top:8px">이 결과로 맞춤 진단 보기</button>':'')+'</div>';
+ if(FR.nhis)h+='<div class="box"><div class="t">건강보험 자격득실 <small>'+FR.nhis.length+'건</small></div><div style="max-height:220px;overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12.5px"><tr style="background:#eee"><th style="text-align:left;padding:4px">구분</th><th style="text-align:left;padding:4px">사업장</th><th style="padding:4px">취득</th><th style="padding:4px">상실</th></tr>'+FR.nhis.map(r=>'<tr style="border-top:1px solid #eee"><td style="padding:4px">'+r.kind+'</td><td style="padding:4px">'+esc(r.place||'-')+'</td><td style="padding:4px">'+r.get+'</td><td style="padding:4px">'+(r.lose||'-')+'</td></tr>').join('')+'</table></div></div>';
+ if(FR.ht)h+='<div class="box"><div class="t">홈택스 사업자 <small>'+FR.ht.length+'개</small></div>'+(FR.ht.length?FR.ht.map(x=>'<div style="font-size:14px">'+x.no+' · '+esc(x.name)+'</div>').join(''):'<div style="font-size:14px">등록된 사업자 없음</div>')+'</div>';
+ if(FR.nhis&&!FR.ht)h+='<button class="btn k" id="fxht" style="width:100%">홈택스도 불러오기 (승인 한 번 더)</button>';
+ return h}
+function bindFxRes(){const u=$('fxuse');if(u)u.onclick=()=>{const v=fxVerdict();DG.wt=v.wt;DG.auto=false;saveDG();openAide()};const h=$('fxht');if(h)h.onclick=()=>fxRun('hometax')}
+async function fxRun(site){const g=id=>($(id).value||'').trim();FX={c:g('fxc'),n:g('fxn'),b:g('fxb').replace(/\D/g,''),p:g('fxp').replace(/\D/g,''),a:$('fxa').value,ok:$('fxok').checked};
+ const st=t=>{$('fxst').textContent=t},sub=t=>{$('fxsub').textContent=t};
+ if(!FX.c){st('초대코드를 넣어줘');return}if(!FX.n||FX.b.length!==8||FX.p.length<10){st('이름·생년월일 8자리·휴대폰을 확인해줘');return}if(!FX.ok){st('동의에 체크해줘');return}
+ fxSave();$('fxgo').disabled=true;const hb=$('fxht');if(hb)hb.disabled=true;const nm=site=='nhis'?'건강보험':'홈택스';st(nm+' 여는 중…');sub('');
+ try{const r=await fetch(BBFN,{method:'POST',headers:{'Content-Type':'application/json',apikey:BBKEY,Authorization:'Bearer '+BBKEY},body:JSON.stringify({action:'flow',site,code:FX.c,name:FX.n,birth:FX.b,phone:FX.p,prov:FX.a})});
+  if(!r.ok){const j=await r.json().catch(()=>({}));st(j.error||('오류 '+r.status));$('fxgo').disabled=false;return}
+  const rd=r.body.getReader(),dec=new TextDecoder();let buf='',stop=0;
+  for(;;){const {value,done}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true});let i;
+   while((i=buf.indexOf('\n\n'))>=0){const line=buf.slice(0,i);buf=buf.slice(i+2);if(!line.startsWith('data: '))continue;const e=JSON.parse(line.slice(6));
+    if(e.step==='live')st('이름·생년월일·휴대폰 넣고 인증 요청하는 중…');
+    else if(e.step==='requested'){if(e.r==='ok'){st('📱 폰에 온 '+FX.a+' 알림에서 승인 눌러줘');sub('승인하면 비서가 알아서 넘어가')}else{stop=1;st('자동 입력이 막혔어. 잠시 뒤 다시 해줘');sub(String(e.r))}}
+    else if(e.step==='wait'&&!stop)sub('승인 기다리는 중 · '+e.s+'초 (2분까지)');
+    else if(e.step==='login'){st('로그인 됐어! '+nm+' 읽는 중…');sub('')}
+    else if(e.step==='data'){if(site=='nhis')FR.nhis=nhParse(e.text||'');else FR.ht=htParse(e.text||'');fxSave();st(nm+' 불러오기 완료');$('fxres').innerHTML=fxResHTML();bindFxRes()}
+    else if(e.step==='timeout'){st('승인이 안 와서 닫았어. 다시 눌러줘');sub('')}
+    else if(e.step==='error'){st('오류가 났어. 다시 해줘');sub(e.error)}}}
+ }catch(err){st('연결이 끊겼어. 다시 해줘');sub(err.message)}
+ $('fxgo').disabled=false;$('fxgo').textContent='다시 불러오기'}
+
 function openReq(){const [R]=judge();openSheet('바로 신청하기');
  sb.innerHTML='<div class="box"><div class="t">간편인증 한 번이면 끝</div><ol style="font-size:14px;line-height:1.7;padding-left:18px;margin:6px 0"><li>간편인증</li><li>비서가 신청서 채움</li><li>확인하고 제출</li></ol><small style="color:#8a7a68;display:block">내 이름으로 신청돼. 인증 정보는 저장 안 해.</small></div>'+
  '<div class="box" style="background:#fff7d6"><div class="t">지금 만드는 중이야</div><div style="font-size:13px">간편인증 자동 신청은 곧 열려. 열리면 바로 알려줄게.</div>'+
