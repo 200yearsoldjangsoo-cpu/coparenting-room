@@ -191,7 +191,7 @@ a.kakao{display:block;margin-top:10px;text-align:center;font:15px Jua,sans-serif
   <div class="who"><b>지금 나는?</b><div class="opt" id="kinds"></div><div class="note" id="nick"></div></div>
   <button class="go" id="go" disabled>시기를 골라줘</button>
   <div class="q" id="queue"></div>
-  <div class="gnote" id="gnote">방마다 30명까지 같이 있을 수 있어. 꽉 차면 다음 방이 열리거나 대기 줄을 설 수 있어.</div>
+  <div class="gnote" id="gnote">방은 2개, 한 방에 30명씩 60명까지 같이 있을 수 있어. 둘 다 꽉 차면 대기 줄을 서고 자리 나면 순서대로 들어가.</div>
  </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -225,23 +225,28 @@ if(mySt&&myMs){me.kind=kindOf(mySt,myMs);me.ex=Object.assign({},me.ex,{ms:myMs,s
 $('nick').textContent=(me.kind?'지난번 선택 그대로야 · 바뀌었으면 다시 눌러 · ':'별명은 자동으로 붙어 · ')+me.nick;
 function others(){return peers.filter(p=>!p.you&&p.state&&p.state.nick)}
 function roomCounts(){const c={};others().forEach(p=>{const r=p.state.room;if(r)c[r]=(c[r]||0)+1});return c}
-function pickRoom(){const c=roomCounts();for(let r=1;r<100;r++)if((c[r]||0)<CAP)return r;return 1}
+const MAXR=2;
+function pickRoom(){const c=roomCounts();for(let r=1;r<=MAXR;r++)if((c[r]||0)<CAP)return r;return 0}
 function queuePos(){const w=others().filter(p=>p.state.wait&&p.state.ws<me.ws).length;return w+1}
 function renderGate(){const c=roomCounts(),tot=others().length+1;$('gtot').textContent=tot+'명';
- const maxR=Math.max(1,...Object.keys(c).map(Number));const rows=[];
- for(let r=1;r<=maxR+1&&r<=6;r++){const n=c[r]||0;if(r>maxR&&n==0&&rows.length>=1&&(c[r-1]||0)<CAP)break;
-  const wait=r==1?others().filter(p=>p.state.wait).length:0;
-  rows.push('<div class="r"><div style="flex:1"><b>'+r+'호방</b><small>'+n+'/'+CAP+(wait?' · 대기 '+wait+'명':'')+'</small><div class="bar"><i style="width:'+Math.min(100,n/CAP*100)+'%"></i></div></div><span class="st '+(n>=CAP?'full">꽉 참':'open">'+(CAP-n)+'자리')+'</span></div>')}
+ const wq=others().filter(p=>p.state.wait).length+(me.wait?1:0);const rows=[];
+ for(let r=1;r<=MAXR;r++){const n=c[r]||0;
+  rows.push('<div class="r"><div style="flex:1"><b>'+r+'호방</b><small>'+n+'/'+CAP+'</small><div class="bar"><i style="width:'+Math.min(100,n/CAP*100)+'%"></i></div></div><span class="st '+(n>=CAP?'full">꽉 참':'open">'+(CAP-n)+'자리')+'</span></div>')}
+ if(wq)rows.push('<div class="r"><div style="flex:1"><b>대기 줄</b><small>'+wq+'명 기다리는 중 · 자리 나면 순서대로 들어가</small></div></div>');
  $('rooms').innerHTML=rows.join('');
  const r=pickRoom(),go=$('go');
- if(me.wait){go.disabled=true;go.textContent='1호방 대기 중 · '+queuePos()+'번째';$('queue').innerHTML='<button id="unq">대기 그만하고 '+r+'호방 들어가기</button>';$('unq').onclick=()=>{me.wait=0;pushP();renderGate()};
-  if((c[1]||0)<CAP&&queuePos()==1){me.wait=0;enter(1)}return}
- go.disabled=!me.kind;go.textContent=me.kind?r+'호방 입장하기':'시기를 골라줘';
- $('queue').innerHTML=(c[1]||0)>=CAP&&me.kind?'<button id="q1">1호방은 대기 줄 서기</button>':'';
- const q1=$('q1');if(q1)q1.onclick=()=>{me.wait=1;me.ws=Date.now();pushP();renderGate()}}
-$('go').onclick=()=>{if(me.kind)enter(pickRoom())};
+ if(me.wait){go.disabled=true;go.textContent='대기 중 · '+queuePos()+'번째';$('queue').innerHTML='<div style="font-size:13px;color:#8a7a68;margin:6px 0">이 화면을 켜두면 자리 났을 때 진동·소리로 알려주고 바로 들어가</div><button id="unq">대기 그만하기</button>';$('unq').onclick=()=>{me.wait=0;pushP();renderGate()};
+  if(r&&queuePos()==1){me.wait=0;seatAlert();enter(r)}return}
+ if(!me.kind){go.disabled=true;go.textContent='시기를 골라줘';$('queue').innerHTML='';return}
+ if(r){go.disabled=false;go.textContent=r+'호방 입장하기';$('queue').innerHTML='';return}
+ go.disabled=true;go.textContent='방 2개 모두 꽉 찼어 ('+(MAXR*CAP)+'/'+(MAXR*CAP)+')';
+ $('queue').innerHTML='<button id="q1">대기 줄 서기'+(wq?' · 지금 '+wq+'명 대기':'')+'</button>';
+ $('q1').onclick=()=>{me.wait=1;me.ws=Date.now();pushP();try{Notification&&Notification.permission=='default'&&Notification.requestPermission()}catch(e){}renderGate()}}
+function seatAlert(){try{navigator.vibrate&&navigator.vibrate([300,120,300])}catch(e){}try{const a=new (window.AudioContext||window.webkitAudioContext)(),o=a.createOscillator(),g=a.createGain();o.frequency.value=880;g.gain.value=.15;o.connect(g);g.connect(a.destination);o.start();o.stop(a.currentTime+.35)}catch(e){}
+ try{if(document.hidden&&window.Notification&&Notification.permission=='granted')new Notification('공동육아방 자리 났어!',{body:'지금 바로 들어가는 중이야'})}catch(e){}}
+$('go').onclick=()=>{const r=pickRoom();if(me.kind&&r)enter(r)};
 /* 한 번 들어온 엄마는 다음부터 시기 고르기 없이 바로 입장 (바꾸려면 미니홈피에서) */
-let autoDone=false;function tryAuto(){if(autoDone||me.room||!me.kind)return;let ok=0;try{ok=localStorage.getItem('cp_entered')}catch(e){}if(!ok)return;autoDone=true;enter(pickRoom())}
+let autoDone=false;function tryAuto(){if(autoDone||me.room||!me.kind)return;let ok=0;try{ok=localStorage.getItem('cp_entered')}catch(e){}if(!ok)return;const r=pickRoom();if(!r){autoDone=true;renderGate();return}autoDone=true;enter(r)}
 try{if(localStorage.getItem('cp_entered')&&me.kind){$('go').textContent='지난번 그대로 들어가는 중…';$('go').disabled=true}}catch(e){}
 setTimeout(tryAuto,2200);
 
