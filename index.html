@@ -1105,14 +1105,29 @@ function snsNorm(t,v){v=(v||'').trim();if(!v)return'';
  const m=v.match(/blog\.naver\.com\/([A-Za-z0-9_-]+)/i);if(m)return m[1];if(/^https?:\/\//i.test(v)||/\.[a-z]{2,}(\/|$)/i.test(v))return(/^https?:/i.test(v)?v:'https://'+v).slice(0,200);return v.replace(/^@/,'').replace(/\s/g,'').slice(0,40)}
 function snsLink(t,v){if(!v)return'';if(/^https?:/i.test(v))return v;if(t=='ig')return'https://www.instagram.com/'+encodeURIComponent(v)+'/';if(t=='yt')return'https://www.youtube.com/'+(v[0]=='@'?v:'@'+v);return'https://blog.naver.com/'+encodeURIComponent(v)}
 function snsShow(t,v){if(!v)return'-';if(/^https?:/i.test(v))return v.replace(/^https?:\/\/(www\.|m\.)?/i,'').slice(0,24);return t=='ig'?'@'+v:v}
-function openVoice(){openSheet('엄마의 소리');const cats=['이런 기능 있으면 좋겠어','이건 고쳐줘','그냥 하고 싶은 말'];let cat=0;
- sb.innerHTML='<div class="box"><div class="t">이 방을 같이 만들어줘</div><div style="font-size:13px;color:#8a7a68">불편한 거, 있었으면 하는 거 다 적어줘. 노무사 엄마가 하나씩 다 읽어.</div><div id="vc" style="display:flex;flex-wrap:wrap;gap:6px;margin:10px 0">'+cats.map((c,i)=>'<button data-v="'+i+'" class="vchip'+(i?'':' on')+'">'+c+'</button>').join('')+'</div><textarea id="vt" maxlength="280" placeholder="예) 밤에 수유 알람 기능 있으면 좋겠어" style="min-height:110px"></textarea><button class="btn" id="vs" style="width:100%;margin-top:8px">보내기</button></div>';
- sb.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{cat=+b.dataset.v;sb.querySelectorAll('[data-v]').forEach(x=>x.classList.toggle('on',x===b))});
- $('vs').onclick=async()=>{const v=$('vt').value.trim();if(v.length<2){toast('한 줄만 적어줘');return}
-  if(typeof SB=='undefined'||!SB||!uid){toast('아직 연결 중이야. 잠시 뒤 다시');return}
-  const r=await SB.from('requests').insert({uid:uid,name:(me.nick||'익명').slice(0,20),contact:'-',memo:('[엄마의 소리 · '+cats[cat]+'] '+v).slice(0,300),diag:{type:'voice',cat:cats[cat],kind:me.kind||''}});
-  if(r.error){toast('전송이 안 됐어. 잠시 뒤 다시');return}
-  sb.innerHTML='<div class="box"><div class="t">고마워!</div>꼭 읽고 반영할게. 바뀌면 이 방에서 제일 먼저 보여줄게.</div>'}}
+const CP_LINK='';/* 쿠팡 파트너스 링크 받으면 여기에 넣기 */
+let vTab=0;
+function openVoice(){openSheet('엄마의 소리');
+ const tabs='<div class="atabs">'+['개선이 필요한 점','앱 운영 알림'].map((n,i)=>'<button data-vt="'+i+'" class="'+(vTab==i?'on':'')+'">'+n+'</button>').join('')+'</div>';
+ if(vTab==0){
+  sb.innerHTML=tabs+'<div class="box"><div class="t">개선이 필요한 점</div><div style="font-size:14px;color:#6a5a48;line-height:1.6;margin-top:2px">이런 기능이 있었으면 좋겠거나 고쳐야 할 부분이 있으면 편하게 말씀해 주세요. 노무사 엄마가 하나씩 다 읽고 지속적으로 업데이트할게요.</div><textarea id="vt" maxlength="280" placeholder="예) 밤에 수유 알람 기능이 있으면 좋겠어요" style="min-height:120px;margin-top:10px"></textarea><button class="btn" id="vs" style="width:100%;margin-top:8px">보내기</button></div>';
+  $('vs').onclick=async()=>{const v=$('vt').value.trim();if(v.length<2){toast('한 줄만 적어주세요');return}
+   if(typeof SB=='undefined'||!SB||!uid){toast('아직 연결 중이에요. 잠시 뒤 다시');return}
+   const r=await SB.from('requests').insert({uid:uid,name:(me.nick||'익명').slice(0,20),contact:'-',memo:('[엄마의 소리 · 개선] '+v).slice(0,300),diag:{type:'voice',cat:'개선',kind:me.kind||''}});
+   if(r.error){toast('전송이 안 됐어요. 잠시 뒤 다시');return}
+   sb.innerHTML=tabs+'<div class="box"><div class="t">고마워요!</div><div style="font-size:14px;line-height:1.6">꼭 읽고 반영할게요. 바뀌면 이 방에서 제일 먼저 보여드릴게요.</div></div>';bindVTabs()}}
+ else{
+  sb.innerHTML=tabs+
+  '<div class="box" style="text-align:center;background:linear-gradient(#fffaf0,#fff3d6)"><div style="font-size:40px;line-height:1">🍼</div><div class="t" style="font-size:19px;margin-top:4px;justify-content:center">분유값 보태기</div>'+
+  '<div style="font-size:14px;color:#5a4a3a;line-height:1.65;margin-top:6px">보태주신 마음, 감사히 받을게요.<br>이 방은 엄마들이 육아와 일에만 집중할 수 있게 노무사 엄마가 직접 만들고 있어요. 서버를 유지하고 엄마 한 분 한 분께 맞는 서비스를 드리려면 유지비가 들어요.</div>'+
+  (CP_LINK?'<a href="'+CP_LINK+'" target="_blank" rel="noopener sponsored" class="btn" style="display:block;margin-top:12px;text-decoration:none;color:#2B2118">🛒 쿠팡에서 육아용품 사고 분유값 보태기</a>':'<div class="btn" style="margin-top:12px;opacity:.55">🛒 쿠팡 링크 준비 중이에요</div>')+
+  '<div style="font-size:12.5px;color:#8a7a68;margin-top:8px;line-height:1.5">어차피 살 기저귀·물티슈를 이 링크로 사시면 가격은 그대로, 앱 운영에 작은 보탬이 돼요.</div>'+
+  '<div style="font-size:11px;color:#a8977f;margin-top:8px">이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</div></div>'+
+  '<div class="box" style="text-align:center"><div style="font-size:34px;line-height:1">🎁</div><div class="t" style="margin-top:4px;justify-content:center">육아용품 협찬 환영해요</div>'+
+  '<div style="font-size:14px;color:#5a4a3a;line-height:1.65;margin-top:4px">엄마들이 직접 써보고 솔직하게 이야기하는 방이에요. 엄마들에게 꼭 필요한 육아용품이라면 협찬·제휴 언제든 환영합니다.</div>'+
+  '<a href="http://pf.kakao.com/_xmxmxjxeX" target="_blank" rel="noopener" class="btn" style="display:block;margin-top:10px;text-decoration:none;color:#2B2118;background:#FEE500">💬 카톡으로 협찬 문의</a></div>'}
+ bindVTabs()}
+function bindVTabs(){sb.querySelectorAll('[data-vt]').forEach(b=>b.onclick=()=>{vTab=+b.dataset.vt;openVoice()})}
 setTimeout(()=>{const v=$('voice');if(v)v.onclick=openVoice},0);
 function openSheet(t){$('stt').textContent=t;sheet.classList.add('on')}
 function closeSheet(){sheet.classList.remove('on');if(miniR){miniR.dispose();miniR=null}}
