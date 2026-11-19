@@ -495,7 +495,7 @@ function ensure(id,st,isMe){let o=AV[id];const sig=(st.carrier?'none':AK(st.kind
  if(!o){const a=makeAv(st);a.root.position.set(st.x||0,0,st.z||0);S.add(a.root);const e=document.createElement('div');e.className='name'+(isMe?' me':'');app.insertBefore(e,$('card'));o=AV[id]={a,e,x:st.x||0,z:st.z||0,tx:st.x||0,tz:st.z||0};}
  o.st=st;o.tx=st.x;o.tz=st.z;return o}
 function drop(id){const o=AV[id];if(!o)return;S.remove(o.a.root);o.e.remove();delete AV[id]}
-function label(st){const ex=st.ex||{};const k=ex.sg&&ex.ms?STAGES[ex.sg]+' · '+MSTATS[ex.ms]:KINDS[st.kind]?KINDS[st.kind].label:'';const s=st.zone&&st.zone[0]=='b'?'수유실 이용 중':st.st=='bottle'?'분유 먹이는 중 '+Math.max(1,Math.round((Date.now()-st.stAt)/60000))+'분':st.fm>0&&st.fm<6?['','분유 바로 가는 중','🔥 물 끓이는 중','🥄 분유 3스푼 넣는 중','💧 물 붓는 중','🍼 쉐킷쉐킷 흔드는 중'][st.fm]:st.zone=='formula'?'분유 바에 있어':st.st=='work'?'💻 집중 중 '+Math.max(1,Math.round((Date.now()-st.stAt)/60000))+'분':st.sit?'앉아서 쉬는 중':st.st=='work'?'💻 집중 중 '+Math.max(1,Math.round((Date.now()-st.stAt)/60000))+'분':st.st=='yukte'?'🍺 육퇴 성공':st.st=='walk'?'🤰 태교 산책 중':st.st=='feed'?'수유 중 '+Math.max(1,Math.round((Date.now()-st.stAt)/60000))+'분':st.st=='dunga'?(st.steps>=100?'아기 꿀잠 zZ':'재우는 중 '+Math.floor(st.steps/34+1)+'바퀴'):k;return esc(st.nick)+' <i>'+esc(s+(st.kind=='preg'&&st.ex&&st.ex.wk&&s==k?' '+st.ex.wk+'주':''))+'</i>'}
+function label(st){const ex=st.ex||{};const k=ex.sg&&ex.ms?STAGES[ex.sg]+' · '+MSTATS[ex.ms]:KINDS[st.kind]?KINDS[st.kind].label:'';const s=st.zone&&st.zone[0]=='b'?'수유실 이용 중':st.st=='bottle'?'분유 먹이는 중 '+Math.max(1,Math.round((Date.now()-st.stAt)/60000))+'분':st.fm>0&&st.fm<6?['','분유 바로 가는 중','🔥 물 끓이는 중','🥄 분유 3스푼 넣는 중','💧 물 붓는 중','🍼 쉐킷쉐킷 흔드는 중'][st.fm]:st.zone=='formula'?'분유 바에 있어':st.st=='work'?'💻 집중 중 '+Math.max(1,Math.round((Date.now()-st.stAt)/60000))+'분':st.sit?'앉아서 쉬는 중':st.st=='work'?'💻 집중 중 '+Math.max(1,Math.round((Date.now()-st.stAt)/60000))+'분':st.st=='bath'?'🛁 아기 목욕시키는 중':st.st=='yukte'?'🍺 육퇴 성공':st.st=='walk'?'🤰 태교 산책 중':st.st=='feed'?'수유 중 '+Math.max(1,Math.round((Date.now()-st.stAt)/60000))+'분':st.st=='dunga'?(st.steps>=100?'아기 꿀잠 zZ':'재우는 중 '+Math.floor(st.steps/34+1)+'바퀴'):k;return esc(st.nick)+' <i>'+esc(s+(st.kind=='preg'&&st.ex&&st.ex.wk&&s==k?' '+st.ex.wk+'주':''))+'</i>'}
 
 /* ---------- 실시간 ---------- */
 let lastPush=0,pend=false;
@@ -750,7 +750,7 @@ function renderCard(){const c=$('card');if(!me.room){c.style.display='none';retu
  else{const n=here.filter(p=>p.state.st=='dunga').length+(me.st=='dunga'?1:0);
   if(me.kind=='preg'){const tm=LS.get('cp_taegyo',{});const td=tm[ymd(new Date())]||0;const w=here.filter(p=>p.state.st=='walk').length+(me.st=='walk'?1:0);c.innerHTML='<b>태교 산책</b>걸은 만큼 오늘 태교 시간이 쌓여<div class="bar"><i style="width:'+Math.min(100,td/30*100)+'%"></i></div>오늘 '+Math.round(td)+'분 · 같이 걷는 예비맘 '+w+'명<br><button id="cb">'+(me.st=='walk'?'산책 끝':'산책 시작')+'</button>';$('cb').onclick=()=>{me.st=me.st=='walk'?'':'walk';pushP();ensure(myId,meState(),true);renderCard()};return}
   c.innerHTML='<b>애기 재우기</b>'+(me.carrier?'아기띠 메고 러그를 걸어봐':'아기띠를 메고 걸으면 아기가 스르륵')+'<div class="bar"><i style="width:'+Math.round(Math.min(100,me.steps))+'%"></i></div>'+(me.steps>=100?'꿀잠 성공 zZ':'꿀잠까지 '+Math.round(Math.max(0,100-me.steps))+'%')+' · 같이 걷는 엄마 '+n+'명'+
-   '<div class="sw">'+['#4a4744','#d9cbb8','#7d8f9e'].map(col=>'<span data-c="'+col+'" class="'+(me.carrier&&me.cc==col?'on':'')+'" style="background:'+col+'"></span>').join('')+'</div><button id="cb">'+(me.carrier?'아기띠 풀기':'아기띠 메기')+'</button>'+sleepSoundsHTML();
+   '<div class="sw">'+['#4a4744','#d9cbb8','#7d8f9e'].map(col=>'<span data-c="'+col+'" class="'+(me.carrier&&me.cc==col?'on':'')+'" style="background:'+col+'"></span>').join('')+'</div><button id="cb">'+(me.carrier?'아기띠 풀기':'아기띠 메기')+'</button> <button id="bathb">🛁 아기 씻기기</button>'+sleepSoundsHTML();
   c.querySelectorAll('[data-c]').forEach(s=>s.onclick=()=>{me.cc=s.dataset.c;me.carrier=1;me.st='dunga';me.steps=0;pushP();ensure(myId,meState(),true);renderCard()});
   $('cb').onclick=()=>{me.carrier=me.carrier?0:1;me.st=me.carrier?'dunga':'';me.steps=0;pushP();ensure(myId,meState(),true);renderCard()};bindSleepSounds()}}
 
@@ -768,7 +768,97 @@ function wnStart(){const a=ac();const n=a.sampleRate*3,b=a.createBuffer(1,n,a.sa
  const s=a.createBufferSource();s.buffer=b;s.loop=true;const f=a.createBiquadFilter();f.type='lowpass';f.frequency.value=900;const g=a.createGain();g.gain.setValueAtTime(0,a.currentTime);g.gain.linearRampToValueAtTime(.5,a.currentTime+1.5);s.connect(f);f.connect(g);g.connect(a.destination);s.start();WN={s,g}}
 function wnStop(){if(!WN)return;const w=WN;WN=null;try{w.g.gain.setTargetAtTime(0,AC.currentTime,.4);setTimeout(()=>{w.s.stop()},2000)}catch(e){}}
 function sleepSoundsHTML(){return '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px"><button id="lb" style="'+(LUL?'':'background:#eee;color:#2B2118')+'">'+(LUL?'⏸ 자장가 끄기':'🎵 자장가')+'</button><button id="wnb" style="'+(WN?'':'background:#eee;color:#2B2118')+'">'+(WN?'⏸ 백색소음 끄기':'🌊 백색소음')+'</button><button id="enb" style="'+(ENG?'':'background:#eee;color:#2B2118')+'">'+(ENG?'⏸ 영어동요 끄기':'🔤 영어 조기교육')+'</button>'+(LS.get('cp_eng',{}).k||LS.get('cp_eng',{}).id?'<button id="enc" style="background:#eee;color:#2B2118">곡 바꾸기</button>':'')+'</div>'}
-function bindSleepSounds(){const l=$('lb');if(l)l.onclick=()=>{LUL?lulStop():lulStart();renderCard()};const w=$('wnb');if(w)w.onclick=()=>{WN?wnStop():wnStart();renderCard()};const ec=$('enc');if(ec)ec.onclick=()=>{engStop();openEng()};const en=$('enb');if(en)en.onclick=()=>{if(ENG)engStop();else{const c=LS.get('cp_eng',{});c.k?engSong(c.k):c.id?engPlay(c.id):openEng()}renderCard()}}
+function bindSleepSounds(){const bb=$('bathb');if(bb)bb.onclick=()=>openBath();const l=$('lb');if(l)l.onclick=()=>{LUL?lulStop():lulStart();renderCard()};const w=$('wnb');if(w)w.onclick=()=>{WN?wnStop():wnStart();renderCard()};const ec=$('enc');if(ec)ec.onclick=()=>{engStop();openEng()};const en=$('enb');if(en)en.onclick=()=>{if(ENG)engStop();else{const c=LS.get('cp_eng',{});c.k?engSong(c.k):c.id?engPlay(c.id):openEng()}renderCard()}}
+/* ---------- 아기 씻기기 (목욕 미니게임) ---------- */
+const BATH_PROD={name:'BABY WASH',sub:'gentle body wash',col:'#f7c9d3',cap:'#ffffff',tag:''}; // 협업 확정 시 브랜드명·색·tag('협찬')만 바꾸면 됨
+const BSTEPS=[['물 받기','수도꼭지를 눌러 물을 받아줘'],['바디워시 펌프','병을 두 번 눌러 손에 덜어줘'],['거품 내기','손 위를 문질러 거품을 만들어줘'],['아기한테 바르기','아기 몸을 문질러 거품을 발라줘'],['헹구기','샤워기를 눌러 깨끗이 헹궈줘'],['수건으로 말리기','수건으로 톡톡 문질러 물기를 닦아줘'],['옷 입히기','오늘 입힐 옷을 골라줘']];
+let BT=null;
+function openBath(){if($('bath'))return;closeSheet();const pst=me.st;me.st='bath';pushP();renderCard();
+ const d=document.createElement('div');d.id='bath';d.style.cssText='position:fixed;inset:0;z-index:9998;background:linear-gradient(#e8f4f8,#d4e9f1 62%,#c5dfe9);display:flex;flex-direction:column;font-family:Jua,sans-serif;color:#2B2118;touch-action:none;user-select:none;-webkit-user-select:none';
+ d.innerHTML='<div style="padding:calc(14px + env(safe-area-inset-top)) 16px 6px;display:flex;align-items:center;gap:8px"><b style="font-size:20px;flex:1">🛁 아기 씻기기</b><button id="bxx" style="border:0;border-radius:99px;background:#2B2118;color:#fff;padding:8px 14px;font:15px Jua,sans-serif">닫기</button></div>'+
+  '<div id="bdots" style="display:flex;gap:5px;padding:0 16px"></div>'+
+  '<div style="flex:1;display:flex;align-items:center;justify-content:center;min-height:0"><svg id="bsv" viewBox="0 0 360 440" style="width:100%;max-width:440px;height:100%;max-height:62vh;touch-action:none"></svg></div>'+
+  '<div style="padding:10px 16px calc(16px + env(safe-area-inset-bottom));background:rgba(255,255,255,.85);border-radius:22px 22px 0 0"><div id="bttl" style="font-size:19px"></div><div id="btip" style="font:14px \'Gowun Dodum\',sans-serif;color:#5a4c3e;margin:3px 0 8px"></div><div style="height:8px;border-radius:99px;background:#eadfce;overflow:hidden"><i id="bbar" style="display:block;height:100%;width:0;background:#FFD43B;transition:width .2s"></i></div><div id="bact" style="display:flex;gap:6px;margin-top:10px"></div></div>';
+ document.body.appendChild(d);
+ BT={step:0,p:0,pump:0,water:0,bubbles:[],drops:[],outfit:null,pst,last:null,raf:0};
+ $('bxx').onclick=()=>closeBath(false);bathScene();
+ const sv=$('bsv');const pt=e=>{const m=sv.getScreenCTM().inverse();const q=sv.createSVGPoint();q.x=e.clientX;q.y=e.clientY;return q.matrixTransform(m)};
+ let down=false;sv.onpointerdown=e=>{down=true;BT.last=pt(e);bathTap(BT.last)};sv.onpointerup=sv.onpointercancel=()=>{down=false;BT.last=null};
+ sv.onpointermove=e=>{if(!down)return;const p=pt(e);if(BT.last){bathRub(p,Math.hypot(p.x-BT.last.x,p.y-BT.last.y))}BT.last=p}}
+function closeBath(done){const d=$('bath');if(d)d.remove();if(BT&&BT.raf)cancelAnimationFrame(BT.raf);me.st=BT&&BT.pst=='bath'?'':(BT?BT.pst:'');if(me.st=='bath')me.st='';BT=null;pushP();renderCard();
+ if(done){const st=LS.get('cp_bath',[]);const k=ymd(new Date());if(!st.includes(k))st.push(k);LS.set('cp_bath',st);homeStamp('bath',st);toast('🛁 보송보송 목욕 끝! 도장 쾅')}}
+const NS='http://www.w3.org/2000/svg';
+function sv_(tag,a,par){const e=document.createElementNS(NS,tag);for(const k in a)e.setAttribute(k,a[k]);(par||$('bsv')).appendChild(e);return e}
+function babyHead(g,x,y,r){sv_('circle',{cx:x,cy:y,r:r,fill:'#ffe0c8',stroke:'#e9bfa0','stroke-width':2},g);sv_('path',{d:'M'+(x-6)+' '+(y-r+4)+' q8 -16 14 -2',fill:'none',stroke:'#8a6a50','stroke-width':4,'stroke-linecap':'round'},g);
+ sv_('path',{d:'M'+(x-18)+' '+(y-2)+' q6 -7 12 0 M'+(x+6)+' '+(y-2)+' q6 -7 12 0',fill:'none',stroke:'#3a2a1a','stroke-width':3,'stroke-linecap':'round'},g);
+ sv_('circle',{cx:x-24,cy:y+10,r:7,fill:'#ffb3b3',opacity:.6},g);sv_('circle',{cx:x+24,cy:y+10,r:7,fill:'#ffb3b3',opacity:.6},g);sv_('path',{d:'M'+(x-7)+' '+(y+14)+' q7 8 14 0',fill:'#e9746a',stroke:'#3a2a1a','stroke-width':2},g)}
+function bathScene(){const sv=$('bsv');sv.innerHTML='';const s=BT.step;
+ $('bdots').innerHTML=BSTEPS.map((x,i)=>'<i style="flex:1;height:5px;border-radius:9px;background:'+(i<s?'#2B2118':i==s?'#FFD43B':'#cfdde3')+'"></i>').join('');
+ $('bttl').textContent=(s+1)+'. '+BSTEPS[s][0];$('btip').textContent=BSTEPS[s][1];$('bbar').style.width='0%';BT.p=0;$('bact').innerHTML='';
+ // 벽 타일
+ const tl=sv_('g',{opacity:.35});for(let y=0;y<200;y+=40)for(let x=0;x<360;x+=40)sv_('rect',{x:x+1,y:y+1,width:38,height:38,rx:6,fill:'#fff'},tl);
+ if(s<=4){
+  // 선반 + 바디워시
+  sv_('rect',{x:14,y:196,width:86,height:10,rx:5,fill:'#d6c3a6'});
+  const b=sv_('g',{id:'bottle',style:'cursor:pointer'});sv_('rect',{x:30,y:126,width:52,height:72,rx:14,fill:BATH_PROD.col,stroke:'#e2a9b6','stroke-width':2},b);
+  sv_('rect',{id:'pumph',x:46,y:104,width:20,height:24,rx:4,fill:BATH_PROD.cap,stroke:'#d0c6c0','stroke-width':2},b);sv_('rect',{x:56,y:104,width:24,height:7,rx:3,fill:BATH_PROD.cap,stroke:'#d0c6c0','stroke-width':2},b);
+  const t1=sv_('text',{x:56,y:160,'text-anchor':'middle','font-size':10,'font-family':'Jua',fill:'#7a3a4a'},b);t1.textContent=BATH_PROD.name;const t2=sv_('text',{x:56,y:174,'text-anchor':'middle','font-size':7,fill:'#9a5a6a'},b);t2.textContent=BATH_PROD.sub;
+  if(BATH_PROD.tag){const t3=sv_('text',{x:56,y:218,'text-anchor':'middle','font-size':9,fill:'#8a7a68'});t3.textContent=BATH_PROD.tag}
+  // 수도꼭지 + 샤워기
+  const f=sv_('g',{id:'faucet',style:'cursor:pointer'});sv_('rect',{x:262,y:180,width:16,height:46,rx:6,fill:'#b9c7cf'},f);sv_('path',{d:'M270 184 q0 -26 30 -26 h14 v14 h-12 q-14 0 -14 12',fill:'#c9d6dd',stroke:'#9fb0b9','stroke-width':2},f);sv_('circle',{cx:270,cy:176,r:9,fill:'#e66',stroke:'#c44','stroke-width':2},f);
+  BT.stream=sv_('rect',{x:306,y:172,width:7,height:0,fill:'#8fd3ee',opacity:.8});
+  // 욕조 뒤
+  sv_('ellipse',{cx:180,cy:262,rx:150,ry:36,fill:'#eef7fb',stroke:'#cfe2ea','stroke-width':3});
+  // 아기
+  const bg=sv_('g',{id:'baby'});sv_('ellipse',{cx:180,cy:300,rx:52,ry:44,fill:'#ffe0c8',stroke:'#e9bfa0','stroke-width':2},bg);babyHead(bg,180,226,44);
+  sv_('ellipse',{cx:124,cy:278,rx:14,ry:22,fill:'#ffe0c8',stroke:'#e9bfa0','stroke-width':2,transform:'rotate(30 124 278)'},bg);sv_('ellipse',{cx:236,cy:278,rx:14,ry:22,fill:'#ffe0c8',stroke:'#e9bfa0','stroke-width':2,transform:'rotate(-30 236 278)'},bg);
+  BT.bub=sv_('g',{});
+  // 물
+  sv_('clipPath',{id:'tubc'});sv_('path',{d:'M30 262 h300 v60 q0 84 -150 84 q-150 0 -150 -84z'},$('tubc'));
+  BT.wat=sv_('rect',{x:30,y:410,width:300,height:0,fill:'#8fd3ee',opacity:.72,'clip-path':'url(#tubc)'});
+  BT.wsh=sv_('ellipse',{cx:180,cy:410,rx:0,ry:8,fill:'#bfe8f7',opacity:.8});
+  // 욕조 앞
+  sv_('path',{d:'M30 262 q0 0 0 60 q0 84 150 84 q150 0 150 -84 v-60 q-30 30 -150 30 q-120 0 -150 -30z',fill:'#fff',stroke:'#cfe2ea','stroke-width':3,'fill-opacity':.55});
+  sv_('rect',{x:24,y:254,width:312,height:16,rx:8,fill:'#fff',stroke:'#cfe2ea','stroke-width':3});
+  if(BT.water)bathWater(1);
+  if(s==1||s==2){BT.hand=sv_('g',{});const h=sv_('text',{x:180,y:430,'text-anchor':'middle','font-size':64},BT.hand);h.textContent='🤲';BT.hfoam=sv_('g',{},BT.hand);for(let i=0;i<BT.pump;i++)bathDollop(i)}
+  if(s>=3)BT.bubbles.forEach(q=>q.el=sv_('circle',{cx:q.x,cy:q.y,r:q.r,fill:'#fff',stroke:'#cfe9f5','stroke-width':1.5,opacity:.95},BT.bub));
+  if(s==4)$('bact').innerHTML='<button id="bsh" style="flex:1;border:0;border-radius:14px;padding:12px;background:#8fd3ee;font:16px Jua,sans-serif">🚿 샤워기로 헹구기</button>';
+  if(s==4)$('bsh').onclick=()=>bathRinse();
+ } else {
+  // 수건 위
+  sv_('rect',{x:30,y:150,width:300,height:250,rx:30,fill:'#fff6e8',stroke:'#efdcc0','stroke-width':3});
+  for(let y=170;y<390;y+=26)sv_('line',{x1:44,y1:y,x2:316,y2:y,stroke:'#f6e7cf','stroke-width':8,'stroke-linecap':'round'});
+  const bg=sv_('g',{id:'baby'});
+  sv_('ellipse',{cx:150,cy:356,rx:13,ry:26,fill:'#ffe0c8',stroke:'#e9bfa0','stroke-width':2},bg);sv_('ellipse',{cx:210,cy:356,rx:13,ry:26,fill:'#ffe0c8',stroke:'#e9bfa0','stroke-width':2},bg);
+  sv_('ellipse',{cx:180,cy:300,rx:50,ry:52,fill:'#ffe0c8',stroke:'#e9bfa0','stroke-width':2},bg);
+  sv_('ellipse',{cx:124,cy:288,rx:13,ry:24,fill:'#ffe0c8',stroke:'#e9bfa0','stroke-width':2,transform:'rotate(25 124 288)'},bg);sv_('ellipse',{cx:236,cy:288,rx:13,ry:24,fill:'#ffe0c8',stroke:'#e9bfa0','stroke-width':2,transform:'rotate(-25 236 288)'},bg);
+  BT.cloth=sv_('g',{},bg);babyHead(bg,180,220,44);
+  if(s==5){BT.drops=[];for(let i=0;i<22;i++){const x=130+Math.random()*100,y=190+Math.random()*180;BT.drops.push({x,y,el:sv_('ellipse',{cx:x,cy:y,rx:4,ry:6,fill:'#8fd3ee',opacity:.85})})}
+   BT.towel=sv_('g',{transform:'translate(300 120)'});sv_('rect',{x:-30,y:-20,width:60,height:40,rx:10,fill:'#9fd3c7',stroke:'#6fb3a5','stroke-width':2},BT.towel);[-10,0,10].forEach(y=>sv_('line',{x1:-24,y1:y,x2:24,y2:y,stroke:'#c4e6de','stroke-width':3},BT.towel))}
+  if(s==6){const cs=[['#ffd6e0','분홍 우주복'],['#cfe8ff','하늘 우주복'],['#fff1a8','노랑 우주복']];
+   $('bact').innerHTML=cs.map(([c,n])=>'<button data-oc="'+c+'" style="flex:1;border:2px solid #2B2118;border-radius:14px;padding:10px 4px;background:'+c+';font:14px Jua,sans-serif">'+n+'</button>').join('');
+   $('bact').querySelectorAll('[data-oc]').forEach(b=>b.onclick=()=>bathDress(b.dataset.oc))}
+ }}
+function bathWater(k){const h=110*k;BT.wat.setAttribute('y',410-h);BT.wat.setAttribute('height',h);BT.wsh.setAttribute('cy',410-h);BT.wsh.setAttribute('rx',k>0?150*Math.min(1,k*1.2):0)}
+function bathProg(v){BT.p=Math.min(1,v);$('bbar').style.width=Math.round(BT.p*100)+'%'}
+function bathNext(){BT.step++;if(BT.step>=BSTEPS.length){closeBath(true);return}setTimeout(bathScene,350)}
+function bathDollop(i){sv_('ellipse',{cx:168+i*22,cy:384,rx:14,ry:8,fill:BATH_PROD.col,opacity:.95},BT.hfoam)}
+function bathTap(p){const s=BT.step;
+ if(s==0&&p.x>250&&p.y>150&&p.y<240&&!BT.filling){BT.filling=1;BT.stream.setAttribute('height',140);const t0=performance.now();const tick=t=>{const k=Math.min(1,(t-t0)/2600);bathWater(k);bathProg(k);if(k<1)BT.raf=requestAnimationFrame(tick);else{BT.stream.setAttribute('height',0);BT.water=1;$('btip').textContent='손목이나 팔꿈치로 물 온도 먼저 확인!';bathNext()}};BT.raf=requestAnimationFrame(tick)}
+ if(s==1&&p.x<100&&p.y>95&&p.y<205){BT.pump++;const ph=$('pumph');ph.setAttribute('y',112);setTimeout(()=>ph.setAttribute('y',104),150);bathDollop(BT.pump-1);bathProg(BT.pump/2);if(BT.pump>=2)bathNext()}}
+function bathFoam(x,y,r,par){const q={x,y,r,el:sv_('circle',{cx:x,cy:y,r:r,fill:'#fff',stroke:'#cfe9f5','stroke-width':1.5,opacity:.95},par)};return q}
+function bathRub(p,dd){const s=BT.step;
+ if(s==2&&p.y>330){BT.rub=(BT.rub||0)+dd;if(Math.random()<.5)bathFoam(140+Math.random()*80,360+Math.random()*40,4+Math.random()*9,BT.hfoam);bathProg(BT.rub/900);if(BT.rub>900){BT.rub=0;bathNext()}}
+ if(s==3&&Math.hypot(p.x-180,(p.y-270)*.8)<80){if(Math.random()<.6)BT.bubbles.push(bathFoam(p.x+(Math.random()-.5)*16,p.y+(Math.random()-.5)*16,5+Math.random()*8,BT.bub));bathProg(BT.bubbles.length/70);if(BT.bubbles.length>=70){$('btip').textContent='눈에 안 들어가게 얼굴은 살살';bathNext()}}
+ if(s==5){BT.towel.setAttribute('transform','translate('+p.x+' '+p.y+')');BT.drops=BT.drops.filter(q=>{if(Math.hypot(q.x-p.x,q.y-p.y)<30){q.el.remove();return false}return true});bathProg(1-BT.drops.length/22);if(!BT.drops.length)bathNext()}}
+function bathRinse(){if(BT.rinsing)return;BT.rinsing=1;BT.stream.setAttribute('height',120);BT.stream.setAttribute('x',176);BT.stream.setAttribute('y',90);BT.stream.setAttribute('width',16);
+ const tot=BT.bubbles.length;const iv=setInterval(()=>{if(!BT){clearInterval(iv);return}for(let k=0;k<4;k++){const q=BT.bubbles.pop();if(q)q.el.remove()}bathProg(1-BT.bubbles.length/Math.max(1,tot));if(!BT.bubbles.length){clearInterval(iv);BT.stream.setAttribute('height',0);bathNext()}},90)}
+function bathDress(c){const g=BT.cloth;g.innerHTML='';sv_('path',{d:'M130 262 q50 -26 100 0 l14 30 -14 8 v52 q-50 22 -100 0 v-52 l-14 -8z',fill:c,stroke:'#2B2118','stroke-width':2},g);
+ sv_('path',{d:'M162 252 q18 14 36 0',fill:'none',stroke:'#2B2118','stroke-width':2},g);[0,1,2].forEach(i=>sv_('circle',{cx:180,cy:282+i*16,r:3,fill:'#fff',stroke:'#2B2118','stroke-width':1.5},g));
+ for(let i=0;i<24;i++){const t=sv_('text',{x:30+Math.random()*300,y:60+Math.random()*120,'font-size':16+Math.random()*12});t.textContent=['✨','🫧','💛','⭐'][i%4]}
+ bathProg(1);$('bttl').textContent='보송보송 목욕 끝!';$('btip').textContent='오늘도 깨끗하게 씻겼다. 수고했어 엄마';$('bact').innerHTML='<button id="bfin" style="flex:1;border:0;border-radius:14px;padding:12px;background:#2B2118;color:#FFD43B;font:16px Jua,sans-serif">🛁 목욕 도장 받기</button>';$('bfin').onclick=()=>closeBath(true)}
+
 let ENG=false;
 function ytId(v){const m=(v||'').match(/(?:youtu\.be\/|v=|\/embed\/|\/shorts\/|\/live\/)([A-Za-z0-9_-]{11})/);return m?m[1]:(/^[A-Za-z0-9_-]{11}$/.test((v||'').trim())?v.trim():'')}
 function engPlay(id){engStop();const d=document.createElement('div');d.id='engp';d.style.cssText='position:fixed;left:10px;top:calc(88px + env(safe-area-inset-top));width:176px;z-index:9999;background:#2B2118;border-radius:14px;padding:4px;box-shadow:0 6px 20px rgba(0,0,0,.3)';
@@ -862,7 +952,7 @@ async function openHome(id,nick,edit){const mine=id===myId;edit=mine&&edit;const
  '<div class="cy-prof"><div><div class="cy-pic">'+(edit?'':'<canvas id="mcv"></canvas>')+'</div><div class="cy-mood">TODAY is.. <b>'+esc(h.mood||MOODS[0])+'</b></div></div>'+
  '<div><span class="chip">'+esc(KINDS[st.kind]?KINDS[st.kind].label:'')+'</span>'+(mine&&!edit?' <button class="ebtn" id="hedit">꾸미기</button>':'')+'<div class="cy-intro">'+(esc(h.intro)||'<span style="color:#aaa">아직 소개가 없어</span>')+'</div>'+
  '<div class="cy-links">'+chips.map(([k,n,v])=>v?'<a href="'+esc(snsLink(k,v))+'" target="_blank" rel="noopener">▶ '+n+' · '+esc(snsShow(k,v))+'</a>':'<a class="off">▷ '+n+' · 아직 없음</a>').join('')+'</div></div></div>'+
- '<div class="cy-sec"><h4>Updated news</h4><div class="cy-news">쓰담 받은 수 <span>♥ '+(h.pats||0)+'</span><br>방명록 <span>'+notes.length+'</span>개'+((h.school||[]).length?'<br>🎒 등원 도장 <span>'+h.school.length+'</span>개':'')+((h.dawn||[]).length?'<br>🌙 새벽 출석 <span>'+h.dawn.length+'</span>일':'')+((h.first||[]).length?'<br>🎉 첫 맛 도장 <span>'+h.first.length+'</span>개':'')+(h.collab?'<br><span>★ 협업 제안 받는 중</span> · 육아용품 · 생활용품 · 교육':'')+'</div></div>'+
+ '<div class="cy-sec"><h4>Updated news</h4><div class="cy-news">쓰담 받은 수 <span>♥ '+(h.pats||0)+'</span><br>방명록 <span>'+notes.length+'</span>개'+((h.school||[]).length?'<br>🎒 등원 도장 <span>'+h.school.length+'</span>개':'')+((h.dawn||[]).length?'<br>🌙 새벽 출석 <span>'+h.dawn.length+'</span>일':'')+((h.bath||[]).length?'<br>🛁 목욕 도장 <span>'+h.bath.length+'</span>개':'')+((h.first||[]).length?'<br>🎉 첫 맛 도장 <span>'+h.first.length+'</span>개':'')+(h.collab?'<br><span>★ 협업 제안 받는 중</span> · 육아용품 · 생활용품 · 교육':'')+'</div></div>'+
  '<div class="cy-sec gb" id="cygb"><h4>방명록 <small style="color:#999;font-weight:400">스티커만 남길 수 있어</small></h4>'+(notes.length?notes.slice(0,20).map((n,i)=>'<div class="cy-gb"><div class="h"><span>No.'+(notes.length-i)+' '+esc(n.from)+'</span><span>'+new Date(n.at).toLocaleDateString('ko')+'</span></div><div class="b">'+esc(n.text)+'</div></div>').join(''):'<div style="color:#aaa;font-size:12px">첫 방명록을 남겨줘</div>')+
  (!mine?'<div class="stk">'+['쓰담쓰담 ♥','새벽 동지!','오늘도 버텼다','아기 너무 귀여워','같이 힘내요'].map(s=>'<button data-s="'+s+'">'+s+'</button>').join('')+'</div>':'')+'</div></div></div>';
  sb.querySelectorAll('.cy-tabs a').forEach(a=>a.onclick=e=>{e.preventDefault();const g=$(a.getAttribute('href').slice(1));if(g)g.scrollIntoView({behavior:'smooth',block:'start'})});
@@ -1120,7 +1210,7 @@ async function ask(q){q=(q||'').trim();if(!q||busy)return;if(!SAMPLE){chat.push(
 /* ---------- 루프 ---------- */
 const V=new T.Vector3(),clk=new T.Clock();
 function place(e,x,y,z){V.set(x,y,z);V.project(cam);e.style.left=((V.x+1)/2*app.clientWidth)+'px';e.style.top=((1-V.y)/2*app.clientHeight)+'px'}
-function loop(){requestAnimationFrame(loop);const dt=Math.min(.1,clk.getDelta());
+function loop(){requestAnimationFrame(loop);if(BT)return;const dt=Math.min(.1,clk.getDelta());
  if(me.room&&AV[myId]){const o=AV[myId];
   if(tgt){const dx=tgt[0]-me.x,dz=tgt[1]-me.z,d=Math.hypot(dx,dz);if(d<.05&&WP.length){tgt=WP.shift();}else if(d<.05){tgt=null;if(pendSeat>=0){const s=SEATS[pendSeat];me.sit=pendSeat+1;me.x=s.x;me.z=s.z;if(breastPend){breastPend=false;me.st='feed';me.stAt=Date.now();toast('모유수유 시작 · 커튼 쳤어');renderCard()}pendSeat=-1;pushP()}}else{const s=Math.min(d,2.6*dt);const ux=dx/d*s,uz=dz/d*s;let p=clampXZ(me.x+ux,me.z+uz);
     if(Math.hypot(p[0]-me.x,p[1]-me.z)<s*.4){const px=clampXZ(me.x+(ux>=0?1:-1)*s,me.z),pz=clampXZ(me.x,me.z+(uz>=0?1:-1)*s);const gx=Math.hypot(px[0]-me.x,px[1]-me.z),gz=Math.hypot(pz[0]-me.x,pz[1]-me.z);p=Math.abs(ux)>=Math.abs(uz)?(gx>s*.4?px:pz):(gz>s*.4?pz:px);stuckT+=dt;if(stuckT>2.5){stuckT=0;if(me.fm==1){const f=clampXZ(FSPOT[0],FSPOT[1]);me.x=f[0];me.z=f[1];WP=[];tgt=null}else{tgt=null;WP=[];pendSeat=-1}}}else stuckT=0;
