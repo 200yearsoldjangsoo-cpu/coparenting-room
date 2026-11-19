@@ -567,7 +567,7 @@ const LS={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){re
 /* 새벽 출석 도장: 0~5시 입장 */
 function dawnInfo(){const ds=LS.get('cp_dawn',[]);let s=0;const d=new Date();if(!ds.includes(ymd(d)))d.setDate(d.getDate()-1);while(ds.includes(ymd(d))){s++;d.setDate(d.getDate()-1)}return{total:ds.length,streak:s,today:ds.includes(ymd(new Date()))}}
 function dawnStamp(){const h=new Date().getHours();if(h>=5)return;const ds=LS.get('cp_dawn',[]),k=ymd(new Date());if(ds.includes(k))return;ds.push(k);LS.set('cp_dawn',ds.slice(-120));const i=dawnInfo();setTimeout(()=>toast('🌙 새벽 출석 도장 쾅 · '+i.streak+'일 연속'),1800);
- if(DB&&uid){(async()=>{try{const h0=Object.assign({nick:me.nick},myHome||{});h0.dawn=ds.slice(-120);myHome=h0;await DB.doc('homes/'+uid).set(h0)}catch(e){}})()}}
+ homeStamp('dawn',ds)}
 /* 같이 수유한 최고 인원 기록(공유 카드용) */
 function feedNow(){return others().filter(p=>p.state.st=='feed'||p.state.st=='bottle').length+((me.st=='feed'||me.st=='bottle')?1:0)}
 function trackPeak(){const n=feedNow(),d=new Date(),k=ymd(d);const pk=LS.get('cp_peak',{});if(n<=0)return;if(pk.day!==k||n>(pk.n||0))LS.set('cp_peak',{day:k,n:n,h:d.getHours()})}
@@ -657,12 +657,26 @@ function openMeal(){openSheet('오늘의 유아식');const mine=LS.get('cp_meal'
   $('mok').onclick=async()=>{if(!pick.length){toast('하나는 골라줘');return}LS.set('cp_meal',{day:ymd(new Date()),m:pick});me.ex=Object.assign({},me.ex,{meal:pick,mealAt:Date.now()});pushP();toast('식탁에 올렸어');
    if(hasSB())await sbPost('meal',pick.join(','));else if(DB&&uid){try{const ref=DB.doc('notes/'+uid);let cur={};try{const d=await ref.get();cur=d&&d.exists!==false?(d.data?d.data():d):{}}catch(e){}const items=(cur.items||[]).filter(x=>x.to!='meal').slice(-40);items.push({to:'meal',m:pick,at:Date.now()});await ref.set({nick:me.nick,items})}catch(e){}}closeSheet();renderCard()}};draw()}
 const SCHOOL=['기저귀','여벌옷','물병·빨대컵','수저통','손수건','낮잠이불','알림장 확인','투약의뢰서(필요하면)'];
-function openSchool(){openSheet('등원 준비 체크');const k=ymd(new Date()),s=LS.get('cp_sch',{});const d=s.day===k?s.c:{};const n=SCHOOL.filter(x=>d[x]).length;
- sb.innerHTML='<div class="box"><div class="t">오늘 가방 '+n+'/'+SCHOOL.length+'</div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">'+SCHOOL.map(x=>'<button class="vchip'+(d[x]?' on':'')+'" data-s="'+esc(x)+'">'+(d[x]?'✔ ':'')+esc(x)+'</button>').join('')+'</div><p class="note">매일 새로 시작돼. 다 챙기면 등원 도장 쾅. 지금까지 도장 '+LS.get('cp_schst',[]).length+'개</p></div>';
- sb.querySelectorAll('[data-s]').forEach(e=>e.onclick=()=>{d[e.dataset.s]=!d[e.dataset.s];LS.set('cp_sch',{day:k,c:d});if(SCHOOL.every(x=>d[x])){const st=LS.get('cp_schst',[]);if(!st.includes(k)){st.push(k);LS.set('cp_schst',st);toast('🎒 등원 준비 끝! 도장 쾅')}}openSchool()})}
+function homeStamp(key,list){const h0=Object.assign({nick:me.nick},myHome||{});h0[key]=list.slice(-120);myHome=h0;
+ (async()=>{try{if(typeof putHome=='function'&&typeof SB!='undefined'&&SB&&uid)await putHome(h0);else if(DB&&uid)await DB.doc('homes/'+uid).set(h0)}catch(e){}})()}
+function schStreak(st){let n=0,d=new Date();const has=k=>st.includes(k);if(!has(ymd(d))){d.setDate(d.getDate()-1)}while(has(ymd(d))){n++;d.setDate(d.getDate()-1)}return n}
+function openSchool(){openSheet('등원 준비 체크');const k=ymd(new Date()),s=LS.get('cp_sch',{});const d=s.day===k?s.c:{};const my=LS.get('cp_schmy',[]);const items=SCHOOL.concat(my);
+ const st=LS.get('cp_schst',[]),done=st.includes(k),n=items.filter(x=>d[x]).length;
+ const last=[];for(let i=13;i>=0;i--){const t=new Date();t.setDate(t.getDate()-i);last.push([ymd(t),t.getDate(),'일월화수목금토'[t.getDay()]])}
+ sb.innerHTML='<div class="box"><div class="t">오늘 가방 <small>챙긴 것 '+n+'개 · 필요 없는 건 그냥 두면 돼</small></div>'+
+  items.map((x,i)=>'<label style="position:relative;display:flex;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid #f0e2cf;font-size:15px"><input type="checkbox" data-s="'+esc(x)+'" '+(d[x]?'checked':'')+' style="position:absolute;opacity:0;width:1px;height:1px"><span style="width:24px;height:24px;flex:none;border-radius:7px;border:2px solid '+(d[x]?'#FFD43B':'#d9cbb8')+';background:'+(d[x]?'#FFD43B':'#fff')+';display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#3a2a1a">'+(d[x]?'✓':'')+'</span><span style="flex:1;'+(d[x]?'text-decoration:line-through;color:#b3a593':'')+'">'+esc(x)+'</span>'+(i>=SCHOOL.length?'<a data-del="'+esc(x)+'" style="color:#b3a593;font-size:13px">빼기</a>':'')+'</label>').join('')+
+  '<div style="display:flex;gap:6px;margin-top:8px"><input id="schadd" maxlength="20" placeholder="우리 집 준비물 추가 (예: 약병)" style="flex:1"><button class="btn" id="schaddb" style="flex:none">추가</button></div>'+
+  '<button class="btn k" id="schdone" style="width:100%;margin-top:10px"'+(done?' disabled':'')+'>'+(done?'🎒 오늘 등원 준비 완료 도장 받았어':'준비 끝!')+'</button></div>'+
+  '<div class="box"><div class="t">등원 도장판 <small>모은 도장 '+st.length+'개 · 연속 '+schStreak(st)+'일</small></div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center">'+
+  last.map(([key,dd,wd])=>'<div style="font-size:11px;color:#8a7a68">'+wd+'<div style="height:40px;border-radius:12px;margin-top:2px;display:flex;align-items:center;justify-content:center;font-size:'+(st.includes(key)?'22px':'13px')+';background:'+(st.includes(key)?'#fff3c4':'#f6efe6')+';'+(key==k?'outline:2px solid #FFD43B;':'')+'">'+(st.includes(key)?'🎒':dd)+'</div></div>').join('')+
+  '</div><p class="note">도장은 이 폰에 쌓이고, 내 미니홈피에도 \'등원 도장 n개\'로 보여. 다른 엄마들이 내 홈피 놀러 오면 같이 봐.</p></div>';
+ sb.querySelectorAll('[data-s]').forEach(e=>e.onchange=()=>{d[e.dataset.s]=e.checked;LS.set('cp_sch',{day:k,c:d});openSchool()});
+ sb.querySelectorAll('[data-del]').forEach(e=>e.onclick=ev=>{ev.preventDefault();LS.set('cp_schmy',my.filter(x=>x!==e.dataset.del));openSchool()});
+ $('schaddb').onclick=()=>{const v=$('schadd').value.trim();if(!v||items.includes(v))return;my.push(v);LS.set('cp_schmy',my);openSchool()};
+ $('schdone').onclick=()=>{if(done)return;st.push(k);LS.set('cp_schst',st);homeStamp('school',st);toast('🎒 등원 준비 끝! 도장 쾅 · 연속 '+schStreak(st)+'일');openSchool()}}
 function renderToddler(c,here){const m=LS.get('cp_meal',{}),k=ymd(new Date()),h=new Date().getHours();const sc=LS.get('cp_sch',{});const sn=sc.day===k?SCHOOL.filter(x=>sc.c[x]).length:0;
  const mates=here.filter(p=>p.state.ex&&p.state.ex.meal&&p.state.ex.meal.length).length;
- c.innerHTML='<b>🍚 유아식 · 등원</b>'+(m.day===k?'오늘 식탁: '+m.m.map(i=>FOODS[i].split(' ')[0]).join(''):'오늘 뭐 먹였어?')+'<div>식탁 올린 엄마 '+mates+'명</div><div style="display:flex;flex-wrap:wrap;gap:4px"><button id="ml">오늘의 유아식</button><button id="sc"'+(h>=6&&h<10?'':' style="background:#eee;color:#2B2118"')+'>등원 준비 '+sn+'/'+SCHOOL.length+'</button></div>'+dawnHTML();
+ c.innerHTML='<b>🍚 유아식 · 등원</b>'+(m.day===k?'오늘 식탁: '+m.m.map(i=>FOODS[i].split(' ')[0]).join(''):'오늘 뭐 먹였어?')+'<div>식탁 올린 엄마 '+mates+'명</div><div style="display:flex;flex-wrap:wrap;gap:4px"><button id="ml">오늘의 유아식</button><button id="sc"'+(h>=6&&h<10?'':' style="background:#eee;color:#2B2118"')+'>'+(LS.get('cp_schst',[]).includes(k)?'🎒 등원 준비 완료':'등원 준비')+'</button></div>'+dawnHTML();
  bindExtras(c);$('ml').onclick=async()=>{await loadMeals();openMeal()};$('sc').onclick=openSchool}
 /* ---------- 내 시간: 같이 일하는 책상 · 육퇴 라운지 · 미니홈피 구경 ---------- */
 function renderGrow(c,here){const wk=here.filter(p=>p.state.st=='work').length+(me.st=='work'?1:0),yk=here.filter(p=>p.state.st=='yukte').length+(me.st=='yukte'?1:0),h=new Date().getHours();
@@ -724,8 +738,21 @@ function lulStop(){if(!LUL)return;clearTimeout(LUL.tm);const g=LUL.g;LUL=null;tr
 function wnStart(){const a=ac();const n=a.sampleRate*3,b=a.createBuffer(1,n,a.sampleRate),d=b.getChannelData(0);let l=0;for(let i=0;i<n;i++){const w=Math.random()*2-1;l=(l+.02*w)/1.02;d[i]=l*3.5}
  const s=a.createBufferSource();s.buffer=b;s.loop=true;const f=a.createBiquadFilter();f.type='lowpass';f.frequency.value=900;const g=a.createGain();g.gain.setValueAtTime(0,a.currentTime);g.gain.linearRampToValueAtTime(.5,a.currentTime+1.5);s.connect(f);f.connect(g);g.connect(a.destination);s.start();WN={s,g}}
 function wnStop(){if(!WN)return;const w=WN;WN=null;try{w.g.gain.setTargetAtTime(0,AC.currentTime,.4);setTimeout(()=>{w.s.stop()},2000)}catch(e){}}
-function sleepSoundsHTML(){return '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px"><button id="lb" style="'+(LUL?'':'background:#eee;color:#2B2118')+'">'+(LUL?'⏸ 자장가 끄기':'🎵 자장가')+'</button><button id="wnb" style="'+(WN?'':'background:#eee;color:#2B2118')+'">'+(WN?'⏸ 백색소음 끄기':'🌊 백색소음')+'</button></div>'}
-function bindSleepSounds(){const l=$('lb');if(l)l.onclick=()=>{LUL?lulStop():lulStart();renderCard()};const w=$('wnb');if(w)w.onclick=()=>{WN?wnStop():wnStart();renderCard()}}
+function sleepSoundsHTML(){return '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px"><button id="lb" style="'+(LUL?'':'background:#eee;color:#2B2118')+'">'+(LUL?'⏸ 자장가 끄기':'🎵 자장가')+'</button><button id="wnb" style="'+(WN?'':'background:#eee;color:#2B2118')+'">'+(WN?'⏸ 백색소음 끄기':'🌊 백색소음')+'</button><button id="enb" style="'+(ENG?'':'background:#eee;color:#2B2118')+'">'+(ENG?'⏸ 영어동요 끄기':'🔤 영어 조기교육')+'</button></div>'}
+function bindSleepSounds(){const l=$('lb');if(l)l.onclick=()=>{LUL?lulStop():lulStart();renderCard()};const w=$('wnb');if(w)w.onclick=()=>{WN?wnStop():wnStart();renderCard()};const en=$('enb');if(en)en.onclick=()=>{if(ENG)engStop();else{const c=LS.get('cp_eng',{});c.id?engPlay(c.id):openEng()}renderCard()}}
+let ENG=false;
+function ytId(v){const m=(v||'').match(/(?:youtu\.be\/|v=|\/embed\/|\/shorts\/|\/live\/)([A-Za-z0-9_-]{11})/);return m?m[1]:(/^[A-Za-z0-9_-]{11}$/.test((v||'').trim())?v.trim():'')}
+function engPlay(id){engStop();const d=document.createElement('div');d.id='engp';d.style.cssText='position:fixed;left:10px;bottom:calc(10px + env(safe-area-inset-bottom));width:176px;z-index:9999;background:#2B2118;border-radius:14px;padding:4px;box-shadow:0 6px 20px rgba(0,0,0,.3)';
+ d.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;color:#fff;font-size:12px;padding:2px 6px 4px">🔁 영어동요 반복 중<a id="engx" style="color:#FFD43B;font-weight:800">끄기</a></div><iframe width="168" height="95" style="border:0;border-radius:10px;display:block" allow="autoplay; encrypted-media; picture-in-picture" src="https://www.youtube-nocookie.com/embed/'+id+'?autoplay=1&loop=1&playlist='+id+'&playsinline=1&rel=0&modestbranding=1"></iframe>';
+ document.body.appendChild(d);ENG=true;$('engx').onclick=()=>{engStop();renderCard()}}
+function engStop(){const d=$('engp');if(d)d.remove();ENG=false}
+function openEng(){openSheet('영어 조기교육 · 한 곡 무한반복');const cur=LS.get('cp_eng',{});
+ sb.innerHTML='<div class="box"><div class="t">우리 아기 영어동요 <small>한 곡만 계속 틀어줘</small></div><p style="font-size:14px;line-height:1.6;margin:4px 0 8px">아이가 좋아하는 영어동요 유튜브 링크를 한 번만 붙여넣어. 다음부터는 버튼만 누르면 그 곡이 끝없이 반복돼.</p>'+
+  '<input id="engu" placeholder="유튜브 링크 붙여넣기 (공유 → 링크 복사)" value="'+esc(cur.u||'')+'" style="width:100%">'+
+  '<button class="btn k" id="engg" style="width:100%;margin-top:8px">'+(cur.id?'▶ 이 곡 반복 재생':'저장하고 반복 재생')+'</button>'+
+  '<p class="note">작은 플레이어가 화면 왼쪽 아래에 떠서 공동육아방을 쓰는 동안 계속 반복돼. 폰 화면을 끄거나 다른 앱으로 가면 아이폰 정책상 멈춰. 영상은 유튜브 플레이어로 재생돼서 광고가 나올 수 있어.</p></div>';
+ $('engg').onclick=()=>{const v=$('engu').value.trim();const id=ytId(v);if(!id){toast('유튜브 링크를 확인해줘');return}LS.set('cp_eng',{u:v,id});closeSheet();engPlay(id);renderCard()}}
+
 
 /* ---------- 시트 ---------- */
 const sheet=$('sheet'),sb=$('sb');$('sx').onclick=closeSheet;
@@ -776,7 +803,7 @@ async function openHome(id,nick,edit){const mine=id===myId;edit=mine&&edit;const
  '<div class="cy-prof"><div><div class="cy-pic">'+(edit?'':'<canvas id="mcv"></canvas>')+'</div><div class="cy-mood">TODAY is.. <b>'+esc(h.mood||MOODS[0])+'</b></div></div>'+
  '<div><span class="chip">'+esc(KINDS[st.kind]?KINDS[st.kind].label:'')+'</span>'+(mine&&!edit?' <button class="ebtn" id="hedit">꾸미기</button>':'')+'<div class="cy-intro">'+(esc(h.intro)||'<span style="color:#aaa">아직 소개가 없어</span>')+'</div>'+
  '<div class="cy-links">'+chips.map(([k,n,v])=>v?'<a href="'+esc(snsLink(k,v))+'" target="_blank" rel="noopener">▶ '+n+' · '+esc(snsShow(k,v))+'</a>':'<a class="off">▷ '+n+' · 아직 없음</a>').join('')+'</div></div></div>'+
- '<div class="cy-sec"><h4>Updated news</h4><div class="cy-news">쓰담 받은 수 <span>♥ '+(h.pats||0)+'</span><br>방명록 <span>'+notes.length+'</span>개'+(h.collab?'<br><span>★ 협업 제안 받는 중</span> · 육아용품 · 생활용품 · 교육':'')+'</div></div>'+
+ '<div class="cy-sec"><h4>Updated news</h4><div class="cy-news">쓰담 받은 수 <span>♥ '+(h.pats||0)+'</span><br>방명록 <span>'+notes.length+'</span>개'+((h.school||[]).length?'<br>🎒 등원 도장 <span>'+h.school.length+'</span>개':'')+((h.dawn||[]).length?'<br>🌙 새벽 출석 <span>'+h.dawn.length+'</span>일':'')+(h.collab?'<br><span>★ 협업 제안 받는 중</span> · 육아용품 · 생활용품 · 교육':'')+'</div></div>'+
  '<div class="cy-sec gb" id="cygb"><h4>방명록 <small style="color:#999;font-weight:400">스티커만 남길 수 있어</small></h4>'+(notes.length?notes.slice(0,20).map((n,i)=>'<div class="cy-gb"><div class="h"><span>No.'+(notes.length-i)+' '+esc(n.from)+'</span><span>'+new Date(n.at).toLocaleDateString('ko')+'</span></div><div class="b">'+esc(n.text)+'</div></div>').join(''):'<div style="color:#aaa;font-size:12px">첫 방명록을 남겨줘</div>')+
  (!mine?'<div class="stk">'+['쓰담쓰담 ♥','새벽 동지!','오늘도 버텼다','아기 너무 귀여워','같이 힘내요'].map(s=>'<button data-s="'+s+'">'+s+'</button>').join('')+'</div>':'')+'</div></div></div>';
  sb.querySelectorAll('.cy-tabs a').forEach(a=>a.onclick=e=>{e.preventDefault();const g=$(a.getAttribute('href').slice(1));if(g)g.scrollIntoView({behavior:'smooth',block:'start'})});
@@ -830,14 +857,17 @@ async function g24Load(rg){if(G24[rg])return G24[rg];const PD='https://hiqekjtjt
  const [a,b]=await Promise.all([q('임신'),q('보육')]);
  const kw=/출산|임신|임산부|산모|신생아|영유아|아동|양육|육아|보육|어린이집|난임|다자녀|아이/;
  const all=a.concat(b.filter(x=>kw.test(x['서비스명']+x['지원대상'])));const seen={};
- G24[rg]=all.filter(x=>!seen[x['서비스ID']]&&(seen[x['서비스ID']]=1)).map(x=>({id:x['서비스ID'],n:x['서비스명'].replace(/^\+/,''),o:x['소관기관명'],c:(x['지원내용']||'').replace(/\s+/g,' ').replace(/^○\s*/,'').slice(0,90),u:x['상세조회URL'],t:x['전화문의']||'',f:x['서비스분야'],d:(x['수정일시']||'').slice(0,10)}));
+ G24[rg]=all.filter(x=>!seen[x['서비스ID']]&&(seen[x['서비스ID']]=1)).map(x=>({id:x['서비스ID'],n:x['서비스명'].replace(/^\+/,''),o:x['소관기관명'],c:(x['지원내용']||'').replace(/\s+/g,' ').replace(/^○\s*/,''),tg:(x['지원대상']||'').trim(),ty:x['지원유형']||'',sel:(x['선정기준']||'').trim(),how:(x['신청방법']||'').trim(),dl:(x['신청기한']||'').trim(),rc:(x['접수기관']||'').trim(),u:x['상세조회URL'],t:x['전화문의']||'',f:x['서비스분야'],d:(x['수정일시']||'').slice(0,10)}));
  return G24[rg]}
+function g24Amt(s){const m=(s||'').match(/(첫째[^,○\-]{0,12}?\d[\d,]*\s*만\s*원|\d[\d,.]*\s*(만|천)\s*원(\s*상당)?|\d[\d,]{3,}\s*원)/g);if(!m)return'';return [...new Set(m.map(x=>x.replace(/\s+/g,'')))].slice(0,3).join(' · ')}
+function g24Row(k,v){v=(v||'').replace(/\r/g,'').trim();if(v=='None')v='';return v?'<div style="margin-bottom:8px"><b style="font-size:13px;color:#8a7a68">'+k+'</b><br>'+esc(v)+'</div>':''}
 function g24HTML(rg){const L=G24[rg];if(!L)return '<div class="box" id="g24"><div class="t">정부24 실시간 <small>불러오는 중…</small></div></div>';
  const orgs=[...new Set(L.map(x=>x.o))].sort((a,b)=>a.length-b.length||a.localeCompare(b));const f=orgs.includes(G24F)?G24F:'';const ls=L.filter(x=>!f||x.o==f);
  return '<div class="box" id="g24"><div class="t">정부24 실시간 · '+rg+' 엄마 지원 <small>'+L.length+'개</small></div>'+
   '<select id="g24o"><option value="">전체 ('+L.length+')</option>'+orgs.map(o=>'<option value="'+esc(o)+'"'+(o==f?' selected':'')+'>'+esc(o.replace((SIDOF[rg]||'')+' ','')||o)+' ('+L.filter(x=>x.o==o).length+')</option>').join('')+'</select>'+
-  '<div style="max-height:420px;overflow-y:auto;margin-top:8px">'+ls.map(x=>'<div style="padding:9px 0;border-bottom:1px solid #f0e2cf;font-size:14px"><b>'+esc(x.n)+'</b> <small style="color:#8a7a68">'+esc(x.o.replace((SIDOF[rg]||'')+' ','')||x.o)+'</small><br><span style="color:#5a4c3e">'+esc(x.c)+(x.c.length>=90?'…':'')+'</span><br><a href="'+esc(x.u)+'" target="_blank" rel="noopener" style="color:#c27a00;font-size:13px">정부24에서 자세히 · 신청</a></div>').join('')+'</div>'+
-  '<p class="note">출처 · 행정안전부 대한민국 공공서비스(혜택) 정보, 공공데이터포털 오픈API(정부24). 금액·대상은 바뀔 수 있으니 신청 전 정부24 상세에서 확인해.</p></div>'}
+  '<div style="max-height:520px;overflow-y:auto;margin-top:8px">'+ls.map(x=>{const am=g24Amt(x.c+' '+x.tg);return '<details style="padding:9px 0;border-bottom:1px solid #f0e2cf;font-size:14px"><summary style="list-style:none;cursor:pointer"><b>'+esc(x.n)+'</b> <small style="color:#8a7a68">'+esc(x.o.replace((SIDOF[rg]||'')+' ','')||x.o)+'</small>'+(am?'<br><span style="display:inline-block;margin-top:3px;background:#fff3c4;border-radius:8px;padding:2px 8px;font-weight:800;color:#3a2a1a">💰 '+esc(am)+'</span>':'')+(x.ty?' <small style="color:#8a7a68">'+esc(x.ty)+'</small>':'')+'<br><span style="color:#5a4c3e">'+esc(x.c.slice(0,70))+(x.c.length>70?'…':'')+'</span> <span style="color:#c27a00;font-size:13px">▾ 자세히</span></summary>'+
+   '<div style="background:#fbf6ee;border-radius:10px;padding:10px;margin-top:6px;line-height:1.55;white-space:pre-line">'+g24Row('얼마·무엇',x.c)+g24Row('누가',x.tg)+g24Row('선정기준',x.sel)+g24Row('신청방법',x.how)+g24Row('신청기한',x.dl)+g24Row('접수처',x.rc)+g24Row('문의',x.t)+
+   '</div></details>'}).join('')+'</div>'+'<p class="note">출처 · 행정안전부 대한민국 공공서비스(혜택) 정보, 공공데이터포털 오픈API(정부24). 금액·대상은 바뀔 수 있으니 신청 전 문의처에 한 번 확인해. 탭하면 대상·신청방법·기한이 펼쳐져.</p></div>'}
 
 function bindRegion(){$('rsd').onchange=e=>{RGN=e.target.value;G24F='';try{localStorage.setItem('cp_rg',RGN)}catch(x){}openAide()};
  const host=$('rsd').closest('.box');host.insertAdjacentHTML('afterend',g24HTML(RGN));
