@@ -13,7 +13,7 @@
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
 <style>
 /* VOICE: 새벽에도 혼자가 아닌 느낌. 뽀짝하고 다정하게
    IDEA: 온라인 공동육아방 — 방마다 30명, 인형 엄마들이 같이 수유하고 둥가둥가하고 서로 쓰담
@@ -36,9 +36,12 @@ html,body{margin:0;height:100%;background:#1b1d38;overflow:hidden;font:15px/1.5 
 .pill.d{background:var(--y)}
 .pill b{color:var(--rd);font-weight:400}
 .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#3ad16b;margin-right:5px;box-shadow:0 0 6px #3ad16b}
-.name{position:absolute;transform:translate(-50%,-100%);background:rgba(255,255,255,.93);border-radius:999px;padding:1px 9px;font:12px Jua,sans-serif;white-space:nowrap;box-shadow:0 2px 4px rgba(0,0,0,.2);pointer-events:none}
-.name i{font-style:normal;color:#8a7a68}
-.name.me{background:var(--y);border:2px solid var(--ink)}
+.name{position:absolute;transform:translate(-50%,calc(-100% - 10px));background:#fff;border:1.5px solid #2B2118;border-radius:16px;padding:5px 12px 6px;font:700 13px/1.25 'Gowun Dodum','Noto Sans KR',sans-serif;color:#2B2118;letter-spacing:-.2px;text-align:center;white-space:nowrap;box-shadow:0 3px 0 rgba(43,33,24,.18);pointer-events:none}
+.name:after{content:'';position:absolute;left:50%;bottom:-6px;width:10px;height:10px;background:inherit;border-right:1.5px solid #2B2118;border-bottom:1.5px solid #2B2118;transform:translateX(-50%) rotate(45deg);border-bottom-right-radius:3px}
+.name i{display:block;font:400 11.5px/1.3 'Gowun Dodum','Noto Sans KR',sans-serif;font-style:normal;color:#7a6a58;margin-top:1px}
+.name i:empty{display:none}
+.name.me{background:#FFE27A}
+.name.me i{color:#5a4632}
 .fx{position:absolute;transform:translate(-50%,-100%);font:15px Jua,sans-serif;color:#ff6b8a;background:#fff;border-radius:999px;padding:0 9px;box-shadow:0 2px 6px rgba(0,0,0,.2);pointer-events:none;animation:up 1.8s ease-out forwards}
 @keyframes up{to{margin-top:-40px;opacity:0}}
 .menu{position:absolute;transform:translate(-50%,-100%);display:flex;gap:6px;background:#fff;border-radius:16px;padding:6px;box-shadow:0 4px 14px rgba(0,0,0,.3)}
@@ -738,19 +741,49 @@ function lulStop(){if(!LUL)return;clearTimeout(LUL.tm);const g=LUL.g;LUL=null;tr
 function wnStart(){const a=ac();const n=a.sampleRate*3,b=a.createBuffer(1,n,a.sampleRate),d=b.getChannelData(0);let l=0;for(let i=0;i<n;i++){const w=Math.random()*2-1;l=(l+.02*w)/1.02;d[i]=l*3.5}
  const s=a.createBufferSource();s.buffer=b;s.loop=true;const f=a.createBiquadFilter();f.type='lowpass';f.frequency.value=900;const g=a.createGain();g.gain.setValueAtTime(0,a.currentTime);g.gain.linearRampToValueAtTime(.5,a.currentTime+1.5);s.connect(f);f.connect(g);g.connect(a.destination);s.start();WN={s,g}}
 function wnStop(){if(!WN)return;const w=WN;WN=null;try{w.g.gain.setTargetAtTime(0,AC.currentTime,.4);setTimeout(()=>{w.s.stop()},2000)}catch(e){}}
-function sleepSoundsHTML(){return '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px"><button id="lb" style="'+(LUL?'':'background:#eee;color:#2B2118')+'">'+(LUL?'⏸ 자장가 끄기':'🎵 자장가')+'</button><button id="wnb" style="'+(WN?'':'background:#eee;color:#2B2118')+'">'+(WN?'⏸ 백색소음 끄기':'🌊 백색소음')+'</button><button id="enb" style="'+(ENG?'':'background:#eee;color:#2B2118')+'">'+(ENG?'⏸ 영어동요 끄기':'🔤 영어 조기교육')+'</button></div>'}
-function bindSleepSounds(){const l=$('lb');if(l)l.onclick=()=>{LUL?lulStop():lulStart();renderCard()};const w=$('wnb');if(w)w.onclick=()=>{WN?wnStop():wnStart();renderCard()};const en=$('enb');if(en)en.onclick=()=>{if(ENG)engStop();else{const c=LS.get('cp_eng',{});c.id?engPlay(c.id):openEng()}renderCard()}}
+function sleepSoundsHTML(){return '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px"><button id="lb" style="'+(LUL?'':'background:#eee;color:#2B2118')+'">'+(LUL?'⏸ 자장가 끄기':'🎵 자장가')+'</button><button id="wnb" style="'+(WN?'':'background:#eee;color:#2B2118')+'">'+(WN?'⏸ 백색소음 끄기':'🌊 백색소음')+'</button><button id="enb" style="'+(ENG?'':'background:#eee;color:#2B2118')+'">'+(ENG?'⏸ 영어동요 끄기':'🔤 영어 조기교육')+'</button>'+(LS.get('cp_eng',{}).k||LS.get('cp_eng',{}).id?'<button id="enc" style="background:#eee;color:#2B2118">곡 바꾸기</button>':'')+'</div>'}
+function bindSleepSounds(){const l=$('lb');if(l)l.onclick=()=>{LUL?lulStop():lulStart();renderCard()};const w=$('wnb');if(w)w.onclick=()=>{WN?wnStop():wnStart();renderCard()};const ec=$('enc');if(ec)ec.onclick=()=>{engStop();openEng()};const en=$('enb');if(en)en.onclick=()=>{if(ENG)engStop();else{const c=LS.get('cp_eng',{});c.k?engSong(c.k):c.id?engPlay(c.id):openEng()}renderCard()}}
 let ENG=false;
 function ytId(v){const m=(v||'').match(/(?:youtu\.be\/|v=|\/embed\/|\/shorts\/|\/live\/)([A-Za-z0-9_-]{11})/);return m?m[1]:(/^[A-Za-z0-9_-]{11}$/.test((v||'').trim())?v.trim():'')}
-function engPlay(id){engStop();const d=document.createElement('div');d.id='engp';d.style.cssText='position:fixed;left:10px;bottom:calc(10px + env(safe-area-inset-bottom));width:176px;z-index:9999;background:#2B2118;border-radius:14px;padding:4px;box-shadow:0 6px 20px rgba(0,0,0,.3)';
+function engPlay(id){engStop();const d=document.createElement('div');d.id='engp';d.style.cssText='position:fixed;left:10px;top:calc(88px + env(safe-area-inset-top));width:176px;z-index:9999;background:#2B2118;border-radius:14px;padding:4px;box-shadow:0 6px 20px rgba(0,0,0,.3)';
  d.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;color:#fff;font-size:12px;padding:2px 6px 4px">🔁 영어동요 반복 중<a id="engx" style="color:#FFD43B;font-weight:800">끄기</a></div><iframe width="168" height="95" style="border:0;border-radius:10px;display:block" allow="autoplay; encrypted-media; picture-in-picture" src="https://www.youtube-nocookie.com/embed/'+id+'?autoplay=1&loop=1&playlist='+id+'&playsinline=1&rel=0&modestbranding=1"></iframe>';
  document.body.appendChild(d);ENG=true;$('engx').onclick=()=>{engStop();renderCard()}}
-function engStop(){const d=$('engp');if(d)d.remove();ENG=false}
+function engStop(){const d=$('engp');if(d)d.remove();ENG=false;if(ESP){ESP.tm.forEach(clearTimeout);const g=ESP.g;ESP=null;try{g.gain.setTargetAtTime(0,AC.currentTime,.1);setTimeout(()=>g.disconnect(),800)}catch(e){}try{speechSynthesis.cancel()}catch(e){}}}
+const ESONGS={
+ twinkle:{n:'Twinkle Twinkle Little Star',b:.46,L:[
+  ['Twinkle, twinkle, little star,',[['C4',1],['C4',1],['G4',1],['G4',1],['A4',1],['A4',1],['G4',2]]],
+  ['How I wonder what you are.',[['F4',1],['F4',1],['E4',1],['E4',1],['D4',1],['D4',1],['C4',2]]],
+  ['Up above the world so high,',[['G4',1],['G4',1],['F4',1],['F4',1],['E4',1],['E4',1],['D4',2]]],
+  ['Like a diamond in the sky.',[['G4',1],['G4',1],['F4',1],['F4',1],['E4',1],['E4',1],['D4',2]]],
+  ['Twinkle, twinkle, little star,',[['C4',1],['C4',1],['G4',1],['G4',1],['A4',1],['A4',1],['G4',2]]],
+  ['How I wonder what you are.',[['F4',1],['F4',1],['E4',1],['E4',1],['D4',1],['D4',1],['C4',2]]]]},
+ row:{n:'Row, Row, Row Your Boat',b:.42,L:[
+  ['Row, row, row your boat,',[['C4',1.5],['C4',1.5],['C4',1],['D4',.5],['E4',1.5]]],
+  ['Gently down the stream.',[['E4',1],['D4',.5],['E4',1],['F4',.5],['G4',3]]],
+  ['Merrily, merrily, merrily, merrily,',[['C5',.5],['C5',.5],['C5',.5],['G4',.5],['G4',.5],['G4',.5],['E4',.5],['E4',.5],['E4',.5],['C4',.5],['C4',.5],['C4',.5]]],
+  ['Life is but a dream.',[['G4',1],['F4',.5],['E4',1],['D4',.5],['C4',3]]]]},
+ mary:{n:'Mary Had a Little Lamb',b:.44,L:[
+  ['Mary had a little lamb,',[['E4',1],['D4',1],['C4',1],['D4',1],['E4',1],['E4',1],['E4',2]]],
+  ['Little lamb, little lamb.',[['D4',1],['D4',1],['D4',2],['E4',1],['G4',1],['G4',2]]],
+  ['Mary had a little lamb,',[['E4',1],['D4',1],['C4',1],['D4',1],['E4',1],['E4',1],['E4',1],['E4',1]]],
+  ['Its fleece was white as snow.',[['D4',1],['D4',1],['E4',1],['D4',1],['C4',4]]]]}};
+let ESP=null;
+function engSay(t){try{const sy=window.speechSynthesis;if(!sy)return;const u=new SpeechSynthesisUtterance(t);u.lang='en-US';u.rate=.82;u.pitch=1.25;const v=sy.getVoices().find(v=>/^en(-|_)US/i.test(v.lang)&&/female|samantha|karen|zira|google us/i.test(v.name))||sy.getVoices().find(v=>/^en/i.test(v.lang));if(v)u.voice=v;sy.speak(u)}catch(e){}}
+function engSong(k){engStop();const S=ESONGS[k];if(!S)return;const a=ac();const g=a.createGain();g.gain.value=.2;g.connect(a.destination);
+ const d=document.createElement('div');d.id='engp';d.style.cssText='position:fixed;left:10px;right:10px;top:calc(88px + env(safe-area-inset-top));z-index:9999;background:#2B2118;color:#fff;border-radius:16px;padding:10px 14px;box-shadow:0 6px 20px rgba(0,0,0,.3);font:15px Jua,sans-serif';
+ d.innerHTML='<div style="display:flex;justify-content:space-between;font-size:12px;color:#FFD43B">🔁 '+S.n+'<a id="engx" style="color:#FFD43B">끄기</a></div><div id="engl" style="font-size:18px;margin-top:4px">♪</div>';document.body.appendChild(d);$('engx').onclick=()=>{engStop();renderCard()};
+ ESP={g,tm:[]};let t0=a.currentTime+.15;
+ const sched=()=>{if(!ESP)return;let t=t0;S.L.forEach(([txt,notes])=>{const ms=(t-a.currentTime)*1000;ESP.tm.push(setTimeout(()=>{if(!ESP)return;const l=$('engl');if(l)l.textContent=txt;engSay(txt)},Math.max(0,ms)));
+   notes.forEach(([n,bt])=>{const f=NF(n),du=bt*S.b;[[1,'triangle',.7],[2,'sine',.12]].forEach(([m,ty,v])=>{const o=a.createOscillator(),e=a.createGain();o.type=ty;o.frequency.value=f*m;e.gain.setValueAtTime(0,t);e.gain.linearRampToValueAtTime(v,t+.015);e.gain.exponentialRampToValueAtTime(.001,t+Math.max(.35,du*.95));o.connect(e);e.connect(g);o.start(t);o.stop(t+Math.max(.4,du))});t+=du})});
+  t+=S.b*2;const len=t-t0;t0=t;ESP.tm.push(setTimeout(sched,Math.max(300,(t0-a.currentTime-1)*1000)));if(ESP.tm.length>200)ESP.tm=ESP.tm.slice(-40)};
+ sched();ENG=true}
+
 function openEng(){openSheet('영어 조기교육 · 한 곡 무한반복');const cur=LS.get('cp_eng',{});
- sb.innerHTML='<div class="box"><div class="t">우리 아기 영어동요 <small>한 곡만 계속 틀어줘</small></div><p style="font-size:14px;line-height:1.6;margin:4px 0 8px">아이가 좋아하는 영어동요 유튜브 링크를 한 번만 붙여넣어. 다음부터는 버튼만 누르면 그 곡이 끝없이 반복돼.</p>'+
+ sb.innerHTML='<div class="box"><div class="t">바로 듣기 <small>저작권 끝난 옛 영어동요</small></div>'+Object.entries(ESONGS).map(([k,s])=>'<button class="btn'+(cur.k==k?' k':'')+'" data-es="'+k+'" style="width:100%;margin-bottom:6px;text-align:left">🔁 '+s.n+'</button>').join('')+'<p class="note">멜로디는 폰에서 만들고 가사는 원어민 목소리(폰 내장 영어 음성)가 한 줄씩 읽어줘. 화면엔 지금 가사가 떠.</p></div><div class="box"><div class="t">우리 아기 최애 영상으로 <small>유튜브 링크</small></div><p style="font-size:14px;line-height:1.6;margin:4px 0 8px">아이가 좋아하는 영어동요 유튜브 링크를 한 번만 붙여넣어. 다음부터는 버튼만 누르면 그 곡이 끝없이 반복돼.</p>'+
   '<input id="engu" placeholder="유튜브 링크 붙여넣기 (공유 → 링크 복사)" value="'+esc(cur.u||'')+'" style="width:100%">'+
   '<button class="btn k" id="engg" style="width:100%;margin-top:8px">'+(cur.id?'▶ 이 곡 반복 재생':'저장하고 반복 재생')+'</button>'+
   '<p class="note">작은 플레이어가 화면 왼쪽 아래에 떠서 공동육아방을 쓰는 동안 계속 반복돼. 폰 화면을 끄거나 다른 앱으로 가면 아이폰 정책상 멈춰. 영상은 유튜브 플레이어로 재생돼서 광고가 나올 수 있어.</p></div>';
+ sb.querySelectorAll('[data-es]').forEach(b=>b.onclick=()=>{LS.set('cp_eng',{k:b.dataset.es});closeSheet();engSong(b.dataset.es);renderCard()});
  $('engg').onclick=()=>{const v=$('engu').value.trim();const id=ytId(v);if(!id){toast('유튜브 링크를 확인해줘');return}LS.set('cp_eng',{u:v,id});closeSheet();engPlay(id);renderCard()}}
 
 
