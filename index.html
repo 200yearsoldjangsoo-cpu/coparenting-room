@@ -78,7 +78,7 @@ html,body{margin:0;height:100%;background:#1b1d38;overflow:hidden;font:15px/1.5 
 .cy-prof{display:grid;grid-template-columns:120px 1fr;gap:10px}
 .cy-pic{height:132px;border:1px solid #cfe3ee;background:#fbe9de;overflow:hidden;position:relative}.cy-pic canvas{width:100%;height:100%;display:block}
 .cy-mood{font-size:11px;color:#888;margin-top:4px}.cy-mood b{color:#ff6a00}
-.cy-intro{font-size:13px;line-height:1.5;margin:2px 0 6px;word-break:break-all}
+.cy-intro{font-size:13px;line-height:1.5;margin:2px 0 6px;word-break:break-all;white-space:pre-line}
 .cy-links a{display:block;font-size:12px;color:#1a7fbf;text-decoration:none;padding:3px 0;border-bottom:1px dotted #d9e8f0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.cy-links a.off{color:#bbb}
 .cy-sec{margin-top:10px;border-top:2px solid #8fc3dd;padding-top:6px}.cy-sec h4{margin:0 0 6px;font:bold 12px Dotum,sans-serif;color:#1a7fbf;display:flex;justify-content:space-between}
 .cy-news{font-size:12px;line-height:1.7}.cy-news span{color:#ff6a00}
@@ -688,7 +688,7 @@ function bindMealMy(draw){const day=ymd(new Date());
 function openMeal(){openSheet('오늘의 유아식');const mine=LS.get('cp_meal',{});const today=mine.day===ymd(new Date())?mine.m:[];let pick=today.slice();
  const live=others().filter(p=>p.state.ex&&p.state.ex.meal&&p.state.ex.meal.length).map(p=>({nick:p.state.nick,m:p.state.ex.meal,at:p.state.ex.mealAt||0}));
  const seen=new Set(),board=[];live.concat(mealBoard).forEach(x=>{if(!seen.has(x.nick)){seen.add(x.nick);board.push(x)}});
- const draw=()=>{const posted=LS.get('cp_meal',{}).day===ymd(new Date());const tm=posted?LS.get('cp_meal',{}).m:[];const bd=(posted?[{nick:me.nick,m:tm,mine:1}]:[]).concat(board.filter(x=>x.nick!==me.nick));sb.innerHTML='<div class="note" style="background:#fff8e6;border-radius:12px;padding:8px 10px;margin-bottom:8px">🍚 유아식 칸은 지금 식탁 올리기부터 시작했어. 메뉴 추천·식단표·간식은 앞으로 차근차근 업데이트할게요.</div>'+(posted?mealMyHTML(tm):'')+'<div class="box"><div class="t">'+(posted?'메뉴 고치기':'우리 아이 오늘 먹은 거')+' <small>최대 4개</small></div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">'+FOODS.map((f,i)=>'<button class="vchip'+(pick.includes(i)?' on':'')+'" data-f="'+i+'">'+f+'</button>').join('')+'</div><button class="btn" id="mok" style="width:100%;margin-top:10px">식탁에 올리기</button></div>'+
+ const draw=()=>{const posted=LS.get('cp_meal',{}).day===ymd(new Date());const tm=posted?LS.get('cp_meal',{}).m:[];const bd=(posted?[{nick:me.nick,m:tm,mine:1}]:[]).concat(board.filter(x=>x.nick!==me.nick));sb.innerHTML='<div class="note" style="background:#fff8e6;border-radius:12px;padding:8px 10px;margin-bottom:8px">🍚 유아식 칸은 지금 식탁 올리기부터 시작했어. 메뉴 추천·식단표·간식은 앞으로 차근차근 채워갈게.</div>'+(posted?mealMyHTML(tm):'')+'<div class="box"><div class="t">'+(posted?'메뉴 고치기':'우리 아이 오늘 먹은 거')+' <small>최대 4개</small></div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">'+FOODS.map((f,i)=>'<button class="vchip'+(pick.includes(i)?' on':'')+'" data-f="'+i+'">'+f+'</button>').join('')+'</div><button class="btn" id="mok" style="width:100%;margin-top:10px">식탁에 올리기</button></div>'+
   '<div class="box"><div class="t">다른 엄마들 식탁</div>'+(bd.length?bd.map(x=>'<div style="padding:8px 0;border-bottom:1px solid #f0e2cf;font-size:14px'+(x.mine?';background:#fffaf0;border-radius:10px;padding:8px':'')+'"><b>'+esc(x.nick)+'의 식탁</b>'+(x.mine?' <small style="color:#c27a00">방금 올림 · 나</small>':'')+'<br>'+x.m.filter(i=>FOODS[i]).map(i=>FOODS[i]).join(' · ')+(x.mine?'':' <button class="vchip" data-copy="'+esc(x.m.join(','))+'" style="padding:3px 8px">따라 할래</button>')+'</div>').join(''):'<div class="note">아직 올린 엄마가 없어. 첫 식탁을 올려줘!</div>')+'</div>';
   sb.querySelectorAll('[data-f]').forEach(e=>e.onclick=()=>{const i=+e.dataset.f;if(pick.includes(i))pick=pick.filter(x=>x!==i);else if(pick.length<4)pick.push(i);else{toast('4개까지만');return}const y=sb.scrollTop;draw();sb.scrollTop=y});
   bindMealMy(draw);
@@ -1156,7 +1156,7 @@ function closeSheet(){sheet.classList.remove('on');if(miniR){miniR.dispose();min
 
 /* 미니홈피 */
 const OWNER_ID='8973e17e-175f-4fa3-a78d-c1c87beb69ec',OWNER_NICK='엄마6865';
-const OWNER_HOME={status:'자영업 워킹맘',intro:'4년 수험 끝에 임신·출산하고 합격한 노무사 엄마. 일하는 엄마들 권리 찾고, 부업으로 월급 넘기는 길 같이 가요.',blog:'tngus4730',blogName:'노무사 블로그',blog2:'real_mompick',blog2Name:'육아 블로그 리얼맘픽',
+const OWNER_HOME={status:'자영업 워킹맘',intro:'일하는 엄마들 권리 찾아주는 게 취미.\n엄마들!! 부업으로 월급 넘기는 거 같이 한번 해봐요',blog:'tngus4730',blogName:'노무사 블로그',blog2:'real_mompick',blog2Name:'육아 블로그 리얼맘픽',
  goals:['상위 1티어 육아블로거 되기','애드포스트로 월 100만원 벌기'],
  works:[{url:'https://blog.naver.com/real_mompick/224483567906',img:'img/socks_thumb.jpg',tag:'리얼맘픽 · 돌아기 육아템',hook:'양말 5켤레 14,000원? 서문시장 아동양말 코너 털고 왔어',sub:'17개월은 몇 호 사야 하는지 · 가게 위치 · 온누리로 내면 얼마인지 다 적어놨어'}]};
 function isOwner(hid,mine){return hid===OWNER_ID||(mine&&me.nick===OWNER_NICK)}
