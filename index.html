@@ -178,7 +178,7 @@ a.kakao{display:block;margin-top:10px;text-align:center;font:15px Jua,sans-serif
   <button data-t="grow"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>엄마 시간</button>
   <button data-t="aide"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z" fill="none" stroke="currentColor" stroke-width="2"/></svg>육아비서</button>
  </div>
- <div class="sheet" id="sheet"><div class="sh"><b id="stt"></b><button id="sx">닫기</button></div><div class="sb" id="sb"></div></div>
+ <div class="sheet" id="sheet"><div class="sh"><button id="sbk" style="display:none;background:#f3ebe0;color:#2B2118;border:0;border-radius:999px;padding:8px 12px;font:14px Jua,sans-serif">‹ 목록</button><b id="stt"></b><button id="sx">닫기</button></div><div class="sb" id="sb"></div></div>
  <div class="gate" id="gate">
   <div class="moon"></div><h1>온라인 공동육아방</h1><div class="sub">엄마만 들어올 수 있는 방 · 가입 없이 바로</div>
   <div class="pill" style="color:var(--ink)"><span class="dot"></span>지금 엄마 <b id="gtot">…</b> 같이 육아 중</div>
@@ -607,8 +607,13 @@ async function shareCard(){const pk=LS.get('cp_peak',{}),d=new Date(),di=dawnInf
   '<button id="shk" style="'+bs+';background:#FEE500;color:#191919">💬 카톡으로 보내기</button>'+
   '<button id="shi" style="'+bs+';background:linear-gradient(90deg,#f9a03f,#e1306c,#833ab4);color:#fff">📷 인스타 스토리에 올리기</button>'+
   '<a id="shs" download="'+file.name+'" href="'+u+'" style="'+bs+';background:#f6efe6;color:#2B2118">⬇ 이미지 저장</a>'+
-  '<p class="note" id="shn">'+(can?'버튼을 누르면 공유창이 떠. 카톡은 카카오톡, 인스타는 Instagram(스토리)을 골라줘.':'이 브라우저는 바로 공유가 안 돼. 이미지 저장 후 카톡·인스타에서 올려줘.')+'</p></div>';
- const go=async w=>{if(!can){toast('이미지 저장 후 '+w+'에서 올려줘');$('shs').click();return}try{await navigator.share({files:[file]})}catch(e){}};
+  '<p class="note" id="shn">'+(can?'카톡은 사진이랑 방 링크가 같이 가. 인스타는 링크가 자동 복사되니까 스토리에서 링크 스티커에 붙여넣어줘.':'이 브라우저는 바로 공유가 안 돼. 이미지 저장 후 카톡·인스타에서 올려줘.')+'</p></div>';
+ const LINK='https://coparenting-room.vercel.app',MSG='오늘도 버틴 엄마들 모여 있는 온라인 공동육아방 🍼 엄마만 입장\n'+LINK;
+ const copy=async()=>{try{await navigator.clipboard.writeText(LINK);return true}catch(e){return false}};
+ const go=async w=>{if(w=='카톡'&&window.Kakao&&KAKAO_JS){try{if(!Kakao.isInitialized())Kakao.init(KAKAO_JS);Kakao.Share.sendDefault({objectType:'feed',content:{title:'오늘 육아인증 · 온라인 공동육아방',description:'오늘도 버틴 엄마들 모여 있는 방. 엄마만 입장',imageUrl:LINK+'/og.jpg',link:{mobileWebUrl:LINK,webUrl:LINK}},buttons:[{title:'나도 들어가기',link:{mobileWebUrl:LINK,webUrl:LINK}}]});return}catch(e){}}
+  if(w=='인스타'){const ok=await copy();toast(ok?'링크 복사됨! 스토리에서 링크 스티커에 붙여넣어줘':'스토리에서 링크 스티커로 '+LINK)}
+  if(!can){toast('이미지 저장 후 '+w+'에서 올려줘');$('shs').click();return}
+  try{await navigator.share(w=='카톡'?{files:[file],text:MSG}:{files:[file]})}catch(e){}};
  $('shk').onclick=()=>go('카톡');$('shi').onclick=()=>go('인스타')}
 document.querySelectorAll('#dock button').forEach(b=>b.onclick=()=>{if(!me.room)return;const t=b.dataset.t;
  if(t=='home'){openHome(myId,me.nick);return}if(t=='aide'){openAide();return}
@@ -732,7 +737,7 @@ async function openHomes(){openSheet('엄마들 미니홈피 구경');sb.innerHT
  const sns=v=>['ig','yt','blog'].filter(k=>v[k]).length;L.sort((a,b)=>sns(b.v)-sns(a.v));
  sb.innerHTML='<div class="box"><div class="t">다른 엄마들은 어떻게 키우고 있을까</div><div style="font-size:13px;color:#8a7a68">육아하면서 SNS·블로그로 부업 키우는 엄마들 미니홈피야. 들어가서 어떻게 하는지 구경하고 레퍼런스 삼아봐.</div><button class="btn" id="mk" style="width:100%;margin-top:8px">내 미니홈피 꾸미기</button></div>'+
  (L.length?L.map(x=>'<div class="box" data-h="'+esc(x.id)+'" data-n="'+esc(x.v.nick)+'" style="cursor:pointer"><b style="font:15px Jua,sans-serif">'+esc(x.v.nick)+'</b> '+(x.v.ig?'<span class="chip">인스타</span>':'')+(x.v.yt?'<span class="chip">유튜브</span>':'')+(x.v.blog?'<span class="chip">블로그</span>':'')+'<div style="font-size:13px;color:#5a4a3a;margin-top:4px">'+esc((x.v.intro||'').slice(0,60))+'</div></div>').join(''):'<div class="note">아직 미니홈피를 연 엄마가 없어. 첫 번째로 열어봐!</div>');
- $('mk').onclick=()=>openHome(myId,me.nick,true);sb.querySelectorAll('[data-h]').forEach(e=>e.onclick=()=>openHome('uid:'+e.dataset.h,e.dataset.n))}
+ $('mk').onclick=()=>openHome(myId,me.nick,true);sb.querySelectorAll('[data-h]').forEach(e=>e.onclick=()=>{BACKTO=openHomes;openHome('uid:'+e.dataset.h,e.dataset.n)})}
 /* ---------- 위로 카드: 랜덤으로 한 장씩 ---------- */
 const COMFORT=['아이 키우는 시간은 경력이 끊기는 게 아니라 늘어나는 시간이야','엄마가 되면서 생긴 감각, 그게 너만의 새 무기야','모르면 못 받는 돈이 있어. 권리는 챙기는 사람 거야','육아랑 일, 딱 두 개에만 집중해. 나머지는 여기서 같이 챙길게','아이 재우고 30분씩, 그게 쌓이면 월급 넘는 부업이 돼','완벽한 엄마 말고 행복한 엄마면 충분해','오늘 버틴 너, 진짜 잘하고 있어','새벽에 깨어 있는 엄마, 지금 이 방에 너 혼자 아니야','남들 SNS 보고 조급해하지 마. 너만의 속도가 있어','육아로 배운 인내심은 일할 때도 진짜 쓸모 있어','작게라도 매일 기록하면 그게 포트폴리오가 돼','임신·출산·육아가 공백이 아니라 다음 일을 여는 기회가 되게','쉬는 것도 일이야. 오늘은 푹 쉬어도 돼','엄마 이름 말고 내 이름으로도 불리는 날, 같이 만들자'];
 function showComfort(){if(!me.room||sheet.classList.contains('on'))return;let el=$('comfort');if(!el){el=document.createElement('div');el.id='comfort';app.appendChild(el)}
@@ -1105,6 +1110,7 @@ function snsNorm(t,v){v=(v||'').trim();if(!v)return'';
  const m=v.match(/blog\.naver\.com\/([A-Za-z0-9_-]+)/i);if(m)return m[1];if(/^https?:\/\//i.test(v)||/\.[a-z]{2,}(\/|$)/i.test(v))return(/^https?:/i.test(v)?v:'https://'+v).slice(0,200);return v.replace(/^@/,'').replace(/\s/g,'').slice(0,40)}
 function snsLink(t,v){if(!v)return'';if(/^https?:/i.test(v))return v;if(t=='ig')return'https://www.instagram.com/'+encodeURIComponent(v)+'/';if(t=='yt')return'https://www.youtube.com/'+(v[0]=='@'?v:'@'+v);return'https://blog.naver.com/'+encodeURIComponent(v)}
 function snsShow(t,v){if(!v)return'-';if(/^https?:/i.test(v))return v.replace(/^https?:\/\/(www\.|m\.)?/i,'').slice(0,24);return t=='ig'?'@'+v:v}
+const KAKAO_JS='';/* 카카오 개발자 JavaScript 키 받으면 넣기 */
 const CP_LINK='';/* 쿠팡 파트너스 링크 받으면 여기에 넣기 */
 let vTab=0;
 function openVoice(){openSheet('엄마의 소리');
@@ -1129,7 +1135,8 @@ function openVoice(){openSheet('엄마의 소리');
  bindVTabs()}
 function bindVTabs(){sb.querySelectorAll('[data-vt]').forEach(b=>b.onclick=()=>{vTab=+b.dataset.vt;openVoice()})}
 setTimeout(()=>{const v=$('voice');if(v)v.onclick=openVoice},0);
-function openSheet(t){$('stt').textContent=t;sheet.classList.add('on')}
+let BACKTO=null;
+function openSheet(t){$('stt').textContent=t;sheet.classList.add('on');const b=$('sbk');if(b){if(BACKTO){const f=BACKTO;b.style.display='';b.onclick=()=>{if(miniR){miniR.dispose();miniR=null}f()}}else b.style.display='none'}BACKTO=null}
 function closeSheet(){sheet.classList.remove('on');if(miniR){miniR.dispose();miniR=null}}
 
 /* 미니홈피 */
@@ -1216,14 +1223,18 @@ async function g24Load(rg){if(G24[rg])return G24[rg];const PD='https://hiqekjtjt
  G24[rg]=all.filter(x=>!seen[x['서비스ID']]&&(seen[x['서비스ID']]=1)).map(x=>({id:x['서비스ID'],n:x['서비스명'].replace(/^\+/,''),o:x['소관기관명'],c:(x['지원내용']||'').replace(/\s+/g,' ').replace(/^○\s*/,''),tg:(x['지원대상']||'').trim(),ty:x['지원유형']||'',sel:(x['선정기준']||'').trim(),how:(x['신청방법']||'').trim(),dl:(x['신청기한']||'').trim(),rc:(x['접수기관']||'').trim(),u:x['상세조회URL'],t:x['전화문의']||'',f:x['서비스분야'],d:(x['수정일시']||'').slice(0,10)}));
  return G24[rg]}
 function g24Amt(s){const m=(s||'').match(/(첫째[^,○\-]{0,12}?\d[\d,]*\s*만\s*원|\d[\d,.]*\s*(만|천)\s*원(\s*상당)?|\d[\d,]{3,}\s*원)/g);if(!m)return'';return [...new Set(m.map(x=>x.replace(/\s+/g,'')))].slice(0,3).join(' · ')}
-function g24Row(k,v){v=(v||'').replace(/\r/g,'').trim();if(v=='None')v='';return v?'<div style="margin-bottom:8px"><b style="font-size:13px;color:#8a7a68">'+k+'</b><br>'+esc(v)+'</div>':''}
+function g24Items(v){v=(v||'').replace(/\r/g,'').trim();if(!v||v=='None')return[];
+ v=v.replace(/\|\|/g,'\n').replace(/\s*○\s*/g,'\n').replace(/\s+-\s+(?=\S)/g,'\n').replace(/\n\s*-\s*/g,'\n').replace(/※/g,'\n※');
+ return v.split('\n').map(s=>s.replace(/^[\s·•\-]+/,'').replace(/\s+/g,' ').trim()).filter(Boolean)}
+function g24Hi(s){return esc(s).replace(/(\d[\d,.]*\s*(만\s*원|천\s*원|원))/g,'<b style="color:#2B2118;background:#fff1c2;border-radius:4px;padding:0 3px">$1</b>').replace(/^([^:：]{2,14})\s*[:：]\s*/,'<span style="color:#8a6a3a;font-weight:700">$1</span> ')}
+function g24Row(k,v){const it=g24Items(v);if(!it.length)return'';return '<div style="margin-bottom:12px"><div style="font:12.5px Jua,sans-serif;color:#a0886a;letter-spacing:.3px;margin-bottom:4px">'+k+'</div>'+(it.length==1?'<div style="font-size:14.5px;line-height:1.6;color:#3a2e24">'+g24Hi(it[0])+'</div>':'<ul style="margin:0;padding-left:16px;font-size:14.5px;line-height:1.6;color:#3a2e24">'+it.map(s=>'<li style="margin-bottom:3px">'+g24Hi(s)+'</li>').join('')+'</ul>')+'</div>'}
 function g24HTML(rg){const L=G24[rg];if(!L)return '<div class="box" id="g24"><div class="t">정부24 실시간 <small>불러오는 중…</small></div></div>';
  const orgs=[...new Set(L.map(x=>x.o))].sort((a,b)=>a.length-b.length||a.localeCompare(b));const f=orgs.includes(G24F)?G24F:'';const ls=L.filter(x=>!f||x.o==f);
  return '<div class="box" id="g24"><div class="t">정부24 실시간 · '+rg+' 엄마 지원 <small>'+L.length+'개</small></div>'+
   '<select id="g24o"><option value="">전체 ('+L.length+')</option>'+orgs.map(o=>'<option value="'+esc(o)+'"'+(o==f?' selected':'')+'>'+esc(o.replace((SIDOF[rg]||'')+' ','')||o)+' ('+L.filter(x=>x.o==o).length+')</option>').join('')+'</select>'+
-  '<div style="max-height:520px;overflow-y:auto;margin-top:8px">'+ls.map(x=>{const am=g24Amt(x.c+' '+x.tg);return '<details style="padding:9px 0;border-bottom:1px solid #f0e2cf;font-size:14px"><summary style="list-style:none;cursor:pointer"><b>'+esc(x.n)+'</b> <small style="color:#8a7a68">'+esc(x.o.replace((SIDOF[rg]||'')+' ','')||x.o)+'</small>'+(am?'<br><span style="display:inline-block;margin-top:3px;background:#fff3c4;border-radius:8px;padding:2px 8px;font-weight:800;color:#3a2a1a">💰 '+esc(am)+'</span>':'')+(x.ty?' <small style="color:#8a7a68">'+esc(x.ty)+'</small>':'')+'<br><span style="color:#5a4c3e">'+esc(x.c.slice(0,70))+(x.c.length>70?'…':'')+'</span> <span style="color:#c27a00;font-size:13px">▾ 자세히</span></summary>'+
-   '<div style="background:#fbf6ee;border-radius:10px;padding:10px;margin-top:6px;line-height:1.55;white-space:pre-line">'+g24Row('얼마·무엇',x.c)+g24Row('누가',x.tg)+g24Row('선정기준',x.sel)+g24Row('신청방법',x.how)+g24Row('신청기한',x.dl)+g24Row('접수처',x.rc)+g24Row('문의',x.t)+
-   '</div></details>'}).join('')+'</div>'+'<p class="note">출처 · 행정안전부 대한민국 공공서비스(혜택) 정보, 공공데이터포털 오픈API(정부24). 금액·대상은 바뀔 수 있으니 신청 전 문의처에 한 번 확인해. 탭하면 대상·신청방법·기한이 펼쳐져.</p></div>'}
+  '<div style="max-height:520px;overflow-y:auto;margin-top:8px">'+ls.map(x=>{const am=g24Amt(x.c+' '+x.tg);return '<details style="padding:9px 0;border-bottom:1px solid #f0e2cf;font-size:14px"><summary style="list-style:none;cursor:pointer"><b>'+esc(x.n)+'</b> <small style="color:#8a7a68">'+esc(x.o.replace((SIDOF[rg]||'')+' ','')||x.o)+'</small>'+(am?'<br><span style="display:inline-block;margin-top:3px;background:#fff3c4;border-radius:8px;padding:2px 8px;font-weight:800;color:#3a2a1a">💰 '+esc(am)+'</span>':'')+(x.ty?' <small style="color:#8a7a68">'+esc(x.ty)+'</small>':'')+'<div style="color:#6a5a48;font-size:13.5px;line-height:1.5;margin-top:3px">'+esc((g24Items(x.c)[0]||'').slice(0,46))+((g24Items(x.c)[0]||'').length>46?'…':'')+'</div><div style="color:#c27a00;font-size:12.5px;margin-top:2px">탭해서 자세히 ▾</div></summary>'+
+   '<div style="background:#fbf6ee;border-radius:14px;padding:14px 14px 4px;margin-top:8px">'+g24Row('얼마·무엇',x.c)+g24Row('누가',x.tg)+g24Row('선정기준',x.sel)+g24Row('신청방법',x.how)+g24Row('신청기한',x.dl)+g24Row('접수처',x.rc)+g24Row('문의',x.t)+
+   '</div></details>'}).join('')+'</div>'+'<p class="note">출처 · 행정안전부 대한민국 공공서비스(혜택) 정보, 공공데이터포털 오픈API(정부24). 금액·대상은 바뀔 수 있으니 신청 전 문의처에 한 번 확인해.</p></div>'}
 
 function bindRegion(){$('rsd').onchange=e=>{RGN=e.target.value;G24F='';try{localStorage.setItem('cp_rg',RGN)}catch(x){}openAide()};
  const host=$('rsd').closest('.box');host.insertAdjacentHTML('afterend',g24HTML(RGN));
