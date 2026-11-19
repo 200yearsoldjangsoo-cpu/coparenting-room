@@ -1135,6 +1135,17 @@ function openVoice(){openSheet('엄마의 소리');
   '<a href="http://pf.kakao.com/_xmxmxjxeX" target="_blank" rel="noopener" class="btn" style="display:block;margin-top:10px;text-decoration:none;color:#2B2118;background:#FEE500">💬 카톡으로 협찬 문의</a></div>'}
  bindVTabs()}
 function bindVTabs(){sb.querySelectorAll('[data-vt]').forEach(b=>b.onclick=()=>{vTab=+b.dataset.vt;openVoice()})}
+
+document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('#kcons');if(!a)return;e.preventDefault();
+ let m=$('kcm');if(m)m.remove();m=document.createElement('div');m.id='kcm';m.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(43,33,24,.45);display:flex;align-items:center;justify-content:center;padding:24px';
+ m.innerHTML='<div style="background:#fffaf2;border-radius:24px;padding:22px 20px 18px;width:min(340px,100%);box-shadow:0 18px 40px rgba(0,0,0,.25);text-align:center;word-break:keep-all">'+
+  '<div style="font-size:34px;line-height:1">⚖️</div><div style="font:19px Jua,sans-serif;margin-top:6px">개별 노동법 상담 안내</div>'+
+  '<div style="font-size:14px;color:#5a4a3a;line-height:1.6;margin-top:8px">내 사건에 맞춘 개별 상담은 공인노무사가 유료로 진행해요.</div>'+
+  '<div style="display:flex;gap:8px;margin-top:12px"><div style="flex:1;background:#fff;border:1px solid #efe3d2;border-radius:14px;padding:10px 6px"><div style="font-size:12.5px;color:#8a7a68">30분 이내</div><div style="font:20px Jua,sans-serif">6만원</div></div><div style="flex:1;background:#fff;border:1px solid #efe3d2;border-radius:14px;padding:10px 6px"><div style="font-size:12.5px;color:#8a7a68">1시간 이내</div><div style="font:20px Jua,sans-serif">10만원</div></div></div>'+
+  '<div style="font-size:12.5px;color:#8a7a68;margin-top:10px;line-height:1.5">제도 일반 내용은 육아비서에서 무료로 확인할 수 있어요.</div>'+
+  '<div style="font:16px Jua,sans-serif;margin-top:12px">상담을 진행할까요?</div>'+
+  '<div style="display:flex;gap:8px;margin-top:10px"><button id="kcn" style="flex:1;border:0;border-radius:14px;padding:12px;background:#f0e8dc;font:16px Jua,sans-serif;color:#2B2118">아니요</button><a id="kcy" href="http://pf.kakao.com/_xmxmxjxeX" target="_blank" rel="noopener" style="flex:1;border-radius:14px;padding:12px;background:#FEE500;font:16px Jua,sans-serif;color:#191919;text-decoration:none">네, 카톡 연결</a></div></div>';
+ document.body.appendChild(m);m.onclick=ev=>{if(ev.target===m)m.remove()};$('kcn').onclick=()=>m.remove();$('kcy').onclick=()=>setTimeout(()=>m.remove(),300)});
 setTimeout(()=>{const v=$('voice');if(v)v.onclick=openVoice},0);
 let BACKTO=null;
 function openSheet(t){$('stt').textContent=t;sheet.classList.add('on');const b=$('sbk');if(b){if(BACKTO){const f=BACKTO;b.style.display='';b.onclick=()=>{if(miniR){miniR.dispose();miniR=null}f()}}else b.style.display='none'}BACKTO=null}
@@ -1409,7 +1420,7 @@ function openAide(){openSheet('육아비서');const t=TODO[me.kind]||TODO.carrie
  if(aTab=='baby')body=babyHTML();
  if(aTab=='ask')body='<div class="box chat"><div class="t">노동법 상담소 <small>'+(SAMPLE?'AI 답변 · 근거 조문 포함':'자주 묻는 질문부터')+'</small></div><div id="log">'+(chat.length?chat.map(m=>m.role=='user'?'<div class="q"><span>'+esc(m.content)+'</span></div>':'<div class="a"><span>'+esc(m.content)+'</span></div>').join(''):'<div class="a"><span>안녕, 노무사 엄마가 만든 육아비서야. 회사·제도 뭐든 물어봐.</span></div>')+'</div>'+
  '<div class="chips">'+['육아휴직 회사가 거절할 수 있어?','복직하는데 다른 부서로 가래','단축근무하면 월급 깎여?'].map(q=>'<button>'+q+'</button>').join('')+'</div><div class="ask"><input id="aq" placeholder="육아비서한테 물어보기" maxlength="300"><button class="btn k" id="asend">보내기</button></div>'+
- '<a class="kakao" href="http://pf.kakao.com/_xmxmxjxeX" target="_blank" rel="noopener">카톡으로 노무사 상담</a><p class="note">육아비서 답변은 참고용이야. 내 사건에 맞는 판단은 노무사 상담으로.</p></div>';
+ '<a class="kakao" id="kcons" href="#">카톡으로 노무사 상담</a><p class="note">육아비서 답변은 참고용이야. 내 사건에 맞는 판단은 노무사 상담으로.</p></div>';
  sb.innerHTML='<div class="atabs">'+tabs.map(([k,n])=>'<button data-a="'+k+'" class="'+(aTab==k?'on':'')+'">'+n+'</button>').join('')+'</div>'+body;sb.scrollTop=0;
  sb.querySelectorAll('.atabs button').forEach(b=>b.onclick=()=>{aTab=b.dataset.a;openAide()});
  if(aTab=='diag')bindDiag();
@@ -1417,7 +1428,7 @@ function openAide(){openSheet('육아비서');const t=TODO[me.kind]||TODO.carrie
  if(aTab=='baby')bindBaby();
  if(aTab=='ask'){sb.querySelectorAll('.chips button').forEach(b=>b.onclick=()=>ask(b.textContent));$('asend').onclick=()=>ask($('aq').value);$('aq').onkeydown=e=>{if(e.key=='Enter')ask($('aq').value)}}}
 const FAQ={'육아휴직 회사가 거절할 수 있어?':'요건을 갖춘 근로자가 신청하면 회사는 허용해야 해. 거절하면 벌칙 대상이야. 회사가 미루거나 눈치 주면 신청서를 서면으로 남겨두고 노무사랑 상의해.\n근거 · 남녀고용평등법 제19조①','복직하는데 다른 부서로 가래':'휴직 전과 같은 업무 또는 같은 수준 임금을 받는 직무로 복귀시키는 게 원칙이야. 휴직했다는 이유로 불리하게 대하면 안 돼. 발령 문서를 받아두고 바로 상담해.\n근거 · 남녀고용평등법 제19조③④','단축근무하면 월급 깎여?':'임신기 근로시간 단축은 임금을 깎을 수 없어. 육아기 근로시간 단축은 줄어든 시간에 비례해서만 임금이 줄 수 있고, 그 밖에 단축을 이유로 근로조건을 불리하게 하면 안 돼.\n근거 · 근로기준법 제74조 제8항 · 남녀고용평등법 제19조의3 제1항'};
-async function ask(q){q=(q||'').trim();if(!q||busy)return;if(!SAMPLE){chat.push({role:'user',content:q});chat.push({role:'assistant',content:FAQ[q]||'이 질문은 아직 비서가 바로 답을 못 해. AI 답변은 곧 열려! 급하면 아래 카톡으로 노무사한테 바로 물어봐.'});openAide();return}
+async function ask(q){q=(q||'').trim();if(!q||busy)return;if(!SAMPLE){chat.push({role:'user',content:q});chat.push({role:'assistant',content:FAQ[q]||'좋은 질문이야. 아직 이 질문엔 비서가 바로 답을 못 해. 질문은 노무사 엄마한테 전달됐고, 답변을 모아 비서가 점점 똑똑해질 거야. 내 사건에 딱 맞는 답이 급하면 아래 노무사 상담으로.'});if(!FAQ[q]&&typeof SB!=='undefined'&&SB&&uid){SB.from('requests').insert({uid:uid,name:(me.nick||'익명').slice(0,20),contact:'-',memo:('[육아비서 질문] '+q).slice(0,300),diag:{type:'ask',kind:me.kind||''}}).then(()=>{},()=>{})}openAide();return}
  busy=true;chat.push({role:'user',content:q});const log=$('log');log.insertAdjacentHTML('beforeend','<div class="q"><span>'+esc(q)+'</span></div><div class="a"><span id="live">생각 중…</span></div>');$('aq').value='';log.parentElement.scrollIntoView(false);
  const sys='너는 "육아비서"야. 공인노무사이자 워킹맘이 만든 모성보호 비서. 한국 노동법(근로기준법, 남녀고용평등과 일·가정 양립 지원에 관한 법률, 고용보험법)과 임신·출산·육아 지원제도를 쉽게 설명해. 반말로 다정하게, 4~6문장 안으로 짧게. 확실한 조문만 "근거 · 법령명 제○조"로 끝에 붙이고, 확실하지 않으면 조문 번호를 지어내지 말고 "정확한 조문은 확인 필요"라고 써. 금액·기간 숫자는 확실할 때만 말하고 최신 금액은 정부24·고용24에서 확인하라고 안내해. 분쟁·불이익이 걸린 상황이면 마지막에 노무사 상담을 권해. 사용자 시기: '+KINDS[me.kind].label+'.';
  const msgs=[{role:'user',content:sys+'\n\n질문: '+chat[0].content}].concat(chat.slice(1));
