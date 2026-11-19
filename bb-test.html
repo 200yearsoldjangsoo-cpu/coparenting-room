@@ -37,6 +37,7 @@ pre{white-space:pre-wrap;font-size:11px;background:#fff;padding:10px;border-radi
 <div id="big"></div>
 <button id="tog" style="display:none">찬이가 보는 화면 보기</button>
 <div id="wrap"><div id="sc"><iframe id="lv" allow="clipboard-read; clipboard-write"></iframe></div></div>
+<div id="dbg" style="margin:6px 16px;font-size:11px;color:#888;word-break:break-all"></div>
 <div id="out"></div>
 <script>
 const FN="https://hiqekjtjtycoisjgyrrh.supabase.co/functions/v1/bb-session";
@@ -69,6 +70,7 @@ $('#go').onclick=async()=>{
         if(e.step==='live'){$('#lv').src=e.live.replace('&debug=true','')+'&navbar=false';$('#tog').style.display='block';st('이름·생년월일·휴대폰 넣고 인증 요청하는 중…');bar(12)}
         else if(e.step==='requested'){if(e.r==='ok'&&!e.msg){big('📱 폰에 온 '+pv+' 알림에서 승인을 눌러 주세요');st('승인하면 찬이가 알아서 다음으로 넘어가요');bar(20)}else{big('자동 입력이 막혔어요 ('+(e.r==='ok'?e.msg:e.r)+')');window.__stop=1}}
         else if(e.step==='wait'){if(window.__stop)st('화면 보기로 직접 진행해 주세요 · '+e.s+'초');else st('승인 기다리는 중 · '+e.s+'초 (130초까지)');bar(20+Math.min(60,e.s/2))}
+        else if(e.step==='dbg'){$('#dbg').textContent='찬이 확인: '+e.dr}
         else if(e.step==='login'){big('로그인 완료!');st('자격득실 읽는 중…');bar(85)}
         else if(e.step==='data'){bar(100);big('불러오기 완료');st('');$('#wrap').style.display='none';$('#tog').style.display='none';
           const rows=parse(e.text);const o=$('#out');o.style.display='block';
