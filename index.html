@@ -15,6 +15,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
 <style>
+body,#app,.sheet,.box,#card,#comfort,.toast{word-break:keep-all;overflow-wrap:break-word}
+#comfort div,.toast,#card b,.box .t{text-wrap:balance}
 /* VOICE: 새벽에도 혼자가 아닌 느낌. 뽀짝하고 다정하게
    IDEA: 온라인 공동육아방 — 방마다 30명, 인형 엄마들이 같이 수유하고 둥가둥가하고 서로 쓰담
    PICTURE: 밤 라운지 3D(달 뜬 창·흔들의자·러그), 실제 접속한 엄마들이 아바타로 보임
@@ -52,7 +54,7 @@ html,body{margin:0;height:100%;background:#1b1d38;overflow:hidden;font:15px/1.5 
 .card .bar{height:6px;border-radius:9px;background:#eee;margin:4px 0;overflow:hidden}.card .bar i{display:block;height:100%;background:var(--y);transition:width .3s}
 .card button{font:12px Jua,sans-serif;background:var(--ink);color:var(--y);border:0;border-radius:999px;padding:4px 9px;min-height:30px;margin-top:3px;cursor:pointer}
 .sw{display:flex;gap:6px;margin:6px 0}.sw span{width:26px;height:26px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #ccc;cursor:pointer}.sw span.on{box-shadow:0 0 0 2px var(--ink)}
-.dock{position:absolute;left:8px;right:8px;bottom:max(12px,env(safe-area-inset-bottom));background:rgba(255,255,255,.96);border-radius:22px;display:grid;grid-template-columns:repeat(5,1fr);padding:6px;box-shadow:0 6px 18px rgba(0,0,0,.35)}
+.dock{position:absolute;left:8px;right:8px;bottom:max(12px,env(safe-area-inset-bottom));background:rgba(255,255,255,.96);border-radius:22px;display:grid;grid-template-columns:repeat(4,1fr);padding:6px;box-shadow:0 6px 18px rgba(0,0,0,.35)}
 .dock button{font:12px Jua,sans-serif;background:none;border:0;color:var(--ink);display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;border-radius:14px;min-height:52px;cursor:pointer}
 .dock button.on{background:var(--y)}
 .dock svg{width:24px;height:24px}
@@ -173,8 +175,7 @@ a.kakao{display:block;margin-top:10px;text-align:center;font:15px Jua,sans-serif
  <div class="dock" id="dock">
   <button data-t="feed" class="on" id="feedTab"></button>
   <button data-t="dunga"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.5-7-9.5A3.8 3.8 0 0 1 12 8a3.8 3.8 0 0 1 7 2.5C19 15.5 12 20 12 20z" fill="none" stroke="currentColor" stroke-width="2"/></svg>애기재우기</button>
-  <button data-t="grow"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>내 시간</button>
-  <button data-t="home"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z" fill="none" stroke="currentColor" stroke-width="2"/></svg>미니홈피</button>
+  <button data-t="grow"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>엄마 시간</button>
   <button data-t="aide"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z" fill="none" stroke="currentColor" stroke-width="2"/></svg>육아비서</button>
  </div>
  <div class="sheet" id="sheet"><div class="sh"><b id="stt"></b><button id="sx">닫기</button></div><div class="sb" id="sb"></div></div>
@@ -495,7 +496,7 @@ function ensure(id,st,isMe){let o=AV[id];const sig=(st.carrier?'none':AK(st.kind
  if(!o){const a=makeAv(st);a.root.position.set(st.x||0,0,st.z||0);S.add(a.root);const e=document.createElement('div');e.className='name'+(isMe?' me':'');app.insertBefore(e,$('card'));o=AV[id]={a,e,x:st.x||0,z:st.z||0,tx:st.x||0,tz:st.z||0};}
  o.st=st;o.tx=st.x;o.tz=st.z;return o}
 function drop(id){const o=AV[id];if(!o)return;S.remove(o.a.root);o.e.remove();delete AV[id]}
-function label(st){const ex=st.ex||{};const k=ex.sg&&ex.ms?STAGES[ex.sg]+' · '+MSTATS[ex.ms]:KINDS[st.kind]?KINDS[st.kind].label:'';const s=st.zone&&st.zone[0]=='b'?'수유실 이용 중':st.st=='bottle'?'분유 먹이는 중 '+Math.max(1,Math.round((Date.now()-st.stAt)/60000))+'분':st.fm>0&&st.fm<6?['','분유 바로 가는 중','🔥 물 끓이는 중','🥄 분유 3스푼 넣는 중','💧 물 붓는 중','🍼 쉐킷쉐킷 흔드는 중'][st.fm]:st.zone=='formula'?'분유 바에 있어':st.st=='work'?'💻 집중 중 '+Math.max(1,Math.round((Date.now()-st.stAt)/60000))+'분':st.sit?'앉아서 쉬는 중':st.st=='work'?'💻 집중 중 '+Math.max(1,Math.round((Date.now()-st.stAt)/60000))+'분':st.st=='bath'?'🛁 아기 목욕시키는 중':st.st=='yukte'?'🍺 육퇴 성공':st.st=='walk'?'🤰 태교 산책 중':st.st=='feed'?'수유 중 '+Math.max(1,Math.round((Date.now()-st.stAt)/60000))+'분':st.st=='dunga'?(st.steps>=100?'아기 꿀잠 zZ':'재우는 중 '+Math.floor(st.steps/34+1)+'바퀴'):k;return esc(st.nick)+' <i>'+esc(s+(st.kind=='preg'&&st.ex&&st.ex.wk&&s==k?' '+st.ex.wk+'주':''))+'</i>'}
+function label(st){const ex=st.ex||{};const k=ex.sg&&ex.ms?STAGES[ex.sg]+' · '+MSTATS[ex.ms]:KINDS[st.kind]?KINDS[st.kind].label:'';const s=st.zone&&st.zone[0]=='b'?'수유실 이용 중':st.st=='bottle'?'분유 먹이는 중 '+Math.max(1,Math.round((Date.now()-st.stAt)/60000))+'분':st.fm>0&&st.fm<6?['','분유 바로 가는 중','🔥 물 끓이는 중','🥄 분유 3스푼 넣는 중','💧 물 붓는 중','🍼 쉐킷쉐킷 흔드는 중'][st.fm]:st.zone=='formula'?'분유 바에 있어':st.st=='work'?'💻 경력 연장 중 '+Math.max(1,Math.round((Date.now()-st.stAt)/60000))+'분':st.sit?'앉아서 쉬는 중':st.st=='work'?'💻 경력 연장 중 '+Math.max(1,Math.round((Date.now()-st.stAt)/60000))+'분':st.st=='bath'?'🛁 아기 목욕시키는 중':st.st=='yukte'?'🍺 육퇴 성공':st.st=='walk'?'🤰 태교 산책 중':st.st=='feed'?'수유 중 '+Math.max(1,Math.round((Date.now()-st.stAt)/60000))+'분':st.st=='dunga'?(st.steps>=100?'아기 꿀잠 zZ':'재우는 중 '+Math.floor(st.steps/34+1)+'바퀴'):k;return esc(st.nick)+' <i>'+esc(s+(st.kind=='preg'&&st.ex&&st.ex.wk&&s==k?' '+st.ex.wk+'주':''))+'</i>'}
 
 /* ---------- 실시간 ---------- */
 let lastPush=0,pend=false;
@@ -621,7 +622,7 @@ function stopFormula(){me.fm=0;if(me.st=='bottle')me.st='';FPROP.reset();pushP()
 function startBreast(){const i=BOOTHS.findIndex(b=>Math.abs(me.x-b.x)<.75&&me.z<-RD/2+1.95);const bi=i>=0?i:BOOTHS.findIndex(b=>!others().some(p=>p.state.room===me.room&&p.state.zone=='b'+BOOTHS.indexOf(b)));if(bi<0){toast('수유실이 다 찼어. 잠깐만');return}
  standUp();me.fm=0;breastPend=true;const s=SEATS[BOOTHS[bi].seat];pendSeat=BOOTHS[bi].seat;PAN.set(0,0,0);tgt=clampXZ(s.x,s.z+.55);renderCard()}
 let breastPend=false;
-function deskTick(){const onDesk=me.sit&&DESKSEATS.includes(me.sit-1);if(onDesk&&me.st!='work'){me.st='work';me.stAt=Date.now();pushP();toast('같이 일하는 책상에 앉았어. 오늘도 나를 키우는 시간');if(tab=='grow')renderCard()}}
+function deskTick(){const onDesk=me.sit&&DESKSEATS.includes(me.sit-1);if(onDesk&&me.st!='work'){me.st='work';me.stAt=Date.now();pushP();toast('경력 연장 시작! 아이 키우며 쌓는 이 시간도 너의 경력이야');if(tab=='grow')renderCard()}}
 function fmTick(){deskTick();if(!me.fm||me.fm>=7)return;const el=(Date.now()-fmAt)/1000;if(me.fm>=2&&me.fm<=5&&AV[myId])AV[myId].a.root.rotation.y=0;
  if(me.fm==1&&!tgt){me.fm=2;fmAt=Date.now();pushP();renderCard();return}
  if(me.fm==2){FPROP.boil(Math.min(1,el/3));if(el>3.2){me.fm=3;fmAt=Date.now();renderCard()}return}
@@ -708,20 +709,23 @@ function renderToddler(c,here){const m=LS.get('cp_meal',{}),k=ymd(new Date()),h=
  c.innerHTML='<b>🍚 유아식 · 등원</b>'+(m.day===k?'오늘 식탁: '+m.m.map(i=>FOODS[i].split(' ')[0]).join(''):'오늘 뭐 먹였어?')+'<div>식탁 올린 엄마 '+mates+'명</div><div style="display:flex;flex-wrap:wrap;gap:4px"><button id="ml">오늘의 유아식</button><button id="sc"'+(h>=6&&h<10?'':' style="background:#eee;color:#2B2118"')+'>'+(LS.get('cp_schst',[]).includes(k)?'🎒 등원 준비 완료':'등원 준비')+'</button></div>'+dawnHTML();
  bindExtras(c);$('ml').onclick=async()=>{await loadMeals();openMeal()};$('sc').onclick=openSchool}
 /* ---------- 내 시간: 같이 일하는 책상 · 육퇴 라운지 · 미니홈피 구경 ---------- */
+const MOMLINE=['육아하며 쌓는 이 시간도 경력이야','엄마들, 부업으로 월급 넘어보자','아이 재우고 30분, 그게 쌓이면 일이 돼','임신·출산·육아는 경력이 끊기는 게 아니라 늘어나는 시간','엄마가 된 감각이 곧 나만의 콘텐츠야','같이 앉아 있는 엄마들이 있으니 혼자 아니야'];
 function renderGrow(c,here){const wk=here.filter(p=>p.state.st=='work').length+(me.st=='work'?1:0),yk=here.filter(p=>p.state.st=='yukte').length+(me.st=='yukte'?1:0),h=new Date().getHours();
- const mins=me.st=='work'?Math.floor((Date.now()-me.stAt)/60000):0;
- c.innerHTML='<b>내 시간</b><div style="color:#8a7a68">아기 키우면서 나도 같이 커</div>'+
- '<div style="margin-top:4px">💻 같이 집중 중 '+wk+'명'+(me.st=='work'?' · 나 '+mins+'분':'')+'</div>'+
+ const mins=me.st=='work'?Math.floor((Date.now()-me.stAt)/60000):0;const line=MOMLINE[Math.floor(Date.now()/60000)%MOMLINE.length];
+ c.innerHTML='<b>엄마 시간</b><div style="color:#8a7a68">'+line+'</div>'+
+ '<div style="margin-top:4px">💻 경력 연장 중 '+wk+'명'+(me.st=='work'?' · 나 '+mins+'분째':'')+'</div>'+
  '<div>🍺 오늘 육퇴한 엄마 '+yk+'명</div>'+
- '<div style="display:flex;flex-wrap:wrap;gap:4px">'+(me.st=='work'?'<button id="wkx" style="background:#eee;color:#2B2118">일어나기</button>':'<button id="wk">책상 가서 앉기</button>')+
+ '<div style="display:flex;flex-wrap:wrap;gap:4px">'+
  (me.st=='yukte'?'<button id="yk" style="background:#eee;color:#2B2118">육퇴 끝</button>':'<button id="yk">'+(h>=20||h<5?'육퇴 선언':'육퇴 미리 선언')+'</button>')+
- '<button id="hb" style="background:#fff;color:#2B2118;border:1px solid #e8d9c2">미니홈피 구경</button></div>'+
+ (me.st=='work'?'<button id="wkx" style="background:#eee;color:#2B2118">오늘은 여기까지</button>':'<button id="wk">경력 연장하기</button>')+
+ '<button id="hm" style="background:#fff;color:#2B2118;border:1px solid #e8d9c2">미니홈피 꾸미기</button></div>'+
+ '<a id="hb" style="display:block;margin-top:6px;font-size:12.5px;color:#8a7a68;text-decoration:underline">부업 키우는 엄마들 미니홈피 구경하기</a>'+
  (here.some(p=>p.state.st=='work'||p.state.st=='yukte')?'<div style="margin-top:4px;max-height:60px;overflow-y:auto">'+here.filter(p=>p.state.st=='work'||p.state.st=='yukte').map(p=>'<div style="display:flex;justify-content:space-between;align-items:center"><span>'+esc(p.state.nick)+'</span><button data-pat="'+esc(p.state.id||p.id)+'" data-ty="'+(p.state.st=='work'?'work':'toast')+'" style="padding:2px 8px;min-height:24px;margin:0">'+(p.state.st=='work'?'화이팅':'짠')+'</button></div>').join('')+'</div>':'');
  bindPats(c);
  const w=$('wk');if(w)w.onclick=()=>{const free=DESKSEATS.find(i=>!others().some(p=>p.state.room===me.room&&p.state.sit==i+1));if(free==null){toast('책상이 꽉 찼어');return}const s=SEATS[free];pendSeat=free;WP=[];tgt=seatApp(s);if(me.z>s.z-.3){const sx=me.x<5?2.8:7.2;WP=[clampXZ(sx,Math.max(me.z,6.2)),clampXZ(sx,s.z-.8),seatApp(s)];tgt=WP.shift()}pushP()};
  const wx=$('wkx');if(wx)wx.onclick=()=>{standUp();renderCard()};
  $('yk').onclick=()=>{if(me.st=='yukte'){me.st=''}else{if(me.st=='work')standUp();me.st='yukte';me.stAt=Date.now();toast('🍺 육퇴 성공! 오늘도 진짜 고생했어');fx(myId,'🍺')}pushP();ensure(myId,meState(),true);renderCard()};
- $('hb').onclick=openHomes}
+ $('hb').onclick=openHomes;$('hm').onclick=()=>openHome(myId,me.nick,true)}
 async function openHomes(){openSheet('엄마들 미니홈피 구경');sb.innerHTML='<div class="note">불러오는 중…</div>';let L=[];
  if(hasSB()){try{const r=await SB.from('homes').select('id,data').limit(200);(r.data||[]).forEach(x=>{if(x.data&&x.data.nick&&x.id!==uid)L.push({id:x.id,v:x.data})})}catch(e){}}
  else if(DB){try{const q=await DB.collection('homes').get();(q.docs||q||[]).forEach(d=>{const v=d.data?d.data():d,id=d.id||v.id;if(v&&v.nick&&id!==uid)L.push({id,v})})}catch(e){}}
@@ -730,7 +734,7 @@ async function openHomes(){openSheet('엄마들 미니홈피 구경');sb.innerHT
  (L.length?L.map(x=>'<div class="box" data-h="'+esc(x.id)+'" data-n="'+esc(x.v.nick)+'" style="cursor:pointer"><b style="font:15px Jua,sans-serif">'+esc(x.v.nick)+'</b> '+(x.v.ig?'<span class="chip">인스타</span>':'')+(x.v.yt?'<span class="chip">유튜브</span>':'')+(x.v.blog?'<span class="chip">블로그</span>':'')+'<div style="font-size:13px;color:#5a4a3a;margin-top:4px">'+esc((x.v.intro||'').slice(0,60))+'</div></div>').join(''):'<div class="note">아직 미니홈피를 연 엄마가 없어. 첫 번째로 열어봐!</div>');
  $('mk').onclick=()=>openHome(myId,me.nick,true);sb.querySelectorAll('[data-h]').forEach(e=>e.onclick=()=>openHome('uid:'+e.dataset.h,e.dataset.n))}
 /* ---------- 위로 카드: 랜덤으로 한 장씩 ---------- */
-const COMFORT=['오늘도 버틴 너, 충분히 잘하고 있어','아기 키우는 시간은 경력 단절이 아니라 경력 연장이야','엄마가 되면서 생긴 감각, 그게 너의 새 무기야','오늘 10분만 나를 위해 써도 괜찮아','잠 못 잔 밤도 다 지나가. 지금 이 방에 너 혼자 아니야','완벽한 엄마 말고 행복한 엄마면 돼','작게라도 매일 기록하면 그게 포트폴리오가 돼','아이가 크는 만큼 나도 같이 크는 중','오늘 못 한 건 내일 하면 돼. 오늘은 여기까지 잘했어','남들 SNS 보고 조급해하지 마. 너의 속도가 있어','육아로 배운 인내심, 일할 때도 진짜 쓸모 있어','지금 이 순간에도 누군가 너를 응원하고 있어','나한테 귀 기울이는 것도 육아만큼 중요해','쉬는 것도 일이야. 오늘은 푹 쉬자'];
+const COMFORT=['아이 키우는 시간은 경력이 끊기는 게 아니라 늘어나는 시간이야','엄마가 되면서 생긴 감각, 그게 너만의 새 무기야','모르면 못 받는 돈이 있어. 권리는 챙기는 사람 거야','육아랑 일, 딱 두 개에만 집중해. 나머지는 여기서 같이 챙길게','아이 재우고 30분씩, 그게 쌓이면 월급 넘는 부업이 돼','완벽한 엄마 말고 행복한 엄마면 충분해','오늘 버틴 너, 진짜 잘하고 있어','새벽에 깨어 있는 엄마, 지금 이 방에 너 혼자 아니야','남들 SNS 보고 조급해하지 마. 너만의 속도가 있어','육아로 배운 인내심은 일할 때도 진짜 쓸모 있어','작게라도 매일 기록하면 그게 포트폴리오가 돼','임신·출산·육아가 공백이 아니라 다음 일을 여는 기회가 되게','쉬는 것도 일이야. 오늘은 푹 쉬어도 돼','엄마 이름 말고 내 이름으로도 불리는 날, 같이 만들자'];
 function showComfort(){if(!me.room||sheet.classList.contains('on'))return;let el=$('comfort');if(!el){el=document.createElement('div');el.id='comfort';app.appendChild(el)}
  const t=COMFORT[Math.floor(Math.random()*COMFORT.length)];el.innerHTML='<div style="font:15px Jua,sans-serif;line-height:1.45">'+esc(t)+'</div><div style="margin-top:8px;display:flex;gap:6px;justify-content:center"><button id="cfh">♡ 말없이 응원 보내기</button><button id="cfx" style="background:#eee;color:#2B2118">고마워</button></div>';el.classList.add('on');
  $('cfh').onclick=()=>{roomCheer();el.classList.remove('on')};$('cfx').onclick=()=>el.classList.remove('on');setTimeout(()=>el.classList.remove('on'),15000)}
@@ -773,7 +777,7 @@ function lulStop(){setTimeout(()=>{if(!LUL&&!WN&&!ESP&&SIL)SIL.pause()},300);if(
 function wnStart(){const a=ac();const n=a.sampleRate*3,b=a.createBuffer(1,n,a.sampleRate),d=b.getChannelData(0);let l=0;for(let i=0;i<n;i++){const w=Math.random()*2-1;l=(l+.02*w)/1.02;d[i]=l*3.5}
  const s=a.createBufferSource();s.buffer=b;s.loop=true;const f=a.createBiquadFilter();f.type='lowpass';f.frequency.value=900;const g=a.createGain();g.gain.setValueAtTime(0,a.currentTime);g.gain.linearRampToValueAtTime(.5,a.currentTime+1.5);s.connect(f);f.connect(g);g.connect(a.destination);s.start();WN={s,g}}
 function wnStop(){if(!WN)return;const w=WN;WN=null;try{w.g.gain.setTargetAtTime(0,AC.currentTime,.4);setTimeout(()=>{w.s.stop()},2000)}catch(e){}}
-function sleepSoundsHTML(){return '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px"><button id="lb" style="'+(LUL?'':'background:#eee;color:#2B2118')+'">'+(LUL?'⏸ 자장가 끄기':'🎵 자장가')+'</button><button id="wnb" style="'+(WN?'':'background:#eee;color:#2B2118')+'">'+(WN?'⏸ 백색소음 끄기':'🌊 백색소음')+'</button><button id="enb" style="'+(ENG?'':'background:#eee;color:#2B2118')+'">'+(ENG?'⏸ 영어동요 끄기':'🔤 영어 조기교육')+'</button>'+(LS.get('cp_eng',{}).k||LS.get('cp_eng',{}).id?'<button id="enc" style="background:#eee;color:#2B2118">곡 바꾸기</button>':'')+'</div>'}
+function sleepSoundsHTML(){return '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px"><button id="lb" style="'+(LUL?'':'background:#eee;color:#2B2118')+'">'+(LUL?'⏸ 자장가 끄기':'🎵 자장가')+'</button><button id="wnb" style="'+(WN?'':'background:#eee;color:#2B2118')+'">'+(WN?'⏸ 백색소음 끄기':'🌊 백색소음')+'</button></div>'}
 function bindSleepSounds(){const bb=$('bathb');if(bb)bb.onclick=()=>openBath();const l=$('lb');if(l)l.onclick=()=>{LUL?lulStop():lulStart();renderCard()};const w=$('wnb');if(w)w.onclick=()=>{WN?wnStop():wnStart();renderCard()};const ec=$('enc');if(ec)ec.onclick=()=>{engStop();openEng()};const en=$('enb');if(en)en.onclick=()=>{if(ENG)engStop();else{const c=LS.get('cp_eng',{});c.k?engSong(c.k):c.id?engPlay(c.id):openEng()}renderCard()}}
 /* ---------- 아기 씻기기 v4 (러베 탑투토 워시 · 애니메이션 연출) ---------- */
 const BATH_PROD={brand:'러베 ruuve',name:'히알루론 탑투토 워시',img:'img/ruuve_ttw.png',url:'https://ruuve.kr/product/%EB%9F%AC%EB%B2%A0-%ED%9E%88%EC%95%8C%EB%A3%A8%EB%A1%A0-%ED%83%91%ED%88%AC%ED%86%A0-%EC%9B%8C%EC%8B%9C-400ml/4114/category/55/display/1/',
