@@ -46,10 +46,33 @@ const $=s=>document.querySelector(s);
 function st(t){$('#st').textContent=t}
 function bar(p){$('#bar i').style.width=p+'%'}
 function parse(text){
-  // 자격득실 표: 날짜 두 개(취득·상실)가 있는 줄 추출
-  const rows=[];const re=/(직장가입자|직장피부양자|지역세대주|지역세대원|지역가입자|피부양자)[^\n]*?(\d{4}[.\-]\d{2}[.\-]\d{2})(?:[^\n]*?(\d{4}[.\-]\d{2}[.\-]\d{2}))?/g;
-  let m;while((m=re.exec(text))){rows.push({kind:m[1],line:m[0].replace(/\s+/g,' ').trim(),get:m[2],lose:m[3]||''})}
+  // 건보 자격득실내역: 구분 → 사업장명 → 취득일 날짜 → 상실일 날짜/-
+  const KIND=/^(직장가입자|직장피부양자|지역세대주|지역세대원|지역가입자|임의계속가입자|의료급여수급권자|피부양자)$/;
+  const D=/^\d{4}[.,\-]\d{2}[.,\-]\d{2}$/;
+  const L=text.split(/\n/).map(x=>x.trim()).filter(Boolean);
+  let k=L.indexOf('자격득실내역');if(k<0)k=0;
+  const rows=[];
+  for(let i=k;i<L.length;i++){
+    if(!KIND.test(L[i]))continue;
+    const r={kind:L[i],place:'',get:'',lose:''};let n=i+1;
+    if(L[n]&&!/^취득일$/.test(L[n])&&!KIND.test(L[n])){r.place=L[n];n++}
+    for(let m=n;m<Math.min(n+6,L.length);m++){
+      if(L[m]==='취득일'&&D.test(L[m+1]||''))r.get=L[m+1].replace(/[,\-]/g,'.');
+      if(L[m]==='상실일')r.lose=D.test(L[m+1]||'')?L[m+1].replace(/[,\-]/g,'.'):'';
+    }
+    if(r.get)rows.push(r);
+  }
   return rows;
+}
+function judge(rows){
+  if(!rows.length)return '';
+  const now=rows.find(r=>!r.lose)||rows[0];
+  const work=rows.filter(r=>r.kind==='직장가입자');
+  let t='지금 자격: '+now.kind+(now.get?' ('+now.get+'부터)':'');
+  t+=' · 직장가입 이력 '+work.length+'건';
+  if(now.kind==='직장가입자')t+=' → 재직 중인 근로자로 판단';
+  else t+=' → 재직 중인 직장가입은 없음. 사업자 여부는 홈택스에서 이어서 확인';
+  return t;
 }
 const LS='cp_nhis_test';try{const v=JSON.parse(localStorage.getItem(LS)||'{}');['nm','bd','ph','pv'].forEach(k=>{if(v[k])$('#'+k).value=v[k]})}catch(e){}
 function fit(){const w=$('#wrap').clientWidth||innerWidth-32;const k=w/1024;$('#sc').style.transform='scale('+k+')';$('#wrap').style.height=(800*k)+'px'}
@@ -74,8 +97,8 @@ $('#go').onclick=async()=>{
         else if(e.step==='login'){big('로그인 완료!');st('자격득실 읽는 중…');bar(85)}
         else if(e.step==='data'){bar(100);big('불러오기 완료');st('');$('#wrap').style.display='none';$('#tog').style.display='none';
           const rows=parse(e.text);const o=$('#out');o.style.display='block';
-          if(e.tables&&e.tables.length){o.innerHTML=e.tables.map(t=>'<table style="margin-bottom:10px">'+t.map((r,i)=>'<tr>'+r.map(c=>(i?'<td>':'<th>')+c.replace(/</g,'&lt;')+(i?'</td>':'</th>')).join('')+'</tr>').join('')+'</table>').join('')+'<details><summary style="font-size:12px;margin-top:8px">읽어온 원문 보기</summary><pre></pre></details>';o.querySelector('pre').textContent=JSON.stringify({u:e.u,t:e.t,clicked:e.clicked,al:e.al,btn:e.btn},null,1)+'\n\n'+e.text;}else{
-          o.innerHTML=(rows.length?'<table><tr><th>구분</th><th>취득일</th><th>상실일</th></tr>'+rows.map(x=>`<tr><td>${x.kind}</td><td>${x.get}</td><td>${x.lose||'-'}</td></tr>`).join('')+'</table>':'<p>표를 못 찾았어요. 원문:</p>')+'<details><summary style="font-size:12px;margin-top:8px">읽어온 원문 보기</summary><pre></pre></details>';
+          if(!rows.length&&e.tables&&e.tables.length){o.innerHTML=e.tables.map(t=>'<table style="margin-bottom:10px">'+t.map((r,i)=>'<tr>'+r.map(c=>(i?'<td>':'<th>')+c.replace(/</g,'&lt;')+(i?'</td>':'</th>')).join('')+'</tr>').join('')+'</table>').join('')+'<details><summary style="font-size:12px;margin-top:8px">읽어온 원문 보기</summary><pre></pre></details>';o.querySelector('pre').textContent=JSON.stringify({u:e.u,t:e.t,clicked:e.clicked,al:e.al,btn:e.btn},null,1)+'\n\n'+e.text;}else{
+          o.innerHTML=(rows.length?'<p style="font-size:14px;font-weight:700;margin:0 0 8px">'+judge(rows)+'</p><table><tr><th>구분</th><th>사업장</th><th>취득일</th><th>상실일</th></tr>'+rows.map(x=>`<tr><td>${x.kind}</td><td>${x.place}</td><td>${x.get}</td><td>${x.lose||'-'}</td></tr>`).join('')+'</table>':'<p>표를 못 찾았어요. 원문:</p>')+'<details><summary style="font-size:12px;margin-top:8px">읽어온 원문 보기</summary><pre></pre></details>';
           o.querySelector('pre').textContent=JSON.stringify({u:e.u,t:e.t,clicked:e.clicked,al:e.al,btn:e.btn},null,1)+'\n\n'+e.text}}
         else if(e.step==='timeout'){big('');st('승인이 안 와서 닫았어요. 다시 눌러 주세요.');$('#wrap').style.display='none';$('#tog').style.display='none'}
         else if(e.step==='error'){st('오류: '+e.error)}
