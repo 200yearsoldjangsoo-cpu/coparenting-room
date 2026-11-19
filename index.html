@@ -800,19 +800,23 @@ function openBath(){if($('bath'))return;closeSheet();const pst=me.st;me.st='bath
 #bath .go2{width:100%;margin-top:8px;border:0;border-radius:16px;padding:12px;font:15px Jua,sans-serif;background:#f3ebe0;color:#2B2118}
 #bath .go:active,#bath .go2:active{transform:translateY(2px)}
 #bath .disc{font-size:11px;color:#a0907c;margin-top:8px;text-align:center}
-#bath .hint{position:absolute;left:50%;top:58%;transform:translate(-50%,-50%);z-index:2;pointer-events:none;font:15px Jua,sans-serif;background:rgba(255,255,255,.88);border-radius:99px;padding:8px 15px;box-shadow:0 4px 14px rgba(0,0,0,.1);transition:opacity .3s;white-space:nowrap}
+#bath .hint{position:absolute;left:50%;top:21%;transform:translate(-50%,-50%);z-index:2;pointer-events:none;font:19px Jua,sans-serif;background:#fff;border:2px solid #2B2118;border-radius:99px;padding:10px 18px;box-shadow:0 4px 14px rgba(0,0,0,.1);transition:opacity .3s;white-space:nowrap}
+#bath .say{position:absolute;left:50%;top:15%;z-index:2;pointer-events:none;max-width:78%;background:#fff;border:2px solid #2B2118;border-radius:22px;padding:11px 16px;font:16px/1.45 'Gowun Dodum',sans-serif;font-weight:700;text-align:center;box-shadow:0 6px 0 rgba(43,33,24,.12);transform:translate(-50%,0) scale(0);transform-origin:50% 120%;transition:transform .45s cubic-bezier(.3,1.6,.5,1)}
+#bath .say.on{transform:translate(-50%,0) scale(1)}
+#bath .say:after{content:'';position:absolute;left:50%;bottom:-9px;width:14px;height:14px;background:#fff;border-right:2px solid #2B2118;border-bottom:2px solid #2B2118;transform:translateX(-50%) rotate(45deg)}
+#bath .say small{display:block;font:12px Jua,sans-serif;color:#b08a5a;margin-bottom:2px}
 #bath .flash{position:absolute;inset:0;background:#fff;z-index:2;pointer-events:none;opacity:0;transition:opacity .35s}
 @keyframes bbob{50%{transform:translateY(-5px)}}
 </style>
 <div class="top"><div class="ttl">🛁 아기 목욕 시간</div><button class="x" id="bxx">✕</button></div>
 <svg id="bsv" viewBox="0 0 360 640" preserveAspectRatio="xMidYMid slice"></svg><canvas id="bcv"></canvas>
-<div class="hint" id="bhint" style="opacity:0"></div><div class="flash" id="bflash"></div>
+<div class="hint" id="bhint" style="opacity:0"></div><div class="say" id="bsay"></div><div class="flash" id="bflash"></div>
 <div class="pane hide" id="bpane"></div>`;
  document.body.appendChild(d);
  BT={pst,parts:[],rips:[],t:0,wy:560,wamp:0,lvl:0,foam:[],sudsK:0,blink:2.5,mood:'calm',arm:[0,0],shake:0,phase:'fill',bubbles:0,acc:0,streams:null};
  $('bxx').onclick=()=>closeBath(false);
  bathScene();bathLoop();bathInput();bathRun();}
-function closeBath(done,again){if(BT)BT.dead=1;const d=$('bath');if(d)d.remove();const p=BT?BT.pst:'';BT=null;me.st=p=='bath'?'':p;pushP();renderCard();
+function closeBath(done,again){if(BT){BT.dead=1;clearInterval(BT.sayT)}const d=$('bath');if(d)d.remove();const p=BT?BT.pst:'';BT=null;me.st=p=='bath'?'':p;pushP();renderCard();
  if(done){const st=LS.get('cp_bath',[]);const k=ymd(new Date());if(!st.includes(k))st.push(k);LS.set('cp_bath',st);homeStamp('bath',st);toast('🛁 보송보송 목욕 끝! 도장 쾅')}
  if(again)setTimeout(openBath,120)}
 function bathMsg(m,s,html){const p=$('bpane');if(!p)return;p.innerHTML='<div class="msg">'+m+'</div>'+(s?'<div class="sub">'+s+'</div>':'')+(html||'');p.classList.remove('hide')}
@@ -858,6 +862,7 @@ function bathScene(){const sv=$('bsv');sv.innerHTML='';bathDefs(sv);bathRoom(sv)
  BT.hair=sv_('path',{d:'M166 252 q8 -24 24 -8 q-11 -3 -11 10',fill:'#8a6248'},b);
  BT.face=bathFace(b,180,304,56);
  BT.headSuds=sv_('g',{},b);
+ BT.handG=sv_('g',{},sv);
  // 물
  const cp=sv_('clipPath',{id:'ctub'},sv);sv_('path',{d:'M30 368 h300 v44 q0 136 -150 136 q-150 0 -150 -136z'},cp);
  BT.wat=sv_('path',{d:'',fill:'url(#gwat)','clip-path':'url(#ctub)'},sv);
@@ -902,6 +907,7 @@ function bathLoop(){const cv=$('bcv'),ctx=cv.getContext('2d');let last=performan
     if(p.k=='drop'){if(p.vy>0&&p.y>waveY(p.x)){bathRipple(p.x,.6);if(Math.random()<.35)bathCrown(p.x,waveY(p.x),3,.7);return false}bathTear(ctx,p);return true}
     if(p.k=='steam'){const a=Math.min(1,p.life*.8)*.32;ctx.fillStyle='rgba(255,255,255,'+a+')';ctx.beginPath();ctx.arc(p.x,p.y,p.r+(2.4-p.life)*7,0,7);ctx.fill();return true}
     if(p.k=='blob'){const s=1+Math.sin(p.life*30)*.1;ctx.fillStyle='#fff';ctx.strokeStyle='#cfe8f3';ctx.lineWidth=1.2;for(const [ox,oy,rr] of [[0,0,p.r],[-p.r*.7,p.r*.3,p.r*.7],[p.r*.7,p.r*.25,p.r*.65]]){ctx.beginPath();ctx.ellipse(p.x+ox,p.y+oy,rr*s,rr/s,0,0,7);ctx.fill();ctx.stroke()}if(p.vy>0&&p.y>=p.ty){p.land&&p.land();return false}return true}
+    if(p.k=='mist'){const a=Math.max(0,p.life/.5)*.35;ctx.fillStyle='rgba(235,248,253,'+a+')';ctx.beginPath();ctx.arc(p.x,p.y,p.r*(1.6-p.life),0,7);ctx.fill();return true}
     if(p.k=='pop'){const k=1-p.life/.25;ctx.strokeStyle='rgba(200,235,248,'+(1-k)+')';ctx.lineWidth=1.4;ctx.beginPath();ctx.arc(p.x,p.y,p.r*(1+k*.8),0,7);ctx.stroke();return true}
     if(p.k=='txt'){ctx.save();ctx.globalAlpha=Math.min(1,p.life*2);ctx.font='bold 15px Jua, sans-serif';ctx.textAlign='center';ctx.fillStyle='#fff';ctx.strokeStyle='#2B2118';ctx.lineWidth=4;ctx.lineJoin='round';ctx.strokeText(p.s,p.x,p.y);ctx.fillStyle=p.c||'#ff7a8a';ctx.fillText(p.s,p.x,p.y);ctx.restore();return true}
     return true})}
@@ -914,16 +920,20 @@ function bathRipple(x,a){BT.rips.push({x,t:0,a:a||1});if(BT.rips.length>14)BT.ri
 // 왕관 튀김(물이 부딪히면 위로 동그랗게 튀어오름)
 function bathCrown(x,y,n,s){s=s||1;for(let i=0;i<n;i++){const a=-Math.PI/2+(i/(n-1||1)-.5)*1.6+(Math.random()-.5)*.25,v=(150+Math.random()*120)*s;BT.parts.push({k:'drop',x:x+(Math.random()-.5)*4,y:y-1,vx:Math.cos(a)*v,vy:Math.sin(a)*v,r:1.6+Math.random()*1.4,life:.9})}}
 // 샤워 물줄기: 구멍마다 이어진 줄기 + 흐르는 하이라이트(애니 기법)
-function bathDrawStreams(ctx,dt){const S=BT.streams;S.off+=dt*520;const hx=S.x,hy=S.y,rad=S.ang*Math.PI/180;
- for(let i=0;i<S.n;i++){const o=(i-(S.n-1)/2)*7,sx=hx+o*Math.cos(rad),sy=hy+8+o*Math.sin(rad);const tx=sx-Math.sin(rad)*60+o*.5;
-  // 줄기가 닿는 곳: 머리 or 물
-  let ty=waveY(tx),hitHead=false;const dx=tx-180;if(Math.abs(dx)<54){const hyh=304-Math.sqrt(54*54-dx*dx);if(hyh>sy&&hyh<ty){ty=hyh;hitHead=true}}
-  const len=(ty-sy)*S.k;if(len<4)continue;const ey=sy+len,ex=sx+(tx-sx)*S.k;
-  const g=ctx.createLinearGradient(sx,sy,ex,ey);g.addColorStop(0,'rgba(170,225,245,.95)');g.addColorStop(1,'rgba(150,215,240,.55)');
-  ctx.strokeStyle=g;ctx.lineWidth=3.2;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(sx,sy);ctx.quadraticCurveTo((sx+ex)/2-Math.sin(rad)*6,(sy+ey)/2,ex,ey);ctx.stroke();
-  ctx.setLineDash([5,13]);ctx.lineDashOffset=-(S.off+i*7);ctx.strokeStyle='rgba(255,255,255,.95)';ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(sx-.7,sy);ctx.quadraticCurveTo((sx+ex)/2-Math.sin(rad)*6-.7,(sy+ey)/2,ex-.7,ey);ctx.stroke();ctx.setLineDash([]);
-  if(S.k>=1&&Math.random()<dt*(hitHead?10:7)){if(hitHead){const a=Math.atan2(ey-304,ex-180);for(let j=0;j<2;j++){const aa=a+(Math.random()-.5)*1.2,v=120+Math.random()*90;BT.parts.push({k:'drop',x:ex,y:ey,vx:Math.cos(aa)*v,vy:Math.sin(aa)*v-60,r:1.5+Math.random()*1.3,life:1})}}else{bathRipple(ex,.9);bathCrown(ex,ey,3,.8)}}}}
-
+function bathDrawStreams(ctx,dt){const S=BT.streams;S.off+=dt*620;const hx=S.x,hy=S.y,rad=S.ang*Math.PI/180;
+ ctx.lineCap='round';
+ for(let i=0;i<S.n;i++){const u=i/(S.n-1)-.5,o=u*44,sx=hx+o*Math.cos(rad),sy=hy+8+o*Math.sin(rad);const dir=rad+u*.32;
+  let ex=sx-Math.sin(dir)*400,ey=sy+Math.cos(dir)*400;
+  // 닿는 지점 찾기
+  let hit=0;for(let s=0;s<1;s+=.02){const x=sx+(ex-sx)*s,y=sy+(ey-sy)*s,dx=x-180,dy=y-304;if(dx*dx+dy*dy<54*54){ex=x;ey=y;hit=1;break}if(y>waveY(x)){ex=x;ey=y;hit=2;break}}
+  const k=S.k;const fx=sx+(ex-sx)*k,fy=sy+(ey-sy)*k;const jx=(Math.random()-.5)*.8;
+  ctx.strokeStyle='rgba(185,230,247,.5)';ctx.lineWidth=2.2;ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(fx+jx,fy);ctx.stroke();
+  ctx.setLineDash([2.5,10+((i*7)%5)]);ctx.lineDashOffset=-(S.off+i*13);ctx.strokeStyle='rgba(255,255,255,.95)';ctx.lineWidth=1.1;ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(fx+jx,fy);ctx.stroke();ctx.setLineDash([]);
+  if(k>=1&&hit){// 닿는 곳 미스트 + 가끔 튀는 물방울
+   if(Math.random()<dt*14)BT.parts.push({k:'mist',x:ex+(Math.random()-.5)*6,y:ey-2,vx:(Math.random()-.5)*40,vy:-30-Math.random()*40,g:60,r:2+Math.random()*3,life:.45});
+   if(Math.random()<dt*(hit==1?3:2.5)){if(hit==1){const a=Math.atan2(ey-304,ex-180)+(Math.random()-.5)*.9,v=90+Math.random()*80;BT.parts.push({k:'drop',x:ex,y:ey,vx:Math.cos(a)*v,vy:Math.sin(a)*v-40,r:1.3+Math.random(),life:1})}else{bathRipple(ex,.7);bathCrown(ex,ey,2,.55)}}}}
+ // 샤워 헤드 주변 물안개
+ if(Math.random()<dt*6)BT.parts.push({k:'mist',x:hx+(Math.random()-.5)*40,y:hy+14,vx:(Math.random()-.5)*10,vy:20,g:0,r:3+Math.random()*3,life:.7})}
 /* ----- 입력 ----- */
 function bathInput(){const sv=$('bsv');const pt=e=>{const q=sv.createSVGPoint();q.x=e.clientX;q.y=e.clientY;return q.matrixTransform(sv.getScreenCTM().inverse())};
  let down=false,last=null;sv.onpointerdown=e=>{down=true;last=pt(e);bathTap(last);bathRub(last,30)};sv.onpointerup=sv.onpointercancel=()=>{down=false};
@@ -931,24 +941,40 @@ function bathInput(){const sv=$('bsv');const pt=e=>{const q=sv.createSVGPoint();
 function bathTap(p){if(!BT||BT.phase!='play')return;const D=BT.dk;if(D&&Math.hypot(p.x-D.x,p.y-waveY(D.x))<34){bathSqueak();return}
  const wy=waveY(p.x);if(p.y>wy-20&&p.y<wy+60){bathRipple(p.x,2.2);bathCrown(p.x,wy,6,1.1);BT.mood='laugh';clearTimeout(BT.mT);BT.mT=setTimeout(()=>{if(BT&&BT.phase=='play')BT.mood='calm'},700)}}
 function bathSqueak(){const D=BT.dk;D.hop=.6;D.vx+=(Math.random()<.5?-1:1)*40;BT.parts.push({k:'txt',s:'삑!',x:D.x,y:waveY(D.x)-40,vx:0,vy:-30,g:0,life:.9,c:'#ffb000'});bathRipple(D.x,1.6);BT.mood='laugh';clearTimeout(BT.mT);BT.mT=setTimeout(()=>{if(BT&&BT.phase=='play')BT.mood='calm'},800)}
-function bathBub(x,y,r,par){const c=sv_('circle',{cx:x,cy:y,r:0,fill:'url(#gbub)'},par||BT.headSuds);const R=r||(5+Math.random()*9);springTo(0,R,v=>c.setAttribute('r',Math.max(0,v).toFixed(2)),null,260,10);BT.bubbles++;return c}
+function bathFaceSafe(x,y){const dx=(x-180)/44,dy=(y-318)/38,d=Math.hypot(dx,dy);if(d<1){if(dy<.2){const k=1.12/d;return [180+dx*44*k,318+dy*38*k]}return [x,Math.max(y,360)]}return [x,y]}
+function bathBub(x,y,r,par){if(!par){[x,y]=bathFaceSafe(x,y)}const c=sv_('circle',{cx:x,cy:y,r:0,fill:'url(#gbub)'},par||BT.headSuds);const R=r||(4+Math.random()*7);springTo(0,R,v=>c.setAttribute('r',Math.max(0,v).toFixed(2)),null,260,10);BT.bubbles++;return c}
 function bathRub(p,dd){if(!BT||BT.phase!='rub')return;if(Math.hypot((p.x-180)/1.15,(p.y-320))>105)return;
  BT.acc+=dd;let n=0;while(BT.acc>13){BT.acc-=13;n++;const a=Math.random()*6.28,rr=Math.random()*14;bathBub(p.x+Math.cos(a)*rr,p.y+Math.sin(a)*rr)}
  BT.mood='squint';clearTimeout(BT.mT);BT.mT=setTimeout(()=>{if(BT&&BT.phase=='rub')BT.mood='laugh'},220);
  const k=Math.min(1,BT.bubbles/50);bathHint(k<1?'🫧 뽀글뽀글 '+Math.round(k*100)+'%':'✨ 거품 가득!');if(k>=1&&!BT.rubDone){BT.rubDone=1;BT.phase='auto';setTimeout(bathPlay,600)}}
 
 /* ----- 진행 ----- */
-async function bathRun(){await bwait(350);if(!BT)return;bathMsg('따뜻한 물 받는 중…','손목 안쪽으로 온도 먼저 체크!');
- // 물 받기: 수도꼭지 물줄기 대신 바닥부터 찰랑찰랑 차오름
- BT.wamp=3.2;tween(1900,k=>{if(BT){BT.wy=560-150*k;if(Math.random()<.4)bathRipple(80+Math.random()*200,.8)}},null,ease.inout);
+async function bathRun(){await bwait(350);if(!BT)return;bathMsg('따뜻한 물 받는 중…','');
+ BT.wamp=3.2;tween(2600,k=>{if(BT){BT.wy=560-150*k;if(Math.random()<.35)bathRipple(80+Math.random()*200,.8)}},null,ease.inout);
  BT.onTick=dt=>{if(Math.random()<dt*2.4)BT.parts.push({k:'steam',x:60+Math.random()*240,y:BT.wy-4,vx:(Math.random()-.5)*10,vy:-20,g:-5,r:3+Math.random()*4,life:2.4})};
- await bwait(1500);if(!BT)return;
+ await bwait(2700);if(!BT)return;bathHide();
+ // 엄마 손 등장 → 손목 담가 온도 체크
+ const H=sv_('g',{},BT.fx);const arm=sv_('g',{},H);
+ sv_('rect',{x:0,y:-13,width:150,height:26,rx:13,fill:'url(#gskin)'},arm);sv_('rect',{x:62,y:-17,width:100,height:34,rx:14,fill:'#e8dccb'},arm);sv_('rect',{x:62,y:-17,width:100,height:34,rx:14,fill:'url(#pterry)'},arm);
+ sv_('rect',{x:60,y:-17,width:12,height:34,rx:6,fill:'#ddcdb6'},arm);
+ sv_('ellipse',{cx:-18,cy:2,rx:25,ry:15,fill:'url(#gskin)'},arm);sv_('ellipse',{cx:-6,cy:-13,rx:11,ry:6.5,fill:'url(#gskin)',transform:'rotate(-25 -6 -13)'},arm);
+ sv_('path',{d:'M-38 -2 q-4 6 0 12 M-30 -8 q-6 8 -2 18',fill:'none',stroke:'#e9a98a','stroke-width':1.3,opacity:.7},arm);
+ let hx=420,hy=200;const pl=()=>H.setAttribute('transform','translate('+hx.toFixed(1)+' '+hy.toFixed(1)+') rotate(-34)');pl();
+ bathHint('손목 안쪽으로 물 온도 체크');
+ springTo(420,270,v=>{hx=v;pl()},null,90,13);springTo(200,BT.wy-6,v=>{hy=v;pl()},null,90,13);
+ await bwait(1100);if(!BT)return;bathRipple(254,2);bathCrown(254,BT.wy,4,.6);
+ // 살랑살랑 저어보기
+ const t0=performance.now();await new Promise(res=>{const go=n=>{if(!BT)return res();const k=(n-t0)/1400;hx=270+Math.sin(k*Math.PI*4)*10;pl();if(Math.random()<.2)bathRipple(hx-16,.8);if(k<1)requestAnimationFrame(go);else res()};requestAnimationFrame(go)});if(!BT)return;
+ bathHint('따끈따끈 딱 좋아요 ✓');await bwait(1300);if(!BT)return;
+ springTo(hx,440,v=>{hx=v;pl()},()=>H.remove(),80,12);springTo(hy,160,v=>{hy=v;pl()},null,80,12);bathHint(null);
+ await bwait(500);if(!BT)return;
  BT.duck.setAttribute('opacity',1);BT.dk={x:300,vx:-30,ph:Math.random()*6,hop:.6};bathRipple(300,2);
- await bwait(700);if(!BT)return;BT.wamp=1.6;bathProduct()}
+ // 잠깐 물장난 보여주기
+ let tt=0;BT.onTick=dt=>{tt+=dt;BT.arm=[Math.max(0,Math.sin(tt*4))*.5,Math.max(0,Math.sin(tt*4+3))*.5];if(Math.random()<dt*2)BT.parts.push({k:'steam',x:60+Math.random()*240,y:BT.wy-4,vx:0,vy:-20,g:-5,r:3,life:2})};BT.mood='laugh';
+ await bwait(1800);if(!BT)return;BT.onTick=null;BT.arm=[0,0];BT.mood='calm';BT.wamp=1.6;bathProduct()}
 function bathProduct(){if(!BT)return;BT.phase='pump';const P=BATH_PROD;
- bathMsg('오늘 목욕은 '+P.brand,'',`<div class="prod" style="margin-top:8px"><img src="${P.img}" alt=""><div><div style="font:17px Jua,sans-serif">${P.name}</div><div class="sub">400ml · 샴푸 겸용 올인원 워시</div></div></div>
- <div class="chips">${P.feats.map(([e,t,s])=>'<div class="chip"><b>'+e+' '+t+'</b>'+s+'</div>').join('')}</div>
- <button class="go" id="bpump">펌프 꾹! 거품 내기</button><div class="disc">${P.disc}</div>`);
+ bathMsg('','',`<div class="prod" style="gap:10px"><img src="${P.img}" style="width:46px;height:78px" alt=""><div style="flex:1"><div class="sub" style="margin:0">오늘 목욕은</div><div style="font:16px Jua,sans-serif">${P.brand} ${P.name}</div></div></div>
+ <button class="go" id="bpump" style="margin-top:10px">펌프 꾹! 거품 내기</button><div class="disc">${P.disc}</div>`);
  $('bpump').onclick=bathPump}
 function bathPump(){if(!BT||BT.phase!='pump')return;BT.phase='auto';bathHide();const bo=BT.bottle;
  // 예비동작(살짝 늘었다) → 꾹(스쿼시) → 탱(오버슈트)
@@ -958,25 +984,26 @@ function bathShootFoam(){[[164,256,12],[192,250,10],[210,262,8]].forEach(([tx,ty
 async function bathPlay(){if(!BT)return;bathHint(null);BT.phase='play';BT.mood='laugh';
  // 물 위 거품이 퍼져나감(거품 목욕)
  for(let i=0;i<34;i++){setTimeout(()=>{if(!BT)return;const x=60+Math.random()*240,r=5+Math.random()*10;const el=sv_('circle',{cx:x,cy:BT.wy,r:0,fill:'url(#gbub)'},BT.foamG);springTo(0,r,v=>el.setAttribute('r',Math.max(0,v).toFixed(2)),null,220,11);BT.foam.push({x,vx:(Math.random()-.5)*8,r,el})},i*45)}
- bathMsg('거품 목욕 놀이 중 🫧','오리를 톡 누르거나 물을 찰박 쳐봐',`<button class="go" id="bnext">이제 헹굴래</button>`);$('bnext').onclick=()=>{BT.playEnd=1};
+ bathMsg('거품 목욕 놀이 중','오리를 톡 누르거나 물을 찰박 쳐봐',`<button class="go" id="bnext">이제 헹굴래</button>`);
+ const SAY=['이거 물 같아!<br>콧물보다 맑고 물보다 살짝 쫀쫀해','어? 눈에 들어갔는데<br>하나도 안 따가워','순해서 내 피부도 편안해','향이 없어서 코도 편해<br>향료를 안 넣었대'];let si=0;const say=()=>{const s=$('bsay');if(!s||!BT||BT.phase!='play')return;s.classList.remove('on');setTimeout(()=>{if(!BT||BT.phase!='play')return;s.innerHTML='<small>아기 속마음</small>'+SAY[si%SAY.length];s.classList.add('on');si++},250)};say();BT.sayT=setInterval(say,3200);$('bnext').onclick=()=>{BT.playEnd=1};
  // 아기 혼자 놀기: 양손 번갈아 첨벙, 오리 잡으러 기울기
- let tt=0,beat=0;BT.onTick=dt=>{tt+=dt;const c=tt%1.6;const L=c<.8?Math.sin(c/.8*Math.PI):0,R=c>=.8?Math.sin((c-.8)/.8*Math.PI):0;BT.arm=[L,R];
+ let tt=0,beat=0;BT.onTick=dt=>{tt+=dt;const c=tt%1.6;const L=c<.8?Math.sin(c/.8*Math.PI)*.7:0,R=c>=.8?Math.sin((c-.8)/.8*Math.PI)*.7:0;BT.arm=[L,R];
   const ph=Math.floor(tt/.8);if(ph!==beat){beat=ph;const x=ph%2?236:124;const wy=waveY(x);bathRipple(x,2.4);bathCrown(x,wy,6,1);if(BT.dk&&Math.abs(BT.dk.x-x)<50)bathSqueak()}
   BT.lean=BT.dk?Math.max(-6,Math.min(6,(BT.dk.x-180)*.05)):0;
   if(Math.random()<dt*1.5)BT.parts.push({k:'steam',x:60+Math.random()*240,y:BT.wy-4,vx:(Math.random()-.5)*10,vy:-20,g:-5,r:3+Math.random()*4,life:2.2});
-  if(Math.random()<dt*.7)BT.parts.push({k:'txt',s:['꺄르르','첨벙!','히히'][Math.floor(Math.random()*3)],x:150+Math.random()*60,y:230,vx:(Math.random()-.5)*20,vy:-26,g:0,life:1.1,c:'#ff7a8a'})};
- const t0=performance.now();while(BT&&!BT.playEnd&&performance.now()-t0<9000)await bwait(100);if(!BT)return;
+};
+ const t0=performance.now();while(BT&&!BT.playEnd&&performance.now()-t0<13500)await bwait(100);if(!BT)return;clearInterval(BT.sayT);$('bsay').classList.remove('on');
  BT.onTick=null;BT.arm=[0,0];BT.lean=0;bathRinse()}
 async function bathRinse(){if(!BT)return;BT.phase='auto';bathHide();BT.mood='calm';
  // 샤워기: 화면 밖에서 스프링으로 들어옴
  const sh=sv_('g',{},BT.fx);const hose=sv_('path',{d:'',fill:'none',stroke:'#c9d2d8','stroke-width':7,'stroke-linecap':'round'},sh);const hd=sv_('g',{},sh);
  sv_('rect',{x:-8,y:-50,width:16,height:50,rx:8,fill:'#e6ecef',stroke:'#c3ccd2','stroke-width':2},hd);sv_('ellipse',{cx:0,cy:4,rx:28,ry:12,fill:'#f2f5f7',stroke:'#c3ccd2','stroke-width':2},hd);sv_('ellipse',{cx:-8,cy:0,rx:10,ry:3,fill:'#fff',opacity:.9},hd);
- [-15,-7.5,0,7.5,15].forEach(x=>sv_('circle',{cx:x,cy:7,r:1.6,fill:'#9fb0b9'},hd));
- const S={x:420,y:60,ang:0,n:5,k:0,off:0};const place=()=>{hd.setAttribute('transform','translate('+S.x.toFixed(1)+' '+S.y.toFixed(1)+') rotate('+S.ang.toFixed(1)+')');hose.setAttribute('d','M380 40 Q'+(S.x+60)+' '+(S.y-80)+' '+S.x.toFixed(1)+' '+(S.y-46).toFixed(1))};place();
+ [-20,-16,-12,-8,-4,0,4,8,12,16,20].forEach(x=>sv_('circle',{cx:x,cy:7,r:1.1,fill:'#9fb0b9'},hd));
+ const S={x:420,y:60,ang:0,n:11,k:0,off:0};const place=()=>{hd.setAttribute('transform','translate('+S.x.toFixed(1)+' '+S.y.toFixed(1)+') rotate('+S.ang.toFixed(1)+')');hose.setAttribute('d','M380 40 Q'+(S.x+60)+' '+(S.y-80)+' '+S.x.toFixed(1)+' '+(S.y-46).toFixed(1))};place();
  springTo(420,184,v=>{S.x=v;place()},null,110,12);springTo(60,168,v=>{S.y=v;place()},null,110,12);await bwait(700);if(!BT)return;
  BT.streams=S;tween(250,k=>S.k=k);BT.mood='squint';bathMsg('쏴아아 헹구는 중','눈에 물 안 들어가게 살살~');
  let tt=0;const heads=()=>[...BT.headSuds.children];
- BT.onTick=dt=>{tt+=dt;S.ang=Math.sin(tt*2)*14;S.x=184+Math.sin(tt*2)*30;place();
+ BT.onTick=dt=>{tt+=dt;S.ang=Math.sin(tt*1.6)*10;S.x=184+Math.sin(tt*1.6)*24;place();
   heads().forEach(c=>{if(c.dataset.go)return;const cx=+c.getAttribute('cx');if((Math.abs(cx-S.x)<60||tt>2.6)&&Math.random()<dt*(tt>2.6?14:3)){c.dataset.go=1;const y0=+c.getAttribute('cy'),r0=+c.getAttribute('r');let y=y0,v=0,sx=cx;const fall=()=>{if(!BT)return;v+=7;y+=v/60;sx+=(cx>180?.4:-.4);c.setAttribute('cy',y.toFixed(1));c.setAttribute('cx',sx.toFixed(1));c.setAttribute('r',(r0*(1-(y-y0)/80)).toFixed(2));if(y-y0>26+Math.random()*20){c.remove();BT.parts.push({k:'pop',x:sx,y,vx:0,vy:0,g:0,r:r0,life:.25});bathCrown(sx,y,2,.5)}else requestAnimationFrame(fall)};fall()}});
   BT.foam.forEach(f=>{if(tt>1&&!f.gone&&Math.random()<dt*1.5){f.gone=1;springTo(f.r,0,v=>f.el.setAttribute('r',Math.max(0,v).toFixed(2)),()=>f.el.remove(),200,16)}})};
  while(BT&&(tt<3||heads().some(c=>!c.dataset.go)))await bwait(120);if(!BT)return;
@@ -1019,10 +1046,12 @@ async function bathRobe(){const fl=$('bflash');fl.style.opacity=.95;await bwait(
  // 등장: 아래서 쏙 올라오며 통통
  R.style.transform='translateY(80px) scale(.9,1.08)';springTo(80,0,v=>{R.style.transform='translateY('+v+'px) scale('+(1-v/800)+','+(1+v/1000)+')'},null,180,10);
  await bwait(500);if(!BT)return;
- BT.mood='laugh';['✨','💛','🫧','⭐','✨','🫧','💛'].forEach((e,i)=>setTimeout(()=>{if(!BT)return;const P=[[52,190],[300,186],[70,262],[292,270],[40,330],[318,340],[88,150]][i];const t=sv_('text',{x:P[0],y:P[1],'font-size':0,'text-anchor':'middle'},BT.fx);t.textContent=e;springTo(0,22,v=>t.setAttribute('font-size',Math.max(0,v).toFixed(1)),null,220,9)},i*90));
+ BT.mood='laugh';const SP=[];[[56,196,9],[304,190,7],[74,268,6],[290,276,10],[44,336,5],[318,344,7],[96,150,5],[262,140,6]].forEach(([x,y,r],i)=>{const g=sv_('g',{transform:'translate('+x+' '+y+') scale(0)'},BT.fx);sv_('path',{d:'M0 -'+r*2+' Q'+r*.28+' -'+r*.28+' '+r*2+' 0 Q'+r*.28+' '+r*.28+' 0 '+r*2+' Q-'+r*.28+' '+r*.28+' -'+r*2+' 0 Q-'+r*.28+' -'+r*.28+' 0 -'+r*2+'z',fill:i%2?'#fff':'#ffe7a8',opacity:.95},g);SP.push({g,x,y,ph:i*.9});setTimeout(()=>{if(BT)springTo(0,1,v=>g.setAttribute('transform','translate('+x+' '+y+') scale('+Math.max(0,v).toFixed(3)+')'),()=>{g.dataset.on=1},200,9)},i*110)});
+ const FB=[];for(let i=0;i<7;i++){const c=sv_('circle',{cx:70+Math.random()*220,cy:520,r:4+Math.random()*7,fill:'url(#gbub)',opacity:.85},BT.fx);FB.push({c,x:+c.getAttribute('cx'),y:520+Math.random()*80,v:14+Math.random()*16,ph:Math.random()*6})}
+ BT.sparks={SP,FB};
  setTimeout(()=>{if(BT)BT.mood='calm'},1400);
  // 리본 살랑 + 몸 살짝 흔들
- BT.onTick=dt=>{if(BT.bow)BT.bow.style.transform='rotate('+(Math.sin(BT.t*3)*6).toFixed(1)+'deg)';if(Math.random()<dt*1.2)BT.parts.push({k:'steam',x:150+Math.random()*60,y:250,vx:(Math.random()-.5)*8,vy:-16,g:-4,r:2+Math.random()*3,life:2})};
+ BT.onTick=dt=>{if(BT.sparks){BT.sparks.SP.forEach(s=>{if(s.g.dataset.on)s.g.setAttribute('transform','translate('+s.x+' '+s.y+') scale('+(.75+.3*Math.sin(BT.t*3+s.ph)).toFixed(3)+') rotate('+(BT.t*20%360).toFixed(1)+')')});BT.sparks.FB.forEach(b=>{b.y-=b.v*dt;if(b.y<120)b.y=560;b.c.setAttribute('cy',b.y.toFixed(1));b.c.setAttribute('cx',(b.x+Math.sin(BT.t*1.5+b.ph)*8).toFixed(1))})}if(BT.bow)BT.bow.style.transform='rotate('+(Math.sin(BT.t*3)*6).toFixed(1)+'deg)';if(Math.random()<dt*1.2)BT.parts.push({k:'steam',x:150+Math.random()*60,y:250,vx:(Math.random()-.5)*8,vy:-16,g:-4,r:2+Math.random()*3,life:2})};
  bathMsg('보송보송 목욕 끝!','오늘도 깨끗하게 씻겼다. 수고했어 엄마',
   `<div class="prod" style="margin-top:10px;background:#f7f1e8;border-radius:16px;padding:8px 10px"><img src="${BATH_PROD.img}" style="width:40px;height:64px" alt=""><div style="flex:1"><div style="font:14px Jua,sans-serif">${BATH_PROD.brand} ${BATH_PROD.name}</div><div class="sub" style="font-size:12px">머리부터 발끝까지 한 통으로</div></div><a href="${BATH_PROD.url}" target="_blank" rel="noopener" style="font:13px Jua,sans-serif;color:#2B2118;background:#fff;border-radius:99px;padding:7px 11px;text-decoration:none;white-space:nowrap">제품 보기</a></div>
   <button class="go" id="bfin">🛁 목욕 도장 받기</button><button class="go2" id="bagain">🔁 한 번 더 씻기기</button><div class="disc">${BATH_PROD.disc}</div>`);
