@@ -23,12 +23,13 @@ table{width:100%;border-collapse:collapse;background:#fff;font-size:13px}
 th,td{border-top:1px solid #ddd;border-bottom:1px solid #ddd;padding:7px 6px;text-align:left}th{background:#e9e9e9}
 pre{white-space:pre-wrap;font-size:11px;background:#fff;padding:10px;border-radius:8px;max-height:300px;overflow:auto}
 </style></head><body>
-<header><h1>건강보험 자격 불러오기 (테스트)</h1>
+<header><h1>찬이 · 내 정보 불러오기 (테스트)</h1>
 <p>이름·생년월일·휴대폰만 적어 주시면 찬이가 건강보험공단 간편인증을 대신 요청해요. 폰에 온 알림에서 <b>승인</b>만 눌러 주세요. 저장은 이 폰에만 돼요.</p></header>
 <div id="form">
 <label>이름<input id="nm" autocomplete="name"></label>
 <label>생년월일 8자리<input id="bd" inputmode="numeric" maxlength="8" placeholder="19940201"></label>
 <label>휴대폰<input id="ph" inputmode="numeric" maxlength="11" placeholder="01012345678"></label>
+<label>불러올 곳<select id="st2"><option value="nhis">건강보험 (자격득실)</option><option value="hometax">홈택스 (사업자 여부)</option></select></label>
 <label>인증 앱<select id="pv"><option>네이버</option><option>카카오톡</option><option>토스</option><option>통신사PASS</option><option>국민인증서</option><option>삼성패스</option></select></label>
 </div>
 <button id="go">간편인증 요청하기</button>
@@ -65,9 +66,25 @@ function parse(text){
   }
   return rows;
 }
+function parseHT(text){
+  const L=text.split(/\n/).map(x=>x.trim()).filter(Boolean);const out=[];
+  L.forEach((l,i)=>{const m=l.match(/\d{3}-\d{2}-\d{5}/);if(m){const near=[L[i-1],l.replace(m[0],'').trim(),L[i+1]].filter(x=>x&&!/\d{3}-\d{2}-\d{5}/.test(x)&&x.length<30);out.push({no:m[0],near:near.join(' / ')})}});
+  const seen={};return out.filter(x=>!seen[x.no]&&(seen[x.no]=1));
+}
+function judgeHT(biz){
+  let nk='';try{nk=localStorage.getItem('cp_nhis_now')||''}catch(e){}
+  let t='홈택스 사업자 '+biz.length+'개';
+  if(nk)t+=' · 건보 지금 자격: '+nk;
+  if(biz.length&&nk&&nk!=='직장가입자')t+=' → 자영업자(사업자)로 판단';
+  else if(biz.length&&nk==='직장가입자')t+=' → 근로자이면서 사업자 등록도 있음(겸업)';
+  else if(!biz.length)t+=' → 사업자 등록 없음';
+  if(!nk)t+=' (건보도 불러오면 판정이 정확해져요)';
+  return t;
+}
 function judge(rows){
   if(!rows.length)return '';
   const now=rows.find(r=>!r.lose)||rows[0];
+  try{localStorage.setItem('cp_nhis_now',now.kind)}catch(e){}
   const work=rows.filter(r=>r.kind==='직장가입자');
   let t='지금 자격: '+now.kind+(now.get?' ('+now.get+'부터)':'');
   t+=' · 직장가입 이력 '+work.length+'건';
@@ -86,7 +103,7 @@ $('#go').onclick=async()=>{
   $('#go').disabled=true;big('');window.__stop=0;$('#out').style.display='none';st('찬이가 건강보험공단 여는 중…');bar(5);
   try{
     const r=await fetch(FN,{method:'POST',headers:{'Content-Type':'application/json',apikey:KEY,Authorization:'Bearer '+KEY},
-      body:JSON.stringify({action:'flow',site:'nhis',name:nm,birth:bd,phone:ph,prov:pv})});
+      body:JSON.stringify({action:'flow',site:$('#st2').value,name:nm,birth:bd,phone:ph,prov:pv})});
     const rd=r.body.getReader();const dec=new TextDecoder();let buf='';
     for(;;){const {value,done}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true});
       let i;while((i=buf.indexOf('\n\n'))>=0){const line=buf.slice(0,i);buf=buf.slice(i+2);
@@ -97,7 +114,9 @@ $('#go').onclick=async()=>{
         else if(e.step==='dbg'){$('#dbg').textContent='찬이 확인: '+e.dr}
         else if(e.step==='login'){big('로그인 완료!');st('자격득실 읽는 중…');bar(85)}
         else if(e.step==='data'){bar(100);big('불러오기 완료');st('');$('#wrap').style.display='none';$('#tog').style.display='none';
-          const rows=parse(e.text);const o=$('#out');o.style.display='block';
+          const o=$('#out');o.style.display='block';
+          if(e.site==='hometax'){const biz=parseHT(e.text||'');o.innerHTML='<p style="font-size:14px;font-weight:700;margin:0 0 8px">'+judgeHT(biz)+'</p>'+(biz.length?'<table><tr><th>사업자등록번호</th><th>주변 글자(상호 등)</th></tr>'+biz.map(x=>'<tr><td>'+x.no+'</td><td>'+x.near.replace(/</g,'&lt;')+'</td></tr>').join('')+'</table>':'')+'<details><summary style="font-size:12px;margin-top:8px">읽어온 원문 보기</summary><pre></pre></details>';o.querySelector('pre').textContent=JSON.stringify({u:e.u,t:e.t},null,1)+'\n\n'+e.text;continue}
+          const rows=parse(e.text);
           if(!rows.length&&e.tables&&e.tables.length){o.innerHTML=e.tables.map(t=>'<table style="margin-bottom:10px">'+t.map((r,i)=>'<tr>'+r.map(c=>(i?'<td>':'<th>')+c.replace(/</g,'&lt;')+(i?'</td>':'</th>')).join('')+'</tr>').join('')+'</table>').join('')+'<details><summary style="font-size:12px;margin-top:8px">읽어온 원문 보기</summary><pre></pre></details>';o.querySelector('pre').textContent=JSON.stringify({u:e.u,t:e.t,clicked:e.clicked,al:e.al,btn:e.btn},null,1)+'\n\n'+e.text;}else{
           o.innerHTML=(rows.length?'<p style="font-size:14px;font-weight:700;margin:0 0 8px">'+judge(rows)+'</p><table><tr><th>구분</th><th>사업장</th><th>취득일</th><th>상실일</th></tr>'+rows.map(x=>`<tr><td>${x.kind}</td><td>${x.place}</td><td>${x.get}</td><td>${x.lose||'-'}</td></tr>`).join('')+'</table>':'<p>표를 못 찾았어요. 원문:</p>')+'<details><summary style="font-size:12px;margin-top:8px">읽어온 원문 보기</summary><pre></pre></details>';
           o.querySelector('pre').textContent=JSON.stringify({u:e.u,t:e.t,clicked:e.clicked,al:e.al,btn:e.btn},null,1)+'\n\n'+e.text}}
