@@ -193,11 +193,13 @@ a.kakao{display:block;margin-top:10px;text-align:center;font:15px Jua,sans-serif
  <div class="gate" id="gate">
   <div class="moon"></div><h1>온라인 공동육아방</h1><div class="sub">엄마만 들어올 수 있는 방 · 가입 없이 바로</div>
   <div class="pill" style="color:var(--ink)"><span class="dot"></span>지금 엄마 <b id="gtot">…</b> 같이 육아 중</div>
+  <div id="gsum" style="flex-shrink:0;margin:8px auto 4px;max-width:320px;text-align:center;font:15px/1.45 Jua,sans-serif;color:#fff6dc;text-shadow:0 1px 6px rgba(0,0,0,.25);min-height:22px"></div>
   <div class="rooms" id="rooms"></div>
   <div class="who"><b>지금 나는?</b><div class="opt" id="kinds"></div><div class="note" id="nick"></div></div>
   <button class="go" id="go" disabled>시기를 골라줘</button>
   <div class="q" id="queue"></div>
   <div class="gnote" id="gnote">방은 2개, 한 방에 30명씩 60명까지 같이 있을 수 있어. 둘 다 꽉 차면 대기 줄을 서고 자리 나면 순서대로 들어가.</div>
+  <button id="gsoon" style="flex-shrink:0;display:block;margin:12px auto 0;border:0;border-radius:999px;padding:10px 16px;font:15px Jua,sans-serif;background:rgba(255,255,255,.92);color:#2B2118;box-shadow:0 4px 12px rgba(0,0,0,.15)">🛠 준비 중인 기능 · 먼저 만들 거 골라줘</button>
  </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -1193,6 +1195,11 @@ async function soonCounts(){const c={};if(typeof SB=='undefined'||!SB)return c;t
 async function drawSoon(){const el=$('soonbox');if(!el)return;const c=await soonCounts(),mine=LS.get('cp_votes',{});
  el.innerHTML='<div class="t">준비 중인 기능 <small>관심 많은 것부터 만들어</small></div>'+SOON.map(([k,i,n,d])=>'<div style="display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid #f0e2cf"><div style="font-size:22px">'+i+'</div><div style="flex:1"><b style="font:15px Jua,sans-serif">'+n+'</b><div style="font-size:12.5px;color:#8a7a68">'+d+'</div></div><button data-vote="'+k+'" style="border:0;border-radius:999px;padding:7px 11px;font:13px Jua,sans-serif;white-space:nowrap;'+(mine[k]?'background:#2B2118;color:#FFD84D':'background:#f3ebe0;color:#2B2118')+'">'+(mine[k]?'관심 있어 ✓':'관심 있어')+' · '+(c[k]||0)+'</button></div>').join('')+'<p class="note" style="margin-top:6px">기기마다 한 번씩 누를 수 있어</p>';
  el.querySelectorAll('[data-vote]').forEach(b=>b.onclick=async()=>{const k=b.dataset.vote,m=LS.get('cp_votes',{});if(m[k]){toast('이미 눌렀어');return}m[k]=1;LS.set('cp_votes',m);b.disabled=true;await sbPost(TO_VOTE,'v:'+k);toast('알았어! 관심 많은 것부터 만들게');drawSoon()})}
+function openSoon(){openSheet('준비 중인 기능');if(!me.room)sheet.style.zIndex='11';sb.innerHTML='<div class="box" id="soonbox"><p class="note">불러오는 중…</p></div><p class="note" style="text-align:center">관심 많은 순서대로 만들고, 다 되면 이 방에서 제일 먼저 알려줄게</p>';drawSoon()}
+async function loadSum(){const el=$('gsum');if(!el)return;if(typeof SB=='undefined'||!SB){setTimeout(loadSum,1500);return}
+ try{const since='2026-11-19T15:10:00Z';const a=await SB.from('notes').select('id',{count:'exact',head:true}).eq('to_id',TO_VISIT).like('text','%|new').gte('at',since);const b=await SB.from('notes').select('id',{count:'exact',head:true}).eq('to_id',TO_VISIT).gte('at',since);
+  const n=a.count||0,v=b.count||0;if(!n)return;const f=x=>x.toLocaleString('ko-KR');el.innerHTML='지금까지 엄마 <b style="color:#FFD84D">'+f(n)+'명</b>이 여기서 같이 키웠어<br><small style="font-size:12.5px;opacity:.85">혼자 아니었던 순간 '+f(v)+'번</small>'}catch(e){}}
+setTimeout(loadSum,1200);setTimeout(()=>{const g=$('gsoon');if(g)g.onclick=openSoon},300);
 function openVoice(){openSheet('엄마의 소리');
  const tabs='<div class="atabs">'+['개선이 필요한 점','앱 운영 알림'].map((n,i)=>'<button data-vt="'+i+'" class="'+(vTab==i?'on':'')+'">'+n+'</button>').join('')+'</div>';
  if(vTab==0){
@@ -1228,7 +1235,7 @@ document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest
 setTimeout(()=>{const v=$('voice');if(v)v.onclick=openVoice},0);
 let BACKTO=null;
 function openSheet(t){$('stt').textContent=t;sheet.classList.add('on');const b=$('sbk');if(b){if(BACKTO){const f=BACKTO;b.style.display='';b.onclick=()=>{if(miniR){miniR.dispose();miniR=null}f()}}else b.style.display='none'}BACKTO=null}
-function closeSheet(){sheet.classList.remove('on');if(miniR){miniR.dispose();miniR=null}}
+function closeSheet(){sheet.classList.remove('on');sheet.style.zIndex='';if(miniR){miniR.dispose();miniR=null}}
 
 /* 미니홈피 */
 const OWNER_ID='8973e17e-175f-4fa3-a78d-c1c87beb69ec',OWNER_NICK='엄마6865';
@@ -1588,5 +1595,5 @@ let SB=null;
  renderGate()})();
 }
 </script>
-<script>(function(){var V="1795188133";function chk(force){fetch("/version.txt?"+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():""}).then(function(x){x=(x||"").trim();if(!x||x===V)return;if(force||document.visibilityState==="visible"&&!document.hasFocus()){location.reload();return}if(document.getElementById("vbar"))return;var b=document.createElement("button");b.id="vbar";b.textContent="새 기능이 생겼어! 눌러서 새로고침";b.style.cssText="position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 8px);transform:translateX(-50%);z-index:99;font:15px Jua,sans-serif;background:#2B2118;color:#FFD84D;border:0;border-radius:999px;padding:10px 18px;box-shadow:0 4px 12px rgba(0,0,0,.3)";b.onclick=function(){location.reload()};document.body.appendChild(b)}).catch(function(){})}document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible")chk(true)});setInterval(function(){chk(false)},60000);setTimeout(function(){chk(false)},5000)})();</script></body>
+<script>(function(){var V="1795188581";function chk(force){fetch("/version.txt?"+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():""}).then(function(x){x=(x||"").trim();if(!x||x===V)return;if(force||document.visibilityState==="visible"&&!document.hasFocus()){location.reload();return}if(document.getElementById("vbar"))return;var b=document.createElement("button");b.id="vbar";b.textContent="새 기능이 생겼어! 눌러서 새로고침";b.style.cssText="position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 8px);transform:translateX(-50%);z-index:99;font:15px Jua,sans-serif;background:#2B2118;color:#FFD84D;border:0;border-radius:999px;padding:10px 18px;box-shadow:0 4px 12px rgba(0,0,0,.3)";b.onclick=function(){location.reload()};document.body.appendChild(b)}).catch(function(){})}document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible")chk(true)});setInterval(function(){chk(false)},60000);setTimeout(function(){chk(false)},5000)})();</script></body>
 </html>
