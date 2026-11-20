@@ -169,6 +169,8 @@ a.kakao{display:block;margin-top:10px;text-align:center;font:15px Jua,sans-serif
 #comfort.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
 #comfort button{font:13px Jua,sans-serif;background:var(--ink);color:var(--y);border:0;border-radius:999px;padding:6px 12px;cursor:pointer}
 #kinds{display:block!important}#kinds .opt{display:grid!important;grid-template-columns:repeat(3,1fr);gap:6px}#kinds .opt button{padding:8px 4px;font-size:14px;white-space:nowrap;grid-column:auto!important;width:auto!important}
+.sdam{position:absolute;right:10px;bottom:300px;z-index:3;display:none;align-items:center;gap:6px;font:18px Jua,sans-serif;border:3px solid var(--ink);background:#FF8FAB;color:#fff;border-radius:999px;padding:10px 20px;min-height:58px;box-shadow:0 4px 12px rgba(0,0,0,.3);-webkit-tap-highlight-color:transparent}
+.sdam:active{transform:scale(.94)}.sdam small{font-size:12px;opacity:.9}
 .ksub{font:12px Jua,sans-serif;color:#8a7a68;margin:8px 0 4px}
 </style>
 </head>
@@ -178,6 +180,7 @@ a.kakao{display:block;margin-top:10px;text-align:center;font:15px Jua,sans-serif
   <div class="live"><span class="pill"><span class="dot"></span>지금 엄마 <b id="tot">1명</b> 같이 육아 중</span><span class="pill d" id="rm">1호방</span></div></div>
  <div id="ceil"></div>
  <div class="card" id="card"></div>
+ <button class="sdam" id="sdam">쓰담 ♥ <small id="sdn"></small></button>
  <div class="zoom" id="zoom"><button data-z="-1" aria-label="가까이">+</button><button data-z="1" aria-label="멀리">−</button></div>
  <div class="toast" id="toast"></div>
  <div class="dock" id="dock">
@@ -522,6 +525,7 @@ function onPeers(list){peers=list||[];
  others().forEach(p=>{const s=p.state;if(s.room!==me.room||!s.kind)return;const id=s.id||p.id;here.add(id);ensure(id,s,false);
   if(s.patTo===myId&&s.patAt&&seenPat[id]!==s.patAt){if(seenPat[id]!==undefined||Date.now()-s.patAt<8000){const fd=me.st=='feed'||me.st=='bottle',pt=s.ex&&s.ex.pt;const L={cheer:['응원 ♥','가 응원을 보냈어'],toast:['짠 🍺','가 같이 건배했어'],work:['화이팅 ✊','가 화이팅을 보냈어']}[pt]||(fd?['토닥 ♥','가 수유 중인 나를 토닥토닥했어']:['쓰담 ♥','가 나를 쓰담했어']);fx(myId,L[0]);toast(s.nick+L[1]);gotPat()}seenPat[id]=s.patAt}
   if(s.ex&&s.ex.cheerAt&&s.room===me.room&&seenCheer[id]!==s.ex.cheerAt){if(seenCheer[id]!==undefined||Date.now()-s.ex.cheerAt<8000){fx(myId,'♡');toast('누군가 말없이 응원을 보냈어 ♡')}seenCheer[id]=s.ex.cheerAt}
+  if(s.ex&&s.ex.sdAt&&s.room===me.room&&seenSd[id]!==s.ex.sdAt){if(seenSd[id]!==undefined||Date.now()-s.ex.sdAt<8000){fx(myId,'쓰담 ♥');toast(s.nick+'가 방 엄마들 전부 쓰담했어 ♥');gotPat()}seenSd[id]=s.ex.sdAt}
   else if(seenPat[id]===undefined)seenPat[id]=s.patAt});
  Object.keys(AV).forEach(id=>{if(id!==myId&&!here.has(id))drop(id)});
  trackPeak();renderCeil();updateTop();renderCard()}
@@ -566,6 +570,9 @@ document.querySelectorAll('#zoom button').forEach(b=>b.onclick=()=>{zoomK=Math.m
 function openMenu(id){const o=AV[id];closeMenu();menuEl=document.createElement('div');menuEl.className='menu';const fdg=o.st&&(o.st.st=='feed'||o.st.st=='bottle');menuEl.innerHTML='<button>'+(fdg?'토닥':'쓰담')+'</button><button class="w">미니홈피</button>';app.appendChild(menuEl);menuEl.dataset.id=id;
  const [b1,b2]=menuEl.querySelectorAll('button');b1.onclick=()=>{sendPat(id);closeMenu()};b2.onclick=()=>{closeMenu();openHome(id,o.st.nick)}}
 function sendPat(id,ty){const o=AV[id];if(!o)return;const fdg=o.st&&(o.st.st=='feed'||o.st.st=='bottle');me.patTo=id;me.patAt=Date.now();me.ex=Object.assign({},me.ex,{pt:ty||''});pushP();const L={cheer:['응원 ♥',' 응원 보냄'],toast:['짠 🍺','이랑 건배'],work:['화이팅 ✊',' 화이팅 보냄']}[ty]||(fdg?['토닥 ♥',' 토닥토닥 보냄']:['쓰담 ♥','에게 쓰담 보냄']);fx(id,L[0]);toast(o.st.nick+L[1])}
+let seenSd={},sdLast=0;function roomSd(){const now=Date.now();if(now-sdLast<2500){fx(myId,'♥');return}sdLast=now;const n=others().filter(p=>p.state.room===me.room).length;me.ex=Object.assign({},me.ex,{sdAt:now});pushP();fx(myId,'쓰담 ♥');if(navigator.vibrate)try{navigator.vibrate(30)}catch(e){}toast(n?'지금 같이 있는 엄마 '+n+'명 전부 쓰담했어 ♥':'지금은 방에 나 혼자야. 엄마들 들어오면 쓰담 보내자')}
+function placeSd(){const b=$('sdam'),c=$('card');if(!b||!c)return;if(!b.onclick)b.onclick=roomSd;const inRoom=$('gate').style.display=='none'&&!$('sheet').classList.contains('on');b.style.display=inRoom?'flex':'none';if(!inRoom)return;const r=c.getBoundingClientRect(),h=app.getBoundingClientRect();b.style.bottom=(r.height?h.bottom-r.top+8:100)+'px';const n=others().filter(p=>p.state.room===me.room).length;$('sdn').textContent=n?'같이 있는 '+n+'명':''}
+setInterval(placeSd,400);
 let seenCheer={};function roomCheer(){me.ex=Object.assign({},me.ex,{cheerAt:Date.now()});pushP();fx(myId,'♡');toast('방 엄마들한테 말없이 응원 보냈어')}
 function feedersHTML(){const fs=others().filter(p=>p.state.room===me.room&&(p.state.st=='feed'||p.state.st=='bottle'));if(!fs.length)return'<div style="font-size:13px;color:#8a7a68;margin:6px 0">지금 같이 수유 중인 엄마는 없어. 다른 엄마가 들어오면 여기서 토닥 보낼 수 있어</div>';
  return '<div style="margin:6px 0 2px;max-height:120px;overflow-y:auto">'+fs.map(p=>{const s=p.state,id=s.id||p.id;return '<div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin:3px 0"><span>'+esc(s.nick)+' <small style="color:#8a7a68">'+Math.max(1,Math.round((Date.now()-s.stAt)/60000))+'분</small></span><button class="patb" data-pat="'+esc(id)+'" style="margin:0">'+(me.kind=='preg'?'응원':'토닥')+'</button></div>'}).join('')+'</div>'}
