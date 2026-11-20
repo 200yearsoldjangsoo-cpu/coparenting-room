@@ -520,7 +520,7 @@ function clampXZ(x,z){x=Math.max(-RW/2+.35,Math.min(RW/2-.3,x));z=Math.max(-RD/2
 /* 아바타 관리 */
 const AV={};
 const AK=k=>({carrier:'carrier',home:'home',work:'work',newborn:'newborn',preg:'preg',toddler:'toddler'}[k]||'preg');
-function makeAv(st){const kind=st.carrier==2?'stroller':st.carrier?'none':AK(st.kind);const a=avatar({kind,top:(KINDS[st.kind]||KINDS.preg).top,hair:st.hair||'#3b2a20'});if(st.carrier==1)konny(a,st.cc||'#4a4744','#efe6d8');const tw=st.ex&&st.ex.tw;if(tw)twins(a,st,kind);const okn=Math.max(0,Math.min(3,(st.ex&&+st.ex.ok)||0));if(okn)bigKids(a,okn);const pg2=st.ex&&st.ex.sgs&&st.ex.sgs.includes('preg')&&kind!=='preg'&&!a.cb&&!st.carrier;if(pg2){try{a.bod.add(sph(.27,(KINDS[st.kind]||KINDS.preg).top,0,.45,.25,1.05,.95,.95))}catch(e){}}a.sig=kind+'|'+st.carrier+'|'+st.cc+'|'+(tw?1:0)+'|'+(pg2?1:0)+'|'+okn;return a}
+function makeAv(st){const kind=st.carrier==2?'stroller':st.carrier?'none':AK(st.kind);const a=avatar({kind,top:(KINDS[st.kind]||KINDS.preg).top,hair:st.hair||'#3b2a20'});if(st.carrier==1)konny(a,st.cc||'#4a4744','#efe6d8');const tw=st.ex&&st.ex.tw;if(tw)twins(a,st,kind);const okn=Math.max(0,Math.min(3,(st.ex&&+st.ex.ok)||0));if(okn)bigKids(a,okn);const hk=st.ex&&st.ex.sgs&&st.ex.sgs.includes('baby')&&st.ex.sgs.includes('todd')&&!a.kid&&kind!=='stroller'&&!st.carrier?1:0;if(hk){try{const k=G(sph(.17,'#ffcf8a',0,.3,0,1,1.15,.9),sph(.16,SKIN,0,.56,0),sph(.165,'#7a5030',0,.62,-.02,1,.7,1),sph(.022,'#2B2118',-.05,.55,.15),sph(.022,'#2B2118',.05,.55,.15),cyl(.05,.05,.16,'#5a7fbf',-.07,.08,0,8),cyl(.05,.05,.16,'#5a7fbf',.07,.08,0,8));k.add(sph(.055,'#ffcf8a',.12,.38,.03,1.9,.8,.8));k.position.set(-.64,0,.2);a.root.add(k)}catch(e){}}const pg2=st.ex&&st.ex.sgs&&st.ex.sgs.includes('preg')&&kind!=='preg'&&!a.cb&&!st.carrier;if(pg2){try{a.bod.add(sph(.27,(KINDS[st.kind]||KINDS.preg).top,0,.45,.25,1.05,.95,.95))}catch(e){}}a.sig=kind+'|'+st.carrier+'|'+st.cc+'|'+(tw?1:0)+'|'+(pg2?1:0)+'|'+okn+'|'+(hk?1:0);return a}
 function bigKids(a,n){try{const C=[['#8fcf9a','#4f7a52'],['#b9a3e6','#5b4a8a'],['#ffb27a','#8a5a3c']],P=[[-.66,-.42],[.66,-.42],[1.2,-.05]],H=['#5a3a22','#3b2a20','#6a4a2a'];
  for(let i=0;i<n;i++){const [top,pants]=C[i],[x,z]=P[i],s=1.28-i*.06;const k=G(sph(.17,top,0,.3,0,1,1.15,.9),sph(.16,SKIN,0,.56,0),sph(.165,H[i],0,.62,-.02,1,.7,1),sph(.022,'#2B2118',-.05,.55,.15),sph(.022,'#2B2118',.05,.55,.15),sph(.03,'#ff9fa6',-.09,.5,.13,1.2,.6,.4),sph(.03,'#ff9fa6',.09,.5,.13,1.2,.6,.4),cyl(.05,.05,.16,pants,-.07,.08,0,8),cyl(.05,.05,.16,pants,.07,.08,0,8),sph(.05,top,-.19,.36,.02,1,1.6,1),sph(.05,top,.19,.36,.02,1,1.6,1));
   if(i==1)k.add(sph(.06,H[i],0,.76,-.1));k.scale.setScalar(s);k.position.set(x,0,z);a.root.add(k)}}catch(e){}}
@@ -609,7 +609,13 @@ const fxs=[];
 let tab='feed',cardOff=false;
 const isNight=()=>{const h=new Date().getHours();return h>=21||h<6};
 const ICON_MOON='<svg viewBox="0 0 24 24"><path d="M12 3a7 7 0 1 0 9 9A8 8 0 1 1 12 3z" fill="none" stroke="currentColor" stroke-width="2"/></svg>',ICON_SUN='<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
-function feedLabel(){const n=isNight();$('feedTab').innerHTML=me.kind=='preg'?'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 12h6M12 9v6" stroke="currentColor" stroke-width="2"/></svg>태교':me.kind=='toddler'?'<svg viewBox="0 0 24 24"><path d="M4 11h16a8 8 0 0 1-16 0zM8 7c0-2 2-2 2-4M13 7c0-2 2-2 2-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>유아식':(n?ICON_MOON:ICON_SUN)+(n?'새벽수유':'수유')}
+function feedLabel(){feedLabel0();fmLabelFix()}
+function feedLabel0(){const n=isNight();$('feedTab').innerHTML=me.kind=='preg'?'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 12h6M12 9v6" stroke="currentColor" stroke-width="2"/></svg>태교':me.kind=='toddler'?'<svg viewBox="0 0 24 24"><path d="M4 11h16a8 8 0 0 1-16 0zM8 7c0-2 2-2 2-4M13 7c0-2 2-2 2-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>유아식':(n?ICON_MOON:ICON_SUN)+(n?'새벽수유':'수유')}
+const FMN={preg:'태교',feed:'수유',todd:'유아식'},FMI={preg:'🤰',feed:'🍼',todd:'🍚'};
+function fmodes(){if(!me.kind)return[];const s=(me.ex&&me.ex.sgs)||mySts||[];const m=[];if(s.includes('preg'))m.push('preg');if(s.includes('baby'))m.push('feed');if(s.includes('todd'))m.push('todd');return m}
+function fmodeNow(){const m=fmodes();if(m.length<2)return me.kind=='preg'?'preg':me.kind=='toddler'?'todd':'feed';let v='';try{v=localStorage.getItem('cp_fmode')||''}catch(e){}if(m.includes(v))return v;const h=new Date().getHours();if(m.includes('feed')&&(h>=22||h<6))return 'feed';return m.includes('todd')?'todd':m[0]}
+function fmLabelFix(){const m=fmodes(),el=$('feedTab');if(m.length>1&&el)el.innerHTML=el.innerHTML.replace(/<\/svg>[\s\S]*$/,'</svg>'+m.map(k=>FMN[k]).join('·'))}
+function fmAfter(){try{const c=$('card');if(c&&c.style.display!=='none'&&tab=='feed'&&!(me.fm>0||me.st=='bottle'||me.zone||breastPend)&&!c.querySelector('.fmsw'))fmSwitch(c)}catch(e){}}
 feedLabel();setInterval(feedLabel,60000);
 const ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 const LS={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
@@ -795,15 +801,19 @@ function showComfort(){if(!me.room||sheet.classList.contains('on'))return;let el
  const t=COMFORT[Math.floor(Math.random()*COMFORT.length)];el.innerHTML='<div style="font:15px Jua,sans-serif;line-height:1.45">'+esc(t)+'</div><div style="margin-top:8px;display:flex;gap:6px;justify-content:center"><button id="cfh">♡ 말없이 응원 보내기</button><button id="cfx" style="background:#eee;color:#2B2118">고마워</button></div>';el.classList.add('on');
  $('cfh').onclick=()=>{roomCheer();el.classList.remove('on')};$('cfx').onclick=()=>el.classList.remove('on');setTimeout(()=>el.classList.remove('on'),15000)}
 setTimeout(showComfort,25000);setInterval(showComfort,7*60000);
-function renderCard(){const c=$('card');if(!me.room){c.style.display='none';return}
+function fmSwitch(c){const m=fmodes();if(m.length<2||tab!='feed')return;const cur=fmodeNow();const d=document.createElement('div');d.className='fmsw';d.style.cssText='display:flex;gap:4px;background:#f3ebe0;border-radius:999px;padding:3px;margin:0 0 8px';
+ d.innerHTML=m.map(k=>'<button data-fm="'+k+'" style="flex:1;border:0;border-radius:999px;padding:6px 4px;font:14px Jua,sans-serif;margin:0;'+(k==cur?'background:#2B2118;color:#FFD84D':'background:transparent;color:#5a4632')+'">'+FMI[k]+' '+FMN[k]+'</button>').join('');
+ c.insertBefore(d,c.firstChild);d.querySelectorAll('[data-fm]').forEach(b=>b.onclick=e=>{e.stopPropagation();try{localStorage.setItem('cp_fmode',b.dataset.fm)}catch(x){}renderCard()})}
+function renderCard(){renderCard0();fmAfter()}
+function renderCard0(){const c=$('card');if(!me.room){c.style.display='none';return}
  if(cardOff&&!(me.fm>0||me.st=='bottle'||me.zone||breastPend)){c.style.display='none';return}c.style.display='';
  if(me.fm>0||me.st=='bottle'){renderFormula(c);return}
  if(me.zone&&me.zone[0]=='b'||breastPend){renderBooth(c);return}
  if(me.zone=='formula'){renderFormula(c);return}
  const here=others().filter(p=>p.state.room===me.room);
  if(tab=='grow'){renderGrow(c,here);return}
- if(tab=='feed'&&me.kind=='preg'){renderPreg(c,here);return}
- if(tab=='feed'&&me.kind=='toddler'){renderToddler(c,here);return}
+ if(tab=='feed'&&fmodeNow()=='preg'){renderPreg(c,here);fmSwitch(c);return}
+ if(tab=='feed'&&fmodeNow()=='todd'){renderToddler(c,here);fmSwitch(c);return}
  if(tab=='feed'&&me.st=='pump'){const pm=Math.max(0,Math.floor((Date.now()-me.stAt)/60000));const pn=here.filter(p=>p.state.st=='pump').length+1;
   c.innerHTML='<b>유축 중 · 퓨숙퓨숙</b>나 · '+pm+'분째'+'<div class="bar"><i style="width:'+Math.min(100,pm/20*100)+'%"></i></div>같이 유축 중 '+pn+'명'+feedersHTML()+'<button id="cb">유축 끝</button>';bindPats(c);$('cb').onclick=()=>{standUp();renderCard()};return}
  if(tab=='feed'){const n=here.filter(p=>p.state.st=='feed').length+(me.st=='feed'?1:0);const mins=me.st=='feed'?Math.floor((Date.now()-me.stAt)/60000):0;
@@ -1562,5 +1572,5 @@ let SB=null;
  renderGate()})();
 }
 </script>
-<script>(function(){var V="1795181943";function chk(force){fetch("/version.txt?"+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():""}).then(function(x){x=(x||"").trim();if(!x||x===V)return;if(force||document.visibilityState==="visible"&&!document.hasFocus()){location.reload();return}if(document.getElementById("vbar"))return;var b=document.createElement("button");b.id="vbar";b.textContent="새 기능이 생겼어! 눌러서 새로고침";b.style.cssText="position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 8px);transform:translateX(-50%);z-index:99;font:15px Jua,sans-serif;background:#2B2118;color:#FFD84D;border:0;border-radius:999px;padding:10px 18px;box-shadow:0 4px 12px rgba(0,0,0,.3)";b.onclick=function(){location.reload()};document.body.appendChild(b)}).catch(function(){})}document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible")chk(true)});setInterval(function(){chk(false)},60000);setTimeout(function(){chk(false)},5000)})();</script></body>
+<script>(function(){var V="1795185733";function chk(force){fetch("/version.txt?"+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():""}).then(function(x){x=(x||"").trim();if(!x||x===V)return;if(force||document.visibilityState==="visible"&&!document.hasFocus()){location.reload();return}if(document.getElementById("vbar"))return;var b=document.createElement("button");b.id="vbar";b.textContent="새 기능이 생겼어! 눌러서 새로고침";b.style.cssText="position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 8px);transform:translateX(-50%);z-index:99;font:15px Jua,sans-serif;background:#2B2118;color:#FFD84D;border:0;border-radius:999px;padding:10px 18px;box-shadow:0 4px 12px rgba(0,0,0,.3)";b.onclick=function(){location.reload()};document.body.appendChild(b)}).catch(function(){})}document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible")chk(true)});setInterval(function(){chk(false)},60000);setTimeout(function(){chk(false)},5000)})();</script></body>
 </html>
