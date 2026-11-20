@@ -221,12 +221,14 @@ const STAGES={preg:'임신 중',baby:'돌 이전',todd:'돌 이후'},MSTATS={lea
 let mySt='',myMs='';
 function kindOf(st,ms){return st=='preg'?'preg':st=='todd'?'toddler':{leave:'carrier',work:'work',biz:'work',home:'home'}[ms]||'carrier'}
 const kpick=(id,O,cur)=>'<div class="ksub">'+id+'</div><div class="opt">'+Object.entries(O).map(([k,v])=>'<button data-'+(O===STAGES?'s':'m')+'="'+k+'" class="'+(cur==k?'on':'')+'">'+v+'</button>').join('')+'</div>';
-function drawKinds(){$('kinds').innerHTML=kpick('아이 시기',STAGES,mySt)+kpick('지금 나',MSTATS,myMs);
+const twHTML=id=>'<div class="ksub">아기</div><div class="opt" id="'+id+'"><button data-tw="0" class="'+(me.ex&&me.ex.tw?'':'on')+'">한 명</button><button data-tw="1" class="'+(me.ex&&me.ex.tw?'on':'')+'">쌍둥이</button></div>';
+function setTw(v){me.ex=Object.assign({},me.ex,{tw:v?1:0});try{localStorage.setItem('cp_tw',v?'1':'0')}catch(e){}try{if(RM){pushP();ensure(myId,meState(),true)}}catch(e){}}
+function drawKinds(){$('kinds').innerHTML=kpick('아이 시기',STAGES,mySt)+kpick('지금 나',MSTATS,myMs)+twHTML('gtw');$('kinds').querySelectorAll('[data-tw]').forEach(b=>b.onclick=()=>{setTw(b.dataset.tw=='1');drawKinds()});
  $('kinds').querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{mySt=b.dataset.s;applyKind()});$('kinds').querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{myMs=b.dataset.m;applyKind()})}
 function applyKind(){try{localStorage.setItem('cp_st',mySt);localStorage.setItem('cp_ms',myMs)}catch(e){}if(mySt&&myMs){me.kind=kindOf(mySt,myMs);me.ex=Object.assign({},me.ex,{ms:myMs,sg:mySt});try{localStorage.setItem('cp_kind',me.kind)}catch(e){}}else me.kind=null;drawKinds();renderGate()}
 function setKind(k){me.kind=k;try{localStorage.setItem('cp_kind',k)}catch(e){}}
 function markKind(){drawKinds()}
-try{mySt=localStorage.getItem('cp_st')||'';myMs=localStorage.getItem('cp_ms')||''}catch(e){}
+try{mySt=localStorage.getItem('cp_st')||'';myMs=localStorage.getItem('cp_ms')||'';if(localStorage.getItem('cp_tw')=='1')me.ex=Object.assign({},me.ex,{tw:1})}catch(e){}
 if(mySt&&myMs){me.kind=kindOf(mySt,myMs);me.ex=Object.assign({},me.ex,{ms:myMs,sg:mySt})}drawKinds();
 $('nick').textContent=(me.kind?'지난번 선택 그대로야 · 바뀌었으면 다시 눌러 · ':'별명은 자동으로 붙어 · ')+me.nick;
 function others(){return peers.filter(p=>!p.you&&p.state&&p.state.nick)}
@@ -506,8 +508,13 @@ function clampXZ(x,z){x=Math.max(-RW/2+.35,Math.min(RW/2-.3,x));z=Math.max(-RD/2
 /* 아바타 관리 */
 const AV={};
 const AK=k=>({carrier:'carrier',home:'home',work:'work',newborn:'newborn',preg:'preg',toddler:'toddler'}[k]||'preg');
-function makeAv(st){const kind=st.carrier==2?'stroller':st.carrier?'none':AK(st.kind);const a=avatar({kind,top:(KINDS[st.kind]||KINDS.preg).top,hair:st.hair||'#3b2a20'});if(st.carrier==1)konny(a,st.cc||'#4a4744','#efe6d8');a.sig=kind+'|'+st.carrier+'|'+st.cc;return a}
-function ensure(id,st,isMe){let o=AV[id];const sig=(st.carrier==2?'stroller':st.carrier?'none':AK(st.kind))+'|'+st.carrier+'|'+st.cc;
+function makeAv(st){const kind=st.carrier==2?'stroller':st.carrier?'none':AK(st.kind);const a=avatar({kind,top:(KINDS[st.kind]||KINDS.preg).top,hair:st.hair||'#3b2a20'});if(st.carrier==1)konny(a,st.cc||'#4a4744','#efe6d8');const tw=st.ex&&st.ex.tw;if(tw)twins(a,st,kind);a.sig=kind+'|'+st.carrier+'|'+st.cc+'|'+(tw?1:0);return a}
+function twins(a,st,kind){try{if(st.carrier==1){a.bod.add(sph(.15,'#ffdcc2',.2,.8,.4));a.bod.add(sph(.155,'#efe6d8',.2,.87,.38,1,.75,1));a.bod.add(sph(.03,'#ff9fa6',.29,.76,.52,1.2,.6,.4));return}
+ if(kind=='stroller'){a.root.add(sph(.12,'#ffdcc2',.16,.78,.85));a.root.add(sph(.125,'#5a4030',.16,.83,.83,1,.7,1));return}
+ if(a.kid){const k2=a.kid.clone();k2.position.set(.64,0,.2);a.root.add(k2);return}
+ if(a.cb){const c2=a.cb.clone();a.cb.position.x-=.16;c2.position.x+=.17;a.cb.scale.setScalar(.86);c2.scale.setScalar(.86);a.bod.add(c2);return}
+ if(a.belly){a.belly.scale.multiplyScalar(1.15)}}catch(e){}}
+function ensure(id,st,isMe){let o=AV[id];const sig=(st.carrier==2?'stroller':st.carrier?'none':AK(st.kind))+'|'+st.carrier+'|'+st.cc+'|'+(st.ex&&st.ex.tw?1:0);
  if(o&&o.a.sig!==sig){S.remove(o.a.root);o.a=makeAv(st);o.a.root.position.set(o.x,0,o.z);S.add(o.a.root)}
  if(!o){const a=makeAv(st);a.root.position.set(st.x||0,0,st.z||0);S.add(a.root);const e=document.createElement('div');e.className='name'+(isMe?' me':'');app.insertBefore(e,$('card'));o=AV[id]={a,e,x:st.x||0,z:st.z||0,tx:st.x||0,tz:st.z||0};}
  o.st=st;o.tx=st.x;o.tz=st.z;return o}
@@ -1349,7 +1356,7 @@ function judge(){const R=[],N=[];const w=Math.max(0,+DG.w||0),wt=DG.wt,emp=['emp
 function autoWT(){if(DG.wt)return DG.wt;const m=(me.ex&&me.ex.ms)||myMs||'';return m=='home'||me.kind=='home'?'none':m=='biz'?'self':'emp'}
 function diagHTML(){if(!DG.wt){DG.wt=autoWT();DG.auto=true}
  const wn=WT.find(x=>x[0]==DG.wt)[1];
- let h='<div class="box"><div class="t">내 맞춤 진단 <small>눌러서 바로 바꿀 수 있어</small></div>'+'<label style="font-size:13px;color:#8a7a68">아기 상태</label><div class="kpick" id="dst">'+Object.entries(STAGES).map(([k,n])=>'<button data-v="'+k+'" class="'+(mySt==k?'on':'')+'">'+n+'</button>').join('')+'</div><label style="font-size:13px;color:#8a7a68">내 상태</label><div class="kpick" id="dms">'+Object.entries(MSTATS).map(([k,n])=>'<button data-v="'+k+'" class="'+(myMs==k?'on':'')+'">'+n+'</button>').join('')+'</div><div style="font-size:14px;margin-top:8px">일하는 형태는 <b>'+esc(wn)+'</b>으로 봤어. <button id="dchg" style="font:13px Jua,sans-serif;border:2px solid var(--ink);background:var(--y);border-radius:999px;padding:4px 12px;min-height:34px">일하는 형태 바꾸기</button></div><div class="kpick" id="dwt" style="display:none;margin-top:8px">'+WT.map(([k,n,s])=>'<button data-w="'+k+'" class="'+(DG.wt==k?'on':'')+'">'+n+'</button>').join('')+'</div>'+
+ let h='<div class="box"><div class="t">내 맞춤 진단 <small>눌러서 바로 바꿀 수 있어</small></div>'+'<label style="font-size:13px;color:#8a7a68">아기 상태</label><div class="kpick" id="dst">'+Object.entries(STAGES).map(([k,n])=>'<button data-v="'+k+'" class="'+(mySt==k?'on':'')+'">'+n+'</button>').join('')+'</div>'+twHTML('dtw')+'<label style="font-size:13px;color:#8a7a68">내 상태</label><div class="kpick" id="dms">'+Object.entries(MSTATS).map(([k,n])=>'<button data-v="'+k+'" class="'+(myMs==k?'on':'')+'">'+n+'</button>').join('')+'</div><div style="font-size:14px;margin-top:8px">일하는 형태는 <b>'+esc(wn)+'</b>으로 봤어. <button id="dchg" style="font:13px Jua,sans-serif;border:2px solid var(--ink);background:var(--y);border-radius:999px;padding:4px 12px;min-height:34px">일하는 형태 바꾸기</button></div><div class="kpick" id="dwt" style="display:none;margin-top:8px">'+WT.map(([k,n,s])=>'<button data-w="'+k+'" class="'+(DG.wt==k?'on':'')+'">'+n+'</button>').join('')+'</div>'+
   '<div class="lk" style="margin-top:8px"><a id="dfetch"><b>내 정보 자동으로 불러오기</b> · 간편인증 한 번이면 고용보험·건강보험 기록으로 비서가 채워줘 <small style="display:block;color:#8a7a68">베타 · 초대코드가 있는 엄마만</small></a></div></div>';
  if(!DG.wt)return h;
  const emp=['emp','day','fixed'].includes(DG.wt);
@@ -1366,6 +1373,7 @@ function diagHTML(){if(!DG.wt){DG.wt=autoWT();DG.auto=true}
 function bindDiag(){const re=()=>{saveDG();const y=sb.scrollTop;openAide();sb.scrollTop=y};
  sb.querySelectorAll('#dwt button').forEach(b=>b.onclick=()=>{DG.wt=b.dataset.w;DG.auto=false;re()});
  const setK=(st,ms)=>{mySt=st;myMs=ms;try{localStorage.setItem('cp_st',mySt);localStorage.setItem('cp_ms',myMs)}catch(e){}if(mySt&&myMs){me.kind=kindOf(mySt,myMs);me.ex=Object.assign({},me.ex,{ms:myMs,sg:mySt});try{localStorage.setItem('cp_kind',me.kind)}catch(e){}try{pushP()}catch(e){}}if(DG.auto){DG.wt={biz:'self',home:'none'}[myMs]||'emp'}DG.child=mySt=='todd'?1:0;re();toast('바꿨어! 진단도 새로 계산했어')};
+ sb.querySelectorAll('#dtw button').forEach(b=>b.onclick=()=>{setTw(b.dataset.tw=='1');re();toast(b.dataset.tw=='1'?'쌍둥이로 바꿨어! 캐릭터도 아기 둘':'한 명으로 바꿨어')});
  sb.querySelectorAll('#dst button').forEach(b=>b.onclick=()=>setK(b.dataset.v,myMs));sb.querySelectorAll('#dms button').forEach(b=>b.onclick=()=>setK(mySt,b.dataset.v));
  const dc=$('dchg');if(dc)dc.onclick=()=>{const w=$('dwt');w.style.display=w.style.display=='none'?'flex':'none'};
  [['dins','ins'],['dbig','big']].forEach(([id,k])=>{const e=$(id);if(e)e.querySelectorAll('button').forEach(b=>b.onclick=()=>{DG[k]=b.dataset.v;re()})});
