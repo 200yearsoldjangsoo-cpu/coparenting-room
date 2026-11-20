@@ -238,7 +238,8 @@ function roomCounts(){const c={};others().forEach(p=>{const r=p.state.room;if(r)
 const MAXR=2,TO_VISIT='00000000-0000-0000-0000-00000000a001',TO_MEAL='00000000-0000-0000-0000-00000000a002';
 function pickRoom(){const c=roomCounts();for(let r=1;r<=MAXR;r++)if((c[r]||0)<CAP)return r;return 0}
 function queuePos(){const w=others().filter(p=>p.state.wait&&p.state.ws<me.ws).length;return w+1}
-function renderGate(){const c=roomCounts(),tot=others().length+1;$('gtot').textContent=tot+'명';
+const inRoomN=()=>others().filter(p=>p.state.room).length+(me.room?1:0);
+function renderGate(){const c=roomCounts(),tot=inRoomN();$('gtot').textContent=tot+'명';
  const wq=others().filter(p=>p.state.wait).length+(me.wait?1:0);const rows=[];
  for(let r=1;r<=MAXR;r++){const n=c[r]||0;
   rows.push('<div class="r"><div style="flex:1"><b>'+r+'호방</b><small>'+n+'/'+CAP+'</small><div class="bar"><i style="width:'+Math.min(100,n/CAP*100)+'%"></i></div></div><span class="st '+(n>=CAP?'full">꽉 참':'open">'+(CAP-n)+'자리')+'</span></div>')}
@@ -545,7 +546,7 @@ function onPeers(list){peers=list||[];
   else if(seenPat[id]===undefined)seenPat[id]=s.patAt});
  Object.keys(AV).forEach(id=>{if(id!==myId&&!here.has(id))drop(id)});
  trackPeak();renderCeil();updateTop();renderCard()}
-function updateTop(){const c=roomCounts();$('tot').textContent=(others().length+1)+'명';const nIn=(c[me.room]||0)+1,wq=others().filter(p=>p.state.wait).length;$('rm').textContent=me.room?me.room+'호방 '+nIn+'/'+CAP+(wq?' · 대기 '+wq+'명':nIn>=CAP*.8?' · '+Math.max(0,CAP-nIn)+'자리 남음':''):'입장 전'}
+function updateTop(){const c=roomCounts();$('tot').textContent=inRoomN()+'명';const nIn=(c[me.room]||0)+1,wq=others().filter(p=>p.state.wait).length;$('rm').textContent=me.room?me.room+'호방 '+nIn+'/'+CAP+(wq?' · 대기 '+wq+'명':nIn>=CAP*.8?' · '+Math.max(0,CAP-nIn)+'자리 남음':''):'입장 전'}
 
 /* ---------- 입장 ---------- */
 function enterFx(r,back){const o=document.createElement('div');o.id='efx';const n=(roomCounts()[r]||0)+1;
@@ -1550,5 +1551,5 @@ let SB=null;
  renderGate()})();
 }
 </script>
-<script>(function(){var V="1795141796";function chk(force){fetch("/version.txt?"+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():""}).then(function(x){x=(x||"").trim();if(!x||x===V)return;if(force||document.visibilityState==="visible"&&!document.hasFocus()){location.reload();return}if(document.getElementById("vbar"))return;var b=document.createElement("button");b.id="vbar";b.textContent="새 기능이 생겼어! 눌러서 새로고침";b.style.cssText="position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 8px);transform:translateX(-50%);z-index:99;font:15px Jua,sans-serif;background:#2B2118;color:#FFD84D;border:0;border-radius:999px;padding:10px 18px;box-shadow:0 4px 12px rgba(0,0,0,.3)";b.onclick=function(){location.reload()};document.body.appendChild(b)}).catch(function(){})}document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible")chk(true)});setInterval(function(){chk(false)},60000);setTimeout(function(){chk(false)},5000)})();</script></body>
+<script>(function(){var V="1795142405";function chk(force){fetch("/version.txt?"+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():""}).then(function(x){x=(x||"").trim();if(!x||x===V)return;if(force||document.visibilityState==="visible"&&!document.hasFocus()){location.reload();return}if(document.getElementById("vbar"))return;var b=document.createElement("button");b.id="vbar";b.textContent="새 기능이 생겼어! 눌러서 새로고침";b.style.cssText="position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 8px);transform:translateX(-50%);z-index:99;font:15px Jua,sans-serif;background:#2B2118;color:#FFD84D;border:0;border-radius:999px;padding:10px 18px;box-shadow:0 4px 12px rgba(0,0,0,.3)";b.onclick=function(){location.reload()};document.body.appendChild(b)}).catch(function(){})}document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible")chk(true)});setInterval(function(){chk(false)},60000);setTimeout(function(){chk(false)},5000)})();</script></body>
 </html>
