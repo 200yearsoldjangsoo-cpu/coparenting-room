@@ -1526,9 +1526,14 @@ let SB=null;
  SB=window.supabase.createClient('https://hiqekjtjtycoisjgyrrh.supabase.co','sb_publishable_E025XGPHRwWuKHm-Z7DL4A_YARBUw2l',{realtime:{params:{eventsPerSecond:10}}});
  try{let s=(await SB.auth.getSession()).data.session;if(!s){const r=await SB.auth.signInAnonymously();s=r.data&&r.data.session}uid=s&&s.user?s.user.id:null}catch(e){}
  try{const saved=localStorage.getItem('cp_nick');if(saved){me.nick=saved;$('nick').textContent=(me.kind?'지난번 선택 그대로야 · 바뀌었으면 다시 눌러 · ':'별명은 자동으로 붙어 · ')+me.nick}else localStorage.setItem('cp_nick',me.nick)}catch(e){}
- const ch=SB.channel('lobby',{config:{presence:{key:myId}}});
- ch.on('presence',{event:'sync'},()=>{const st=ch.presenceState();onPeers(Object.entries(st).map(([k,arr])=>({you:k===myId,state:(arr&&arr[arr.length-1])||{},id:k})))});
- ch.subscribe(async status=>{if(status==='SUBSCRIBED'){RM={presence:s=>ch.track(s)};pushP()}});
+ let CH=null,joining=0;
+ const joinLobby=()=>{if(joining&&Date.now()-joining<10000)return;joining=Date.now();const old=CH;CH=null;RM=null;try{if(old)SB.removeChannel(old)}catch(e){}
+  const ch=SB.channel('lobby',{config:{presence:{key:myId}}});CH=ch;
+  ch.on('presence',{event:'sync'},()=>{if(ch!==CH)return;const st=ch.presenceState();onPeers(Object.entries(st).map(([k,arr])=>({you:k===myId,state:(arr&&arr[arr.length-1])||{},id:k})))});
+  ch.subscribe(status=>{if(ch!==CH)return;if(status==='SUBSCRIBED'){joining=0;RM={presence:s=>ch.track(s)};lastPush=0;pushP()}else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){joining=0;RM=null;setTimeout(joinLobby,2000)}})};
+ const revive=()=>{if(document.visibilityState!=='visible')return;try{if(SB.realtime&&!SB.realtime.isConnected())SB.realtime.connect()}catch(e){}if(!CH||CH.state!=='joined')joinLobby();else{lastPush=0;pushP()}};
+ joinLobby();
+ document.addEventListener('visibilitychange',revive);window.addEventListener('pageshow',revive);window.addEventListener('online',revive);setInterval(revive,20000);
  renderGate()})();
 }
 </script>
