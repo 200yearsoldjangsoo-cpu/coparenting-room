@@ -73,8 +73,8 @@ let world,DYN=[],SMOKE=[],FIRE=[],STAR=[],FLY=[],PL3={},HOT=[],LBL={},avs={},las
 const P={home:V(-7.5,0,11.5),post:V(1.2,0,15),store:V(9,0,11),pyeong:V(0,0,3),sarang:V(-9.5,0,-3.5),madang:V(2,0,-7),hall:V(10,0,-2),jangdok:V(-2,1.75,-16)};
 const SPOTS={home:[V(-1,.75,.2),V(.6,.75,.3),V(1.6,.75,0),V(-1.8,.75,.1)],sarang:[V(-.6,.75,.2),V(.6,.75,-.2),V(0,.75,.6)],hall:[V(-1,.75,.3),V(.5,.75,.4),V(1.4,.75,0)],store:[V(-.7,.2,2.4),V(.6,.2,2.6),V(1.6,.2,2.2)],
  madang:[V(-1.6,0,2.4),V(1.4,0,2.6),V(0,0,3.6),V(-2.6,0,3.4)],pyeong:[V(-1,1.0,1.6),V(.4,1.0,1.9),V(1.5,1.0,1.4),V(-.3,1.0,2.6),V(2.6,0,3.6),V(-2.6,0,3.5)],jangdok:[V(-1.4,0,2),V(.4,0,2.3),V(1.6,0,1.8)],vil:[V(1.2,0,13),V(-1,0,10),V(3,0,8),V(-2,0,7)]};
-const VIEW={map:{t:V(0,0,0),w:29},home:{t:V(-7.5,1.2,11.2),w:8.4},sarang:{t:V(-9.6,1,-3.6),w:7},hall:{t:V(9.8,1.2,-2),w:7.6},store:{t:V(9,1.2,11.4),w:7.4},madang:{t:V(1.6,.9,-7.2),w:7.6},pyeong:{t:V(.6,1.2,3.8),w:9.4},jangdok:{t:V(-1.6,2,-16.4),w:8}};
-const VDIR=V(0,.74,.67).normalize(),PDIR=V(0,.52,.85).normalize();function dist(w){const hf=Math.atan(Math.tan(C3.fov*Math.PI/360)*C3.aspect);return (w/2)/Math.tan(hf)}
+const VIEW={map:{t:V(0,0,0),w:29},home:{t:V(-7.5,1.2,11.2),w:7.1},sarang:{t:V(-9.6,1,-3.6),w:6.0},hall:{t:V(9.8,1.2,-2),w:6.5},store:{t:V(9,1.2,11.4),w:6.3},madang:{t:V(1.6,.9,-7.2),w:6.5},pyeong:{t:V(.6,1.2,3.8),w:8.0},jangdok:{t:V(-1.6,2,-16.4),w:6.8}};
+const VDIR=V(0,.74,.67).normalize(),PDIR=V(0,.46,.89).normalize();function dist(w){const hf=Math.atan(Math.tan(C3.fov*Math.PI/360)*C3.aspect);return (w/2)/Math.tan(hf)}
 const NAMES={home:'우리 집',post:'우체통·마을 방송',store:'구멍가게',pyeong:'정자나무 평상',sarang:'새벽 사랑방',madang:'부엌 마당',hall:'마을회관',jangdok:'장독대 언덕'};
 const SUB={home:'도감·안방',post:'',store:'오늘의 선물',pyeong:'모두 모이는 곳',sarang:'수유·재우기',madang:'아궁이·식판',hall:'노무사 이장',jangdok:'위로 한 줄'};
 const PATH=[V(1.2,0,17),V(1.2,0,13),V(-1,0,9.5),V(0,0,6),V(1.5,0,0),V(-3,0,-3),V(-.5,0,-6.5),V(-2,0,-11),V(-2,.8,-12.8),V(-2,1.6,-14.2)];
