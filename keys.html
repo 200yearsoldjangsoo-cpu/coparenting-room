@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>운영자 열쇠 · 온라인 공동육아방</title>
+<style>
+ body{margin:0;background:#fbf7f0;color:#2B2118;font:15px/1.6 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif}
+ main{max-width:760px;margin:0 auto;padding:24px 18px 60px}
+ h1{font-size:21px;margin:0 0 6px} h2{font-size:17px;margin:26px 0 8px;padding-top:12px;border-top:1px solid #e5dccd}
+ input,textarea,button{font:inherit} input[type=password],textarea{width:100%;box-sizing:border-box;padding:9px;border:1px solid #cfc5b5;border-radius:8px;background:#fff}
+ textarea{min-height:120px;font-family:ui-monospace,Menlo,monospace;font-size:12px}
+ button{padding:10px 16px;border:0;border-radius:8px;background:#2B2118;color:#fff;cursor:pointer;margin-top:8px}
+ .note{color:#6b5d4f;font-size:13px} .ok{color:#1e6b2e} .err{color:#a1261b}
+ table{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px} th,td{border-top:1px solid #d9d0c2;border-bottom:1px solid #d9d0c2;padding:6px;text-align:left;vertical-align:top} th{background:#eee8de}
+ code{word-break:break-all}
+</style>
+</head>
+<body>
+<main>
+<h1>운영자 열쇠</h1>
+<p class="note">이 페이지는 모든 계산을 이 브라우저 안에서만 해. 비밀번호와 개인 열쇠는 어디로도 전송되지 않아.</p>
+
+<h2>1. 열쇠 처음 만들기 (한 번만)</h2>
+<p class="note">엄마들이 보내는 연락처·의견을 잠그는 열쇠 한 쌍을 만들어. <b>공개 열쇠</b>는 앱에 넣고 <b>개인 열쇠 파일</b>은 네 기기에만 보관해. 개인 열쇠 파일은 아래 비밀번호로 한 번 더 잠겨. 파일이나 비밀번호 둘 중 하나라도 잃어버리면 그동안 받은 내용은 영영 못 열어. 파일은 PC와 USB 등 두 군데 이상에 보관해 줘.</p>
+<label>열쇠 비밀번호 (12자 이상)<input type="password" id="p1" autocomplete="new-password"></label>
+<label>한 번 더<input type="password" id="p2" autocomplete="new-password"></label>
+<button id="gen">열쇠 만들고 개인 열쇠 파일 내려받기</button>
+<div id="genout"></div>
+
+<h2>2. 받은 내용 열어보기</h2>
+<p class="note">Supabase 대시보드 Table Editor에서 requests 테이블을 CSV나 JSON으로 내보낸 내용을 아래에 그대로 붙여 넣어. 암호화된 줄만 골라서 풀어 줄게.</p>
+<label>개인 열쇠 파일 <input type="file" id="kf" accept=".json,application/json"></label>
+<label>열쇠 비밀번호<input type="password" id="kp" autocomplete="current-password"></label>
+<textarea id="rows" placeholder="CSV 또는 JSON 붙여넣기"></textarea>
+<button id="dec">풀어보기</button>
+<div id="decout"></div>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const te=new TextEncoder(),td=new TextDecoder();
+const b64e=b=>{const u=new Uint8Array(b);let s='';for(let i=0;i<u.length;i+=8192)s+=String.fromCharCode.apply(null,u.subarray(i,i+8192));return btoa(s)};
+const b64d=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function passKey(pass,salt,usage){const base=await crypto.subtle.importKey('raw',te.encode(pass),'PBKDF2',false,['deriveKey']);
+ return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:600000,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,[usage])}
+$('gen').onclick=async()=>{const o=$('genout');const p=$('p1').value;
+ if(p.length<12){o.innerHTML='<p class="err">비밀번호는 12자 이상으로 해줘</p>';return}
+ if(p!==$('p2').value){o.innerHTML='<p class="err">두 비밀번호가 달라</p>';return}
+ o.innerHTML='<p class="note">만드는 중…</p>';
+ try{
+  const kp=await crypto.subtle.generateKey({name:'RSA-OAEP',modulusLength:3072,publicExponent:new Uint8Array([1,0,1]),hash:'SHA-256'},true,['encrypt','decrypt']);
+  const spki=b64e(await crypto.subtle.exportKey('spki',kp.publicKey));
+  const jwk=te.encode(JSON.stringify(await crypto.subtle.exportKey('jwk',kp.privateKey)));
+  const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12));
+  const wk=await passKey(p,salt,'encrypt');
+  const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},wk,jwk);
+  const file={kind:'coparenting-room-owner-key',v:1,pub:spki,kdf:'PBKDF2-SHA256-600000',salt:b64e(salt),iv:b64e(iv),key:b64e(ct),created:new Date().toISOString()};
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(file,null,1)],{type:'application/json'}));
+  a.download='공동육아방_개인열쇠_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();
+  $('p1').value=$('p2').value='';
+  o.innerHTML='<p class="ok">개인 열쇠 파일을 내려받았어. 두 군데 이상에 보관해 줘.</p><p><b>공개 열쇠</b> (앱에 넣을 값, 남이 봐도 괜찮아)</p><textarea id="pubout" readonly>'+spki+'</textarea>';
+ }catch(e){o.innerHTML='<p class="err">실패: '+esc(e.message||e)+'</p>'}};
+function findEnvelopes(text){
+ const t=text.replace(/""/g,'"');const out=[];const re=/\{\s*"v"\s*:\s*1\s*,\s*"k"\s*:\s*"([A-Za-z0-9+\/=]+)"\s*,\s*"iv"\s*:\s*"([A-Za-z0-9+\/=]+)"\s*,\s*"c"\s*:\s*"([A-Za-z0-9+\/=]+)"\s*\}/g;let m;
+ while((m=re.exec(t)))out.push({k:m[1],iv:m[2],c:m[3]});return out}
+$('dec').onclick=async()=>{const o=$('decout');o.innerHTML='<p class="note">여는 중…</p>';
+ try{
+  const f=$('kf').files[0];if(!f)throw new Error('개인 열쇠 파일을 골라줘');
+  const kfile=JSON.parse(await f.text());if(kfile.kind!=='coparenting-room-owner-key')throw new Error('열쇠 파일이 아니야');
+  const wk=await passKey($('kp').value,b64d(kfile.salt),'decrypt');
+  let jwk;try{jwk=JSON.parse(td.decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:b64d(kfile.iv)},wk,b64d(kfile.key))))}catch(e){throw new Error('비밀번호가 맞지 않아')}
+  const priv=await crypto.subtle.importKey('jwk',jwk,{name:'RSA-OAEP',hash:'SHA-256'},false,['decrypt']);
+  const envs=findEnvelopes($('rows').value);if(!envs.length)throw new Error('암호화된 내용을 못 찾았어');
+  const rows=[];
+  for(const e of envs){try{const raw=await crypto.subtle.decrypt({name:'RSA-OAEP'},priv,b64d(e.k));
+    const ak=await crypto.subtle.importKey('raw',raw,'AES-GCM',false,['decrypt']);
+    rows.push(JSON.parse(td.decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:b64d(e.iv)},ak,b64d(e.c)))))}catch(x){rows.push({error:'이 줄은 다른 열쇠로 잠겼거나 손상됨'})}}
+  const cols=[...new Set(rows.flatMap(r=>Object.keys(r)))];
+  o.innerHTML='<p class="ok">'+rows.length+'건 열었어. 이 화면을 닫으면 사라져.</p><table><tr>'+cols.map(c=>'<th>'+esc(c)+'</th>').join('')+'</tr>'+rows.map(r=>'<tr>'+cols.map(c=>'<td>'+esc(typeof r[c]=='object'?JSON.stringify(r[c]):r[c])+'</td>').join('')+'</tr>').join('')+'</table>';
+ }catch(e){o.innerHTML='<p class="err">'+esc(e.message||e)+'</p>'}};
+</script>
+</body>
+</html>
