@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>포근 한옥 v2</title>
+<style>html,body{margin:0;height:100%;background:#f3eee6;overflow:hidden;font-family:sans-serif}canvas{display:block}#st{position:fixed;left:8px;top:8px;font-size:11px;color:#6b5b4a;background:rgba(255,255,255,.7);padding:4px 8px;border-radius:8px}</style>
+<script src="lib/three.min.js"></script><script src="lib/BufferGeometryUtils.js"></script>
+<script src="lib/EffectComposer.js"></script><script src="lib/RenderPass.js"></script><script src="lib/ShaderPass.js"></script><script src="lib/CopyShader.js"></script>
+<script src="lib/HorizontalTiltShiftShader.js"></script><script src="lib/VerticalTiltShiftShader.js"></script><script src="lib/VignetteShader.js"></script>
+</head><body><div id="st"></div>
+<script>
+/* 포근 한옥 v2 — 동숲식: 큰 덩어리·둥근 모서리·두툼한 기와, 빛은 미리 구워두고 정적 물체는 재질별로 합쳐 그리기 횟수 최소화 */
+const T=THREE,BU=T.BufferGeometryUtils;
+const R=new T.WebGLRenderer({antialias:true,powerPreference:'high-performance'});R.setPixelRatio(Math.min(2,devicePixelRatio));R.info.autoReset=false;R.setSize(innerWidth,innerHeight);
+R.shadowMap.enabled=true;R.shadowMap.type=T.PCFSoftShadowMap;R.outputEncoding=T.sRGBEncoding;R.toneMapping=T.ACESFilmicToneMapping;R.toneMappingExposure=1.0;
+document.body.appendChild(R.domElement);
+const S=new T.Scene();S.background=new T.Color('#f3eee6');
+const cam=new T.PerspectiveCamera(22,innerWidth/innerHeight,1,200);
+const rnd=(a,b)=>a+Math.random()*(b-a);
+
+/* ---------- 재질: 파스텔 + 거칠게(말랑한 점토 느낌), 색은 정점색으로 음영을 구움 ---------- */
+function ctex(w,h,draw){const c=document.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'),w,h);const t=new T.CanvasTexture(c);t.encoding=T.sRGBEncoding;t.wrapS=t.wrapT=T.RepeatWrapping;t.anisotropy=4;return t}
+function clayNoise(g,w,h,base,amt){g.fillStyle=base;g.fillRect(0,0,w,h);for(let i=0;i<w*h/6;i++){const v=rnd(-amt,amt);g.fillStyle=v>0?`rgba(255,255,255,${v})`:`rgba(60,40,20,${-v})`;const r=rnd(1,4);g.beginPath();g.arc(rnd(0,w),rnd(0,h),r,0,7);g.fill()}}
+const texClay=ctex(256,256,(g,w,h)=>clayNoise(g,w,h,'#ffffff',.05));
+const texHanji=ctex(256,256,(g,w,h)=>{clayNoise(g,w,h,'#fbf3e6',.035);g.strokeStyle='#b8875a';g.lineWidth=7;g.lineCap='round';for(let i=1;i<4;i++){g.beginPath();g.moveTo(i*w/4,6);g.lineTo(i*w/4,h-6);g.stroke()}for(let j=1;j<6;j++){g.beginPath();g.moveTo(6,j*h/6);g.lineTo(w-6,j*h/6);g.stroke()}g.lineWidth=14;g.strokeRect(7,7,w-14,h-14)});
+const texWood=ctex(256,64,(g,w,h)=>{g.fillStyle='#fff';g.fillRect(0,0,w,h);for(let y=0;y<h;y+=3){g.strokeStyle=`rgba(120,75,35,${rnd(.04,.12)})`;g.lineWidth=rnd(1,2);g.beginPath();g.moveTo(0,y);for(let x=0;x<=w;x+=20)g.lineTo(x,y+Math.sin(x*.05+y)*1.5);g.stroke()}});
+const M={
+ tile:new T.MeshStandardMaterial({vertexColors:true,map:texClay,roughness:.75,color:'#7686a0'}),
+ ridge:new T.MeshStandardMaterial({vertexColors:true,map:texClay,roughness:.8,color:'#5e6b82',side:T.DoubleSide}),
+ wall:new T.MeshStandardMaterial({vertexColors:true,map:texClay,roughness:.95,color:'#fff6e6'}),
+ wood:new T.MeshStandardMaterial({vertexColors:true,map:texWood,roughness:.8,color:'#e0a874'}),
+ woodD:new T.MeshStandardMaterial({vertexColors:true,map:texWood,roughness:.85,color:'#b8794a'}),
+ hanji:new T.MeshStandardMaterial({map:texHanji,roughness:.9}),
+ stone:new T.MeshStandardMaterial({vertexColors:true,map:texClay,roughness:.95,color:'#e3ddd3'}),
+ ground:new T.MeshStandardMaterial({vertexColors:true,map:texClay,roughness:1,color:'#efd9b2'}),
+ grass:new T.MeshStandardMaterial({vertexColors:true,roughness:1,color:'#a9c48a'}),
+ flower:new T.MeshStandardMaterial({vertexColors:true,roughness:.8}),
+ cloth:new T.MeshStandardMaterial({color:'#fffaf2',roughness:.95,side:T.DoubleSide}),
+ pot:new T.MeshStandardMaterial({vertexColors:true,map:texClay,roughness:.7,color:'#9b6a48'})};
+const BAG={};for(const k in M)BAG[k]=[];
+/* 정적 조각은 바로 씬에 넣지 않고 재질별 주머니에 모았다가 한 번에 합침 */
+function put(geo,mat,pos,rot,scl,tint){geo=geo.index?geo.toNonIndexed():geo.clone();const m=new T.Matrix4().compose(pos||new T.Vector3(),new T.Quaternion().setFromEuler(rot||new T.Euler()),scl||new T.Vector3(1,1,1));geo.applyMatrix4(m);
+ const n=geo.attributes.position.count,c=new Float32Array(n*3),col=new T.Color(tint||'#ffffff');for(let i=0;i<n;i++){c[i*3]=col.r;c[i*3+1]=col.g;c[i*3+2]=col.b}geo.setAttribute('color',new T.BufferAttribute(c,3));
+ if(!geo.attributes.uv){geo.setAttribute('uv',new T.BufferAttribute(new Float32Array(n*2),2))}['uv2'].forEach(a=>geo.deleteAttribute&&geo.deleteAttribute(a));BAG[mat].push(geo)}
+const V3=(x,y,z)=>new T.Vector3(x,y,z),E=(x,y,z)=>new T.Euler(x||0,y||0,z||0);
+/* 둥근 상자: 모든 모서리를 크게 굴려 점토처럼 */
+function rbox(w,h,d,r){r=Math.min(r,w/2-.001,h/2-.001,d/2-.001);const s=new T.Shape(),x=-w/2+r,y=-h/2+r,W=w-2*r,H=h-2*r;s.moveTo(x,y-r);s.lineTo(x+W,y-r);s.absarc(x+W,y,r,-Math.PI/2,0);s.lineTo(x+W+r,y+H);s.absarc(x+W,y+H,r,0,Math.PI/2);s.lineTo(x,y+H+r);s.absarc(x,y+H,r,Math.PI/2,Math.PI);s.lineTo(x-r,y);s.absarc(x,y,r,Math.PI,Math.PI*1.5);
+ const g=new T.ExtrudeGeometry(s,{depth:Math.max(.001,d-2*r),bevelEnabled:true,bevelThickness:r,bevelSize:r*.98,bevelSegments:4,curveSegments:5});g.translate(0,0,-(d-2*r)/2);
+ const p=g.attributes.position;for(let i=0;i<p.count;i++){const sx=w/(w+0.0)*1;}return g}
+function rboxFix(w,h,d,r){const g=rbox(w-2*r*0.98,h-2*r*0.98,d,r);return g}
+
+/* ---------- 비율: 동숲처럼 지붕이 크고 몸채는 낮고 통통하게 ---------- */
+const W=6.4,D=3.4,H=1.75,y0=.62,y1=y0+H;
+/* 땅 섬 */
+put(rboxFix(16,.9,13,.45),'ground',V3(-.4,-.45,.8));
+put(rboxFix(W+1.6,.5,D+2.8,.22),'stone',V3(0,.25,.55),null,null,'#f4efe8');
+/* 기둥·주춧돌 */
+const cx=[-W/2,-W/6,W/6,W/2],cz=[-D/2,D/2];
+cx.forEach(x=>cz.forEach(z=>{put(new T.CylinderGeometry(.27,.32,.2,14),'stone',V3(x,.6,z));put(new T.CylinderGeometry(.16,.17,H,14),'woodD',V3(x,y0+H/2,z))}));
+/* 벽: 둥근 회벽판 + 굵은 나무틀 */
+function panel(cxp,cyp,czp,w,h,axis){const g=rboxFix(axis?.16:w,h,axis?w:.16,.06);put(g,'wall',V3(cxp,cyp,czp))}
+const bays=[[cx[0],cx[1]],[cx[1],cx[2]],[cx[2],cx[3]]];
+bays.forEach(([a,b],i)=>{const m=(a+b)/2,w=b-a-.3;panel(m,(y0+y1)/2,D/2-.02,w,H-.08,0);panel(m,(y0+y1)/2,-D/2+.02,w,H-.08,0);
+ put(rboxFix(w+.1,.16,.2,.06),'woodD',V3(m,y0+.55,D/2+.02));put(rboxFix(w+.1,.16,.2,.06),'woodD',V3(m,y1-.28,D/2+.02))});
+panel(-W/2+.02,(y0+y1)/2,0,D-.3,H-.08,1);panel(W/2-.02,(y0+y1)/2,0,D-.3,H-.08,1);
+[-W/2,W/2].forEach(x=>put(rboxFix(.2,.16,D,.06),'woodD',V3(x,y0+.55,0)));
+/* 문·창(창호지는 질감 때문에 따로) */
+const hanjiG=[];
+function hanji(x,y,z,w,h,ry){const g=new T.PlaneGeometry(w,h);g.rotateY(ry||0);g.translate(x,y,z);hanjiG.push(g);put(rboxFix(w+.14,h+.14,.08,.04),'woodD',V3(x,y,z-(ry?0:.03)),E(0,ry||0,0))}
+hanji(-.4,y0+.62,D/2+.12,.72,1.15);hanji(.4,y0+.62,D/2+.12,.72,1.15);
+hanji(-W/3,y0+.95,D/2+.12,1.1,.62);hanji(W/3,y0+.95,D/2+.12,1.1,.62);
+hanji(-W/2-.1,y0+.95,0,.8,.62,Math.PI/2);
+put(new T.TorusGeometry(.06,.02,8,14),'pot',V3(0,y0+.6,D/2+.17),null,null,'#c8a060');
+/* 창방·도리 */
+put(rboxFix(W+.6,.26,.32,.1),'woodD',V3(0,y1+.1,D/2));put(rboxFix(W+.6,.26,.32,.1),'woodD',V3(0,y1+.1,-D/2));
+put(rboxFix(.32,.26,D+.4,.1),'woodD',V3(-W/2,y1+.1,0));put(rboxFix(.32,.26,D+.4,.1),'woodD',V3(W/2,y1+.1,0));
+/* 툇마루: 둥근 널빤지 */
+{const z0=D/2+.18,z1=D/2+1.4,n=11;for(let i=0;i<n;i++){const w=(W+.3)/n;put(rboxFix(w-.05,.16,z1-z0,.05),'wood',V3(-W/2-.15+w*(i+.5),y0+.28,(z0+z1)/2),null,null,i%2?'#ffffff':'#f3e6d6')}
+ put(rboxFix(W+.4,.16,.18,.07),'woodD',V3(0,y0+.15,z1));cx.forEach(x=>{put(new T.CylinderGeometry(.08,.08,.45,10),'woodD',V3(x,y0-.05,z1-.06));put(new T.SphereGeometry(.16,10,8),'stone',V3(x,.5,z1-.06),null,V3(1,.45,1))})}
+put(rboxFix(1.1,.22,.6,.1),'stone',V3(0,.6,D/2+1.85));
+/* 고무신·화분·호롱(툇마루 위 귀여운 소품) */
+[[-.15,'#ffffff'],[.15,'#ffffff']].forEach(([o,c])=>put(new T.SphereGeometry(.13,12,8),'stone',V3(o,.76,D/2+1.85),E(0,.2,0),V3(.7,.45,1.5),c));
+[[W/2-.35,'#f4a6b5'],[-W/2+.4,'#f7d27a']].forEach(([x,c])=>{put(new T.CylinderGeometry(.18,.13,.26,14),'pot',V3(x,y0+.5,D/2+1.15));for(let k=0;k<6;k++)put(new T.SphereGeometry(.09,8,6),'flower',V3(x+rnd(-.12,.12),y0+.72+rnd(0,.1),D/2+1.15+rnd(-.12,.12)),null,null,k%2?c:'#ffffff');put(new T.SphereGeometry(.17,10,8),'grass',V3(x,y0+.66,D/2+1.15),null,V3(1,.6,1))});
+
+/* ---------- 지붕: 두툼한 기와 줄(굵고 적게) + 크게 들린 처마 ---------- */
+const OH=1.35,ridgeY=y1+2.15,eaveY=y1+.38,RW=W/2+OH,RDp=D/2+OH,Wr=W/2+.25,Gz=1.0,gY=ridgeY-.95;
+const prof=v=>Math.pow(v,.7),lift=(u,v)=>Math.pow(Math.abs(u),4.5)*.75*v*v;
+const fP=(u,v,s)=>V3(u*(Wr+v*(RW-Wr)),ridgeY-(ridgeY-eaveY)*prof(v)+lift(u,v),s*v*RDp);
+const eP=(u,v,s)=>V3(s*(Wr+v*(RW-Wr)),gY-(gY-eaveY)*prof(v)+lift(u,v),u*(Gz+v*(RDp-Gz)));
+function slope(fn,s,cols){const base=new T.ParametricGeometry((u,v,t)=>{const p=fn(u*2-1,v,s);t.set(p.x,p.y-.06,p.z)},30,12);put(base,'ridge',null,null,null,'#9aa3b4');
+ for(let i=0;i<=cols;i++){const u=(i/cols*2-1)*.985,pts=[];for(let k=0;k<=10;k++)pts.push(fn(u,.03+k/10*.97,s));
+  put(new T.TubeGeometry(new T.CatmullRomCurve3(pts),18,.095,7,false),'tile',null,null,null,i%2?'#ffffff':'#e6ecf6');
+  const e=pts[10],d=e.clone().sub(pts[9]).normalize();const cap=new T.CylinderGeometry(.11,.11,.07,12);put(cap,'ridge',e,new T.Euler().setFromQuaternion(new T.Quaternion().setFromUnitVectors(V3(0,1,0),d)),null,'#ffffff');
+  if(i%2==0){const p=fn(u,.9,s);p.y-=.2;put(new T.CylinderGeometry(.06,.06,.4,8),'wood',p,new T.Euler().setFromQuaternion(new T.Quaternion().setFromUnitVectors(V3(0,1,0),d)))}}}
+slope(fP,1,26);slope(fP,-1,26);slope(eP,1,10);slope(eP,-1,10);
+[-1,1].forEach(s=>{const sh=new T.Shape();sh.moveTo(-Gz,0);sh.lineTo(Gz,0);sh.lineTo(0,ridgeY-gY+.05);sh.closePath();const g=new T.ShapeGeometry(sh);g.rotateY(s*Math.PI/2);g.translate(s*(Wr-.03),gY,0);put(g,'wall')});
+{const pts=[];for(let k=0;k<=20;k++){const u=k/20*2-1;pts.push(V3(u*(Wr+.2),ridgeY+.12+Math.pow(Math.abs(u),6)*.4,0))}
+ put(new T.TubeGeometry(new T.CatmullRomCurve3(pts),40,.22,12,false),'ridge');
+ put(new T.TubeGeometry(new T.CatmullRomCurve3(pts.map(p=>p.clone().add(V3(0,.17,0)))),40,.13,10,false),'tile');
+ [-1,1].forEach(s=>put(new T.SphereGeometry(.26,14,10),'ridge',V3(s*(Wr+.28),ridgeY+.62,0),null,V3(.75,1.1,.7)))}
+[[-1,1],[1,1],[-1,-1],[1,-1]].forEach(([sx,sz])=>{const pts=[];for(let k=0;k<=10;k++){const p=fP(sx,k/10,sz);p.y+=.08;pts.push(p)}put(new T.TubeGeometry(new T.CatmullRomCurve3(pts),20,.13,9,false),'ridge');
+ const g=[];for(let k=0;k<=4;k++){const v=k/4;g.push(V3(sx*(Wr+.03),ridgeY+.06-(ridgeY-gY)*v,sz*Gz*v))}put(new T.TubeGeometry(new T.CatmullRomCurve3(g),8,.1,8,false),'ridge')});
+/* 굴뚝(연기 나오는 곳) */
+const chim=V3(-W/2-.9,0,-D/2-.4);put(rboxFix(.55,1.6,.55,.2),'stone',V3(chim.x,.8,chim.z),null,null,'#efe6da');put(new T.CylinderGeometry(.2,.22,.25,12),'pot',V3(chim.x,1.72,chim.z),null,null,'#c79a7a');
+
+/* ---------- 마당: 자갈·풀덤불·꽃·디딤돌·빨랫줄 기둥 ---------- */
+const inHouse=(x,z)=>Math.abs(x)<W/2+1.2&&z>-D/2-1.8&&z<D/2+2.4;
+for(let i=0;i<90;i++){const x=rnd(-7.8,6.8),z=rnd(-4.8,6.8);if(inHouse(x,z))continue;put(new T.SphereGeometry(rnd(.07,.16),7,5),'stone',V3(x,.02,z),null,V3(1,.45,1),i%3?'#ffffff':'#e8e0d4')}
+for(let i=0;i<22;i++){const x=rnd(-7.5,6.5),z=rnd(-4.5,6.5);if(inHouse(x,z))continue;const r=rnd(.25,.5);put(new T.SphereGeometry(r,10,8),'grass',V3(x,r*.35,z),null,V3(1,.7,1),i%2?'#ffffff':'#dfeccd');put(new T.SphereGeometry(r*.7,10,8),'grass',V3(x+r*.6,r*.25,z+.1),null,V3(1,.7,1),'#cfe2b8')}
+const fc=['#f4a6b5','#f7d27a','#c9b4f0','#ffffff','#ffb3a1'];
+for(let i=0;i<40;i++){const x=rnd(3.4,6.4),z=rnd(3.4,6.4);put(new T.SphereGeometry(.11,8,6),'flower',V3(x,.2,z),null,null,fc[i%5]);put(new T.CylinderGeometry(.012,.012,.2,4),'grass',V3(x,.1,z))}
+[[1.0,3.0],[1.7,3.7],[2.5,4.4],[3.4,5.0]].forEach(([x,z],i)=>put(rboxFix(.75,.14,.55,.12),'stone',V3(x,.05,z),E(0,rnd(-.4,.4),0),null,'#f6f2ea'));
+const px=[-W/2-2.4,-W/2-.6],pzc=D/2+.9;px.forEach(x=>put(new T.CylinderGeometry(.08,.09,2.1,10),'woodD',V3(x,1.05,pzc)));
+
+/* ---------- 구운 음영(가짜 AO): 땅에 가까울수록·처마 밑일수록 정점색을 어둡게 ---------- */
+function bake(g){const p=g.attributes.position,c=g.attributes.color;for(let i=0;i<p.count;i++){const x=p.getX(i),y=p.getY(i),z=p.getZ(i);let k=1;
+ k*=.72+.28*Math.min(1,Math.max(0,y/.5));                                       // 바닥 접촉 그늘
+ if(y<eaveY&&y>.3&&Math.abs(x)<RW-.2&&Math.abs(z)<RDp-.2)k*=.82+.18*Math.min(1,Math.max(0,(Math.abs(z)-D/2)/1.2)); // 처마 밑 그늘
+ c.setXYZ(i,c.getX(i)*k,c.getY(i)*k,c.getZ(i)*k)}}
+let calls=0;for(const k in BAG){if(!BAG[k].length)continue;const list=BAG[k].map(g=>{['normal','uv','color','position'].forEach(a=>{if(!g.attributes[a])console.warn(k,a)});return g});
+ const merged=BU.mergeBufferGeometries(list.map(g=>{const ng=new T.BufferGeometry();['position','normal','uv','color'].forEach(a=>ng.setAttribute(a,g.attributes[a]));return ng}));bake(merged);
+ const m=new T.Mesh(merged,M[k]);m.castShadow=k!=='ground';m.receiveShadow=true;S.add(m);calls++}
+{const g=BU.mergeBufferGeometries(hanjiG);const m=new T.Mesh(g,M.hanji);m.receiveShadow=true;S.add(m);calls++}
+
+/* ---------- 움직이는 것만 따로: 빨래, 굴뚝 연기 ---------- */
+const rope=new T.CatmullRomCurve3([0,1,2,3,4,5,6,7,8].map(k=>{const t=k/8;return V3(px[0]+(px[1]-px[0])*t,2.0-Math.sin(t*Math.PI)*.15,pzc)}));
+S.add(new T.Mesh(new T.TubeGeometry(rope,16,.015,4,false),new T.MeshStandardMaterial({color:'#efe7d8'})));
+const CL=[];[[.25,'#fffaf2',.55],[.5,'#f9d9de',.42],[.75,'#dcebf7',.5]].forEach(([t,c,h])=>{const g=new T.PlaneGeometry(.46,h,4,6);g.translate(0,-h/2,0);const m=new T.Mesh(g,new T.MeshStandardMaterial({color:c,roughness:.95,side:T.DoubleSide}));m.position.copy(rope.getPoint(t));m.castShadow=true;S.add(m);CL.push(m)});
+const smokeTex=ctex(64,64,(g,w,h)=>{const r=g.createRadialGradient(32,32,2,32,32,30);r.addColorStop(0,'rgba(255,255,255,.95)');r.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=r;g.fillRect(0,0,w,h)});
+const PUFF=[];for(let i=0;i<7;i++){const s=new T.Sprite(new T.SpriteMaterial({map:smokeTex,transparent:true,depthWrite:false,color:'#ffffff'}));s.userData.t=i/7;S.add(s);PUFF.push(s)}
+
+/* ---------- 빛: 해 하나(그림자는 정적이라 한 번만 계산) + 하늘빛 + 따뜻한 반사 ---------- */
+S.add(new T.HemisphereLight(0xfff8ee,0xe6d2b0,1.0));
+const sun=new T.DirectionalLight(0xffeed6,1.0);sun.position.set(-8,15,10);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.radius=8;sun.shadow.bias=-.0005;sun.shadow.normalBias=.03;
+Object.assign(sun.shadow.camera,{left:-12,right:12,top:12,bottom:-12,near:1,far:45});S.add(sun);
+const rim=new T.DirectionalLight(0xffe2c4,.45);rim.position.set(10,5,-10);S.add(rim);
+
+/* ---------- 후처리: 미니어처 흐림 + 비네트만(가벼움) ---------- */
+const comp=new T.EffectComposer(R);comp.addPass(new T.RenderPass(S,cam));
+const hT=new T.ShaderPass(T.HorizontalTiltShiftShader),vT=new T.ShaderPass(T.VerticalTiltShiftShader);hT.uniforms.h.value=1.1/innerWidth;vT.uniforms.v.value=1.1/innerHeight;hT.uniforms.r.value=vT.uniforms.r.value=.5;comp.addPass(hT);comp.addPass(vT);
+const vig=new T.ShaderPass(T.VignetteShader);vig.uniforms.offset.value=.95;vig.uniforms.darkness.value=.45;comp.addPass(vig);
+
+let ang=0,drag=null,frames=0,ft=performance.now(),fps=0,shadowDone=0;
+addEventListener('pointerdown',e=>drag=[e.clientX,ang]);addEventListener('pointerup',()=>drag=null);addEventListener('pointermove',e=>{if(drag){ang=drag[1]+(e.clientX-drag[0])*.008;R.shadowMap.needsUpdate=true}});
+R.shadowMap.autoUpdate=false;R.shadowMap.needsUpdate=true;
+const t0=performance.now();
+function loop(){requestAnimationFrame(loop);const t=(performance.now()-t0)/1000;
+ CL.forEach((c,i)=>{c.rotation.x=Math.sin(t*1.7+i)*.14;c.rotation.y=Math.sin(t*1.2+i*2)*.1});
+ PUFF.forEach(s=>{const k=(s.userData.t+t*.12)%1;s.position.set(chim.x+Math.sin(k*6)*.25*k,1.95+k*2.6,chim.z+k*.4);const sc=.35+k*1.1;s.scale.set(sc,sc,1);s.material.opacity=(1-k)*.8});
+ const r=Math.hypot(24,29),a=Math.atan2(24,29)+ang;cam.position.set(Math.sin(a)*r,19.5,Math.cos(a)*r);cam.lookAt(-.5,1.5,.5);
+ R.info.reset();comp.render();frames++;const now=performance.now();if(now-ft>1000){fps=frames*1000/(now-ft);frames=0;ft=now;document.getElementById('st').textContent='그리기 '+R.info.render.calls+'회 · 삼각형 '+Math.round(R.info.render.triangles/1000)+'k · '+fps.toFixed(0)+'fps'}}
+loop();
+addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();R.setSize(innerWidth,innerHeight);comp.setSize(innerWidth,innerHeight)});
+</script></body></html>
