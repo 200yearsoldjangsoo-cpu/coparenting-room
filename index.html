@@ -251,7 +251,7 @@ body.v3on .sheet .box .t{font-family:Jua,sans-serif}
 body.v3on .sheet button{border-radius:14px}
 body.v3on #stt{font-family:Jua,sans-serif}
 body.v3on #stt::before{content:'🍃 ';}
-#v3chore{position:absolute;left:50%;transform:translateX(-50%);top:calc(118px + env(safe-area-inset-top));z-index:6;border:2.5px solid #2B2118;border-radius:999px;background:#fff8ee;font:14px Jua,sans-serif;color:#2B2118;padding:7px 14px;box-shadow:0 3px 0 #c9a27a;white-space:nowrap}#v3chore b{color:#d8453a;font-weight:400}#v3chore.done{background:#e8f3dc}
+#v3chore{position:absolute;left:50%;transform:translateX(-50%);top:calc(118px + env(safe-area-inset-top));z-index:6;border:2.5px solid #2B2118;border-radius:999px;background:#fff8ee;font:14px Jua,sans-serif;color:#2B2118;padding:7px 14px;box-shadow:0 3px 0 #c9a27a;white-space:nowrap}#v3chore b{color:#8a6a52;font-weight:400}#v3chore.done{background:#e8f3dc}
 #plui .pb{display:flex!important;flex-wrap:wrap;gap:8px}#plui .pb button{flex:1 1 40%}#plui .pb button.sm{flex:0 1 auto;min-height:40px!important;padding:6px 12px!important;font-size:14px!important;background:#fff8ee!important}
 .gate{background:#2f3266 url(img/village/hanok_village_night.webp) center top/cover no-repeat!important}
 .gate.day{background:#cfe6ee url(img/village/hanok_village_day.webp) center top/cover no-repeat!important}
@@ -259,6 +259,7 @@ body.v3on #stt::before{content:'🍃 ';}
 .gate h1{text-shadow:0 3px 0 #2B2118,0 0 12px rgba(0,0,0,.4)}
 .gate .sub{text-shadow:0 2px 6px rgba(0,0,0,.6)}
 body.v3on .sheet{height:66%!important}
+body.v3on.v3card #card button{background:#fff8ee!important}body.v3on.v3card #card button#cb,body.v3on.v3card #card > button:first-of-type{background:#FFD84D!important}
 </style>
 </head>
 <body>
@@ -2225,5 +2226,5 @@ let SB=null;
  renderGate()})();
 }
 </script>
-<script>(function(){var V="1795279192";function chk(force){fetch("/version.txt?"+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():""}).then(function(x){x=(x||"").trim();if(!x||x===V)return;if(!(document.querySelector(".sheet.on,#bath")||(window.__busy&&window.__busy())||document.body.classList.contains("v3place"))&&(force||document.visibilityState==="visible"&&!document.hasFocus())){location.reload();return}if(document.getElementById("vbar"))return;var b=document.createElement("button");b.id="vbar";b.textContent="새 기능이 생겼어! 눌러서 새로고침";b.style.cssText="position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 8px);transform:translateX(-50%);z-index:99;font:15px Jua,sans-serif;background:#2B2118;color:#FFD84D;border:0;border-radius:999px;padding:10px 18px;box-shadow:0 4px 12px rgba(0,0,0,.3)";b.onclick=function(){location.reload()};document.body.appendChild(b)}).catch(function(){})}document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible")chk(true)});setInterval(function(){chk(false)},60000);setTimeout(function(){chk(false)},5000)})();</script></body>
+<script>(function(){var V="1795279397";function chk(force){fetch("/version.txt?"+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():""}).then(function(x){x=(x||"").trim();if(!x||x===V)return;if(!(document.querySelector(".sheet.on,#bath")||(window.__busy&&window.__busy())||document.body.classList.contains("v3place"))&&(force||document.visibilityState==="visible"&&!document.hasFocus())){location.reload();return}if(document.getElementById("vbar"))return;var b=document.createElement("button");b.id="vbar";b.textContent="새 기능이 생겼어! 눌러서 새로고침";b.style.cssText="position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 8px);transform:translateX(-50%);z-index:99;font:15px Jua,sans-serif;background:#2B2118;color:#FFD84D;border:0;border-radius:999px;padding:10px 18px;box-shadow:0 4px 12px rgba(0,0,0,.3)";b.onclick=function(){location.reload()};document.body.appendChild(b)}).catch(function(){})}document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible")chk(true)});setInterval(function(){chk(false)},60000);setTimeout(function(){chk(false)},5000)})();</script></body>
 </html>
