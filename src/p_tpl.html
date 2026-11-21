@@ -239,7 +239,7 @@ body.v3on.v3card #card{position:absolute;left:12px;right:12px;width:auto;bottom:
 body.v3on.v3card #card b{font-size:18px;margin-bottom:4px}body.v3on.v3card #card button{font:15px Jua,sans-serif;border:2.5px solid #2B2118;border-radius:14px;background:#FFD84D;padding:8px 12px;margin:4px 4px 0 0}body.v3on.v3card #card .bar{height:10px;background:#f0e2cf}body.v3on.v3card #card .bar i{background:#f4a6b5}
 #v3cx{position:absolute;right:8px;top:6px;border:0!important;background:none!important;font-size:18px!important;padding:2px 6px!important;margin:0!important}
 #b3{position:absolute;left:12px;right:12px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:8;background:#fff8ee;border:3px solid #2B2118;border-radius:22px;padding:12px 14px;text-align:center;box-shadow:0 6px 0 #c9a27a}
-#b3 .b3t{font:18px Jua,sans-serif;color:#2B2118}#b3 .b3s{font:13px Jua,sans-serif;color:#8a6a52;margin:4px 0 8px}#b3 .b3b{width:100%;min-height:58px;border:3px solid #2B2118;border-radius:18px;background:#FFD84D;font:20px Jua,sans-serif;color:#2B2118}#b3 .b3x{margin-top:6px;border:0;background:none;font:12px Jua,sans-serif;color:#8a7a68}
+#b3 .b3t{font:18px Jua,sans-serif;color:#2B2118}#b3 .b3s{font:13px Jua,sans-serif;color:#8a6a52;margin:4px 0 8px}#b3 .b3b{width:100%;min-height:58px;border:3px solid #2B2118;border-radius:18px;background:#FFD84D;font:20px Jua,sans-serif;color:#2B2118}#b3 .b3x{margin-top:8px;border:2px solid #c9a27a;border-radius:12px;background:#fff;padding:6px 16px;font:14px Jua,sans-serif;color:#5a4632}
 body.v3bath #plui .pb,body.v3bath #v3q,body.v3bath #giftb{display:none!important}
 body.v3on.v3card #card{display:block!important}
 body.v3on #sndpill{bottom:auto!important;top:calc(132px + env(safe-area-inset-top))!important;left:auto!important;right:12px!important;z-index:7!important}
@@ -1118,7 +1118,7 @@ const GIFTS=[['🌙','달 모양 수면등','새벽에도 은은하게'],['🪴'
 const myGifts=()=>LS.get('cp_gifts',[])||[];
 function giftReady(){return LS.get('cp_gday','')!==ymd(new Date())}
 function giftBtn(){let b=$('giftb');if(!me.room||!giftReady()){if(b)b.remove();return}if(b)return;b=document.createElement('button');b.id='giftb';b.innerHTML='🎁<small>오늘의 선물</small>';b.onclick=openGift;app.appendChild(b)}
-function openGift(){if(!giftReady())return;setTimeout(()=>{try{V3D._.shelfGifts()}catch(e){}},1500);const own=myGifts().map(g=>g.k);let pool=GIFTS.map((g,i)=>i).filter(i=>!own.includes(i));if(!pool.length)pool=GIFTS.map((g,i)=>i);const i=pool[Math.floor(Math.random()*pool.length)];
+function openGift(){if(!giftReady())return;if(sheet.classList.contains('on')||$('b3')||$('vcard')){setTimeout(openGift,5000);return}setTimeout(()=>{try{V3D._.shelfGifts()}catch(e){}},1500);const own=myGifts().map(g=>g.k);let pool=GIFTS.map((g,i)=>i).filter(i=>!own.includes(i));if(!pool.length)pool=GIFTS.map((g,i)=>i);const i=pool[Math.floor(Math.random()*pool.length)];
  const gs=myGifts();if(!own.includes(i))gs.push({k:i,d:ymd(new Date())});LS.set('cp_gifts',gs);LS.set('cp_gday',ymd(new Date()));const b=$('giftb');if(b)b.remove();drawShelf();try{fx(myId,GIFTS[i][0]+' '+GIFTS[i][1])}catch(e){}
  const g=GIFTS[i];vcard('<div class="vt">오늘의 작은 선물</div><div class="ve big">'+g[0]+'</div><div class="vb"><b>'+g[1]+'</b></div><div class="vs">'+g[2]+'</div><div class="vs">내 선반에 놓았어 · 지금까지 '+gs.length+'개 모았어</div><div style="display:flex;gap:8px;justify-content:center"><button class="vbtn ghost" id="vdg">도감 보기</button><button class="vbtn" id="vok">고마워</button></div>');
  $('vok').onclick=vclose;$('vdg').onclick=()=>{vclose();openDogam()}}
