@@ -25,10 +25,10 @@ const texWood=ctex(256,64,(g,w,h)=>{g.fillStyle='#fff';g.fillRect(0,0,w,h);for(l
 const M={
  tile:new T.MeshStandardMaterial({vertexColors:true,map:texClay,roughness:.75,color:'#7686a0'}),
  ridge:new T.MeshStandardMaterial({vertexColors:true,map:texClay,roughness:.8,color:'#5e6b82',side:T.DoubleSide}),
- wall:new T.MeshStandardMaterial({vertexColors:true,map:texClay,roughness:.95,color:'#fff6e6'}),
+ wall:new T.MeshStandardMaterial({vertexColors:true,map:texClay,roughness:.95,color:'#fff6e6',side:T.DoubleSide}),
  wood:new T.MeshStandardMaterial({vertexColors:true,map:texWood,roughness:.8,color:'#e0a874'}),
  woodD:new T.MeshStandardMaterial({vertexColors:true,map:texWood,roughness:.85,color:'#b8794a'}),
- hanji:new T.MeshStandardMaterial({map:texHanji,roughness:.9}),
+ hanji:new T.MeshStandardMaterial({map:texHanji,roughness:.9,side:T.DoubleSide}),
  stone:new T.MeshStandardMaterial({vertexColors:true,map:texClay,roughness:.95,color:'#e3ddd3'}),
  ground:new T.MeshStandardMaterial({vertexColors:true,map:texClay,roughness:1,color:'#efd9b2'}),
  grass:new T.MeshStandardMaterial({vertexColors:true,roughness:1,color:'#a9c48a'}),
@@ -145,7 +145,7 @@ const t0=performance.now();
 function loop(){requestAnimationFrame(loop);const t=(performance.now()-t0)/1000;
  CL.forEach((c,i)=>{c.rotation.x=Math.sin(t*1.7+i)*.14;c.rotation.y=Math.sin(t*1.2+i*2)*.1});
  PUFF.forEach(s=>{const k=(s.userData.t+t*.12)%1;s.position.set(chim.x+Math.sin(k*6)*.25*k,1.95+k*2.6,chim.z+k*.4);const sc=.35+k*1.1;s.scale.set(sc,sc,1);s.material.opacity=(1-k)*.8});
- const r=Math.hypot(24,29),a=Math.atan2(24,29)+ang;cam.position.set(Math.sin(a)*r,19.5,Math.cos(a)*r);cam.lookAt(-.5,1.5,.5);
+ const fit=Math.max(1,1.15/cam.aspect*.62),r=Math.hypot(24,29)*fit,a=Math.atan2(24,29)+ang;cam.position.set(Math.sin(a)*r,19.5*fit,Math.cos(a)*r);cam.lookAt(-.5,1.5,.5);
  R.info.reset();comp.render();frames++;const now=performance.now();if(now-ft>1000){fps=frames*1000/(now-ft);frames=0;ft=now;document.getElementById('st').textContent='그리기 '+R.info.render.calls+'회 · 삼각형 '+Math.round(R.info.render.triangles/1000)+'k · '+fps.toFixed(0)+'fps'}}
 loop();
 addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();R.setSize(innerWidth,innerHeight);comp.setSize(innerWidth,innerHeight)});
