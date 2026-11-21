@@ -228,6 +228,10 @@ body.v3on #plui{position:absolute;inset:0;z-index:6;pointer-events:none}body.v3o
 .v3chip{position:absolute;transform:translate(-50%,-100%);background:#fffdf6;border:2px solid #2B2118;border-radius:999px;padding:2px 9px;font:12px Jua,sans-serif;color:#2B2118;white-space:nowrap;pointer-events:none}.v3chip.me{background:#FFE27A}
 body.v3on:not(.v3jang) #comfort{display:none!important}body.v3on #comfort{top:auto!important;bottom:calc(96px + env(safe-area-inset-bottom))!important;transform:translateX(-50%) scale(.9)!important;left:50%!important}
 body.v3on #giftb{bottom:calc(96px + env(safe-area-inset-bottom))}
+#v3q .snap{position:absolute;right:0;top:-62px;min-height:48px;width:48px;border-radius:50%;padding:0;font-size:22px;background:#fff8ee}
+body.v3on.dawnmode #v3q button{background:#F5E6C8}body.v3on.dawnmode #v3q button:first-child{background:#FFD84D}
+body.v3on #app>.top{background:linear-gradient(180deg,rgba(255,250,240,.92) 0,rgba(255,250,240,.6) 70%,rgba(255,250,240,0));padding-bottom:10px}body.v3on #app>.top .brand{color:#2B2118}
+body.v3on.v3place #giftb{display:none}
 </style>
 </head>
 <body>
@@ -1140,7 +1144,7 @@ function vLoop(){vRaf=0;if(!document.body.classList.contains('vil'))return;const
   m.e.style.left=(a[0]+(b[0]-a[0])*r)+'%';m.e.style.top=(a[1]+(b[1]-a[1])*r)+'%';m.e.style.transform='translate(-50%,-100%) translateY('+(Math.abs(Math.sin(now/180+m.t*40))*-3).toFixed(1)+'px) scaleX('+(m.v>0?-1:1)+')'});
  vRaf=requestAnimationFrame(vLoop)}
 function vilShow(){plLeave();setPl('vil');if(V3D.ok()&&V3D.map()!==false&&V3D.isOn())return;vilBuild();document.body.classList.add('vil');vilSky();setTimeout(vClamp,60);if(!vRaf)vRaf=requestAnimationFrame(vLoop)}
-function goRoom(tab){try{V3D.hide()}catch(e){}document.body.classList.remove('pl');plLeave();setPl('room');document.body.classList.remove('vil');if(tab){const b=document.querySelector('#dock button[data-t="'+tab+'"]');b&&b.click()}toast('평상에 왔어 · 엄마를 누르면 쓰담')}
+function goRoom(tab){try{V3D.hide()}catch(e){}document.body.classList.remove('pl');plLeave();setPl('room');document.body.classList.remove('vil');if(tab){const b=document.querySelector('#dock button[data-t="'+tab+'"]');b&&b.click()}toast(tab=='dunga'?'요람 방에 왔어 · 같이 재우자':tab=='grow'?'엄마 시간이야 · 잠깐 숨 돌리자':'안방에 왔어 · 엄마를 누르면 쓰담')}
 function vTap(k){const s=VSPOT.find(x=>x.k==k);const p=$('vpop');p.querySelector('img').src='img/village/'+s.img+'.webp';p.classList.remove('on');void p.offsetWidth;p.classList.add('on');
  setTimeout(()=>{p.classList.remove('on');({pyeong:()=>goPlace('pyeong'),sarang:()=>goPlace('sarang'),madang:()=>goPlace('madang'),hall:()=>goPlace('hall'),bundle:openBag,jangdok:()=>goPlace('jangdok'),store:()=>goPlace('store'),speaker:()=>{vTab=0;openVoice()},post:vPost,home:()=>goPlace('home')})[k]()},520)}
 function vPost(){const tot=LS.get('cp_mbtot',0)||0;LS.set('cp_mbnew',0);vilSky();
