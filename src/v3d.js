@@ -216,7 +216,7 @@ function choreChip(){let c=$('v3chore');if(!c){c=document.createElement('button'
 function choreSheet(){const ks=chores();openSheet('오늘 동네 일');sb.innerHTML='<div class="box"><div class="t">하루 3개 · 안 해도 괜찮아</div><p class="note">다 하면 이장님 도장 하나. 못 한 날도 사라지는 건 없어 · 지금까지 도장 '+(LS.get('cp_ijang',0)||0)+'개</p>'+CHORE.map(([k,e,n,pl])=>'<button data-ch="'+pl+'" style="display:flex;align-items:center;gap:10px;width:100%;margin-top:8px;padding:12px;border:2.5px solid #2B2118;border-radius:16px;background:'+(ks.includes(k)?'#e8f3dc':'#fff')+';font:16px Jua,sans-serif;color:#2B2118;text-align:left"><span style="font-size:24px">'+e+'</span><span style="flex:1">'+n+'</span><span>'+(ks.includes(k)?'✅':'가기 ›')+'</span></button>').join('')+'</div>';sb.querySelectorAll('[data-ch]').forEach(b=>b.onclick=()=>{closeSheet();go(b.dataset.ch)})}
 /* ---------- 우물 목욕 (러베 탑투토 워시) ---------- */
 let B3=null;function anim(d,f,done){const t0=performance.now();const s=()=>{const k=Math.min(1,(performance.now()-t0)/d);f(k);if(k<1)requestAnimationFrame(s);else if(done)done()};requestAnimationFrame(s)}
-function bath(){if(B3)return;if(!(mode==='place'&&cur==='pyeong')){go('pyeong');setTimeout(bath,window.__snap?600:2300);return}
+function bath(){if(B3)return;try{v3cardOff()}catch(_){}if(!(mode==='place'&&cur==='pyeong')){go('pyeong');setTimeout(bath,window.__snap?600:2300);return}
  const g=PL3.pyeong.g,grp=new T.Group();grp.position.set(2.7,0,1.2);g.add(grp);const K2=new Kit();
  K2.put(cyl(.8,.62,.42,28),'cloth',V(0,.21,0),null,null,'#8fc6ea');K2.put(new T.TorusGeometry(.78,.06,8,28).rotateX(Math.PI/2),'cloth',V(0,.42,0),null,null,'#6fb0de');
  K2.put(rb(.5,.06,.36,.03),'cloth',V(-1.1,.03,.3),null,null,'#f6dbe0');grp.add(K2.build());
