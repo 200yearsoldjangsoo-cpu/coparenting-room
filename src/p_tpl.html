@@ -251,8 +251,13 @@ body.v3on .sheet .box .t{font-family:Jua,sans-serif}
 body.v3on .sheet button{border-radius:14px}
 body.v3on #stt{font-family:Jua,sans-serif}
 body.v3on #stt::before{content:'🍃 ';}
-#v3c{position:absolute;left:50%;transform:translateX(-50%);top:calc(118px + env(safe-area-inset-top));z-index:6;border:2.5px solid #2B2118;border-radius:999px;background:#fff8ee;font:14px Jua,sans-serif;color:#2B2118;padding:7px 14px;box-shadow:0 3px 0 #c9a27a;white-space:nowrap}#v3c b{color:#d8453a;font-weight:400}#v3c.done{background:#e8f3dc}
+#v3chore{position:absolute;left:50%;transform:translateX(-50%);top:calc(118px + env(safe-area-inset-top));z-index:6;border:2.5px solid #2B2118;border-radius:999px;background:#fff8ee;font:14px Jua,sans-serif;color:#2B2118;padding:7px 14px;box-shadow:0 3px 0 #c9a27a;white-space:nowrap}#v3chore b{color:#d8453a;font-weight:400}#v3chore.done{background:#e8f3dc}
 #plui .pb{display:flex!important;flex-wrap:wrap;gap:8px}#plui .pb button{flex:1 1 40%}#plui .pb button.sm{flex:0 1 auto;min-height:40px!important;padding:6px 12px!important;font-size:14px!important;background:#fff8ee!important}
+.gate{background:#2f3266 url(img/village/hanok_village_night.webp) center top/cover no-repeat!important}
+.gate.day{background:#cfe6ee url(img/village/hanok_village_day.webp) center top/cover no-repeat!important}
+.gate::before{content:'';position:fixed;inset:0;background:linear-gradient(rgba(30,25,50,.25),rgba(30,25,50,.05) 30%,rgba(255,248,238,.0) 50%,rgba(255,248,238,.0));pointer-events:none;z-index:-1}
+.gate h1{text-shadow:0 3px 0 #2B2118,0 0 12px rgba(0,0,0,.4)}
+.gate .sub{text-shadow:0 2px 6px rgba(0,0,0,.6)}
 </style>
 </head>
 <body>
@@ -328,7 +333,7 @@ const MAXR=2,TO_VISIT='00000000-0000-0000-0000-00000000a001',TO_MEAL='00000000-0
 function pickRoom(){const c=roomCounts();for(let r=1;r<=MAXR;r++)if((c[r]||0)<CAP)return r;return 0}
 function queuePos(){const w=others().filter(p=>p.state.wait&&p.state.ws<me.ws).length;return w+1}
 const inRoomN=()=>others().filter(p=>p.state.room).length+(me.room?1:0);
-function renderGate(){const c=roomCounts(),tot=inRoomN();$('gtot').textContent=tot+'명';
+function renderGate(){try{const ph=window.__phase||phaseNow();$('gate').classList.toggle('day',ph!=='dawn')}catch(e){}const c=roomCounts(),tot=inRoomN();$('gtot').textContent=tot+'명';
  const wq=others().filter(p=>p.state.wait).length+(me.wait?1:0);const rows=[];
  for(let r=1;r<=MAXR;r++){const n=c[r]||0;
   rows.push('<div class="r"><div style="flex:1"><b>'+r+'호방</b><small>'+n+'/'+CAP+'</small><div class="bar"><i style="width:'+Math.min(100,n/CAP*100)+'%"></i></div></div><span class="st '+(n>=CAP?'full">꽉 참':'open">'+(CAP-n)+'자리')+'</span></div>')}

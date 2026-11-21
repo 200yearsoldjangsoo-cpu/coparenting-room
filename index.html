@@ -251,8 +251,13 @@ body.v3on .sheet .box .t{font-family:Jua,sans-serif}
 body.v3on .sheet button{border-radius:14px}
 body.v3on #stt{font-family:Jua,sans-serif}
 body.v3on #stt::before{content:'🍃 ';}
-#v3c{position:absolute;left:50%;transform:translateX(-50%);top:calc(118px + env(safe-area-inset-top));z-index:6;border:2.5px solid #2B2118;border-radius:999px;background:#fff8ee;font:14px Jua,sans-serif;color:#2B2118;padding:7px 14px;box-shadow:0 3px 0 #c9a27a;white-space:nowrap}#v3c b{color:#d8453a;font-weight:400}#v3c.done{background:#e8f3dc}
+#v3chore{position:absolute;left:50%;transform:translateX(-50%);top:calc(118px + env(safe-area-inset-top));z-index:6;border:2.5px solid #2B2118;border-radius:999px;background:#fff8ee;font:14px Jua,sans-serif;color:#2B2118;padding:7px 14px;box-shadow:0 3px 0 #c9a27a;white-space:nowrap}#v3chore b{color:#d8453a;font-weight:400}#v3chore.done{background:#e8f3dc}
 #plui .pb{display:flex!important;flex-wrap:wrap;gap:8px}#plui .pb button{flex:1 1 40%}#plui .pb button.sm{flex:0 1 auto;min-height:40px!important;padding:6px 12px!important;font-size:14px!important;background:#fff8ee!important}
+.gate{background:#2f3266 url(img/village/hanok_village_night.webp) center top/cover no-repeat!important}
+.gate.day{background:#cfe6ee url(img/village/hanok_village_day.webp) center top/cover no-repeat!important}
+.gate::before{content:'';position:fixed;inset:0;background:linear-gradient(rgba(30,25,50,.25),rgba(30,25,50,.05) 30%,rgba(255,248,238,.0) 50%,rgba(255,248,238,.0));pointer-events:none;z-index:-1}
+.gate h1{text-shadow:0 3px 0 #2B2118,0 0 12px rgba(0,0,0,.4)}
+.gate .sub{text-shadow:0 2px 6px rgba(0,0,0,.6)}
 </style>
 </head>
 <body>
@@ -329,7 +334,7 @@ const MAXR=2,TO_VISIT='00000000-0000-0000-0000-00000000a001',TO_MEAL='00000000-0
 function pickRoom(){const c=roomCounts();for(let r=1;r<=MAXR;r++)if((c[r]||0)<CAP)return r;return 0}
 function queuePos(){const w=others().filter(p=>p.state.wait&&p.state.ws<me.ws).length;return w+1}
 const inRoomN=()=>others().filter(p=>p.state.room).length+(me.room?1:0);
-function renderGate(){const c=roomCounts(),tot=inRoomN();$('gtot').textContent=tot+'명';
+function renderGate(){try{const ph=window.__phase||phaseNow();$('gate').classList.toggle('day',ph!=='dawn')}catch(e){}const c=roomCounts(),tot=inRoomN();$('gtot').textContent=tot+'명';
  const wq=others().filter(p=>p.state.wait).length+(me.wait?1:0);const rows=[];
  for(let r=1;r<=MAXR;r++){const n=c[r]||0;
   rows.push('<div class="r"><div style="flex:1"><b>'+r+'호방</b><small>'+n+'/'+CAP+'</small><div class="bar"><i style="width:'+Math.min(100,n/CAP*100)+'%"></i></div></div><span class="st '+(n>=CAP?'full">꽉 참':'open">'+(CAP-n)+'자리')+'</span></div>')}
@@ -1666,7 +1671,7 @@ function sync(){if(!world)return;Object.values(avs).forEach(o=>o.seen=0);
 const CHORE=[['wood','🔥','아궁이에 장작 하나','madang'],['sd','♥','엄마 한 명 쓰담','pyeong'],['jar','🏺','장독 뚜껑 열어보기','jangdok']];
 function chores(){const c=LS.get('cp_chore',{d:'',k:[]});return c.d===ymd(new Date())?c.k:[]}
 function chore(k){const ks=chores();if(ks.includes(k))return;ks.push(k);LS.set('cp_chore',{d:ymd(new Date()),k:ks});if(ks.length===CHORE.length){const n=(LS.get('cp_ijang',0)||0)+1;LS.set('cp_ijang',n);setTimeout(()=>{toast('📢 오늘 동네 일 다 했네! 이장님 도장 '+n+'개째');try{burst((avs[myId]?avs[myId].pos:V(0,0,0)).clone().add(V(0,2.6,0)),'이장님 도장 쾅 🟥')}catch(e){}},500)}choreChip()}
-function choreChip(){let c=$('v3c');if(!c){c=document.createElement('button');c.id='v3c';c.onclick=e=>{e.stopPropagation();choreSheet()};$('v3').appendChild(c)}const n=chores().length;c.innerHTML='🌾 오늘 동네 일 <b>'+n+'/3</b>'+(n>=3?' · 다 했다!':'');c.classList.toggle('done',n>=3);c.style.display=mode==='map'?'':'none'}
+function choreChip(){let c=$('v3chore');if(!c){c=document.createElement('button');c.id='v3chore';c.onclick=e=>{e.stopPropagation();choreSheet()};$('v3').appendChild(c)}const n=chores().length;c.innerHTML='🌾 오늘 동네 일 <b>'+n+'/3</b>'+(n>=3?' · 다 했다!':'');c.classList.toggle('done',n>=3);c.style.display=mode==='map'?'':'none'}
 function choreSheet(){const ks=chores();openSheet('오늘 동네 일');sb.innerHTML='<div class="box"><div class="t">하루 3개 · 안 해도 괜찮아</div><p class="note">다 하면 이장님 도장 하나. 못 한 날도 사라지는 건 없어 · 지금까지 도장 '+(LS.get('cp_ijang',0)||0)+'개</p>'+CHORE.map(([k,e,n,pl])=>'<button data-ch="'+pl+'" style="display:flex;align-items:center;gap:10px;width:100%;margin-top:8px;padding:12px;border:2.5px solid #2B2118;border-radius:16px;background:'+(ks.includes(k)?'#e8f3dc':'#fff')+';font:16px Jua,sans-serif;color:#2B2118;text-align:left"><span style="font-size:24px">'+e+'</span><span style="flex:1">'+n+'</span><span>'+(ks.includes(k)?'✅':'가기 ›')+'</span></button>').join('')+'</div>';sb.querySelectorAll('[data-ch]').forEach(b=>b.onclick=()=>{closeSheet();go(b.dataset.ch)})}
 /* ---------- 우물 목욕 (러베 탑투토 워시) ---------- */
 let B3=null;function anim(d,f,done){const t0=performance.now();const s=()=>{const k=Math.min(1,(performance.now()-t0)/d);f(k);if(k<1)requestAnimationFrame(s);else if(done)done()};requestAnimationFrame(s)}
@@ -2217,5 +2222,5 @@ let SB=null;
  renderGate()})();
 }
 </script>
-<script>(function(){var V="1795276213";function chk(force){fetch("/version.txt?"+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():""}).then(function(x){x=(x||"").trim();if(!x||x===V)return;if(!(document.querySelector(".sheet.on,#bath")||(window.__busy&&window.__busy())||document.body.classList.contains("v3place"))&&(force||document.visibilityState==="visible"&&!document.hasFocus())){location.reload();return}if(document.getElementById("vbar"))return;var b=document.createElement("button");b.id="vbar";b.textContent="새 기능이 생겼어! 눌러서 새로고침";b.style.cssText="position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 8px);transform:translateX(-50%);z-index:99;font:15px Jua,sans-serif;background:#2B2118;color:#FFD84D;border:0;border-radius:999px;padding:10px 18px;box-shadow:0 4px 12px rgba(0,0,0,.3)";b.onclick=function(){location.reload()};document.body.appendChild(b)}).catch(function(){})}document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible")chk(true)});setInterval(function(){chk(false)},60000);setTimeout(function(){chk(false)},5000)})();</script></body>
+<script>(function(){var V="1795277927";function chk(force){fetch("/version.txt?"+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():""}).then(function(x){x=(x||"").trim();if(!x||x===V)return;if(!(document.querySelector(".sheet.on,#bath")||(window.__busy&&window.__busy())||document.body.classList.contains("v3place"))&&(force||document.visibilityState==="visible"&&!document.hasFocus())){location.reload();return}if(document.getElementById("vbar"))return;var b=document.createElement("button");b.id="vbar";b.textContent="새 기능이 생겼어! 눌러서 새로고침";b.style.cssText="position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 8px);transform:translateX(-50%);z-index:99;font:15px Jua,sans-serif;background:#2B2118;color:#FFD84D;border:0;border-radius:999px;padding:10px 18px;box-shadow:0 4px 12px rgba(0,0,0,.3)";b.onclick=function(){location.reload()};document.body.appendChild(b)}).catch(function(){})}document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible")chk(true)});setInterval(function(){chk(false)},60000);setTimeout(function(){chk(false)},5000)})();</script></body>
 </html>
