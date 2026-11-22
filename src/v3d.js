@@ -379,7 +379,7 @@ function frame(){raf=on?requestAnimationFrame(frame):0;if(!on)return;const now=p
  if(PL3.pyeong&&PL3.pyeong.shoes){const n=Object.values(avs).filter(o=>o.pl==='pyeong').length;PL3.pyeong.shoes.forEach((s,i)=>s.visible=i<Math.max(1,n))}
  if(PL3.sarang&&PL3.sarang.lamp)PL3.sarang.lamp.intensity=cur==='sarang'?(.25+nightK()*.45):0;
  chips();strollTick();if(!frame.ab||now-frame.ab>200){frame.ab=now;actBtn()}
- Object.values(avs).forEach(o=>{if(!o.ph)o.ph=Math.random()*6;{const S=(o.me&&B3)?1.0:mode==='place'&&(cur==='sarang'||cur==='home'||cur==='hall')?1.0:1.5;o.a.root.scale.set(S,S*(1+Math.sin(t*2.2+o.ph)*.025),S)}});
+ Object.values(avs).forEach(o=>{if(!o.ph)o.ph=Math.random()*6;if(!o.me&&o.pl==='pyeong'&&!o.route.length&&o.pos.y>.5&&!o.a.sit)o.a.sit=1;{const S=(o.me&&B3)?1.0:mode==='place'&&(cur==='sarang'||cur==='home'||cur==='hall')?1.0:1.5;o.a.root.scale.set(S,S*(1+Math.sin(t*2.2+o.ph)*.025),S)}});
  for(let i=HF.length-1;i>=0;i--){const h=HF[i],k=(t-h.t0)/.9;if(k<0){h.s.visible=false;continue}h.s.visible=true;if(k>=1){world.remove(h.s);burst(h.b,'마음이 전해졌어요 ♥');HF.splice(i,1);continue}h.s.position.lerpVectors(h.a,h.b,k);h.s.position.y+=Math.sin(k*Math.PI)*2.2}
  DYN.forEach(f=>f(t));{const ph=window.__phase||phaseNow();if(ph!==lastPh){lastPh=ph;sky()}}if(now-lastSync>600){lastSync=now;sync()}placeLabels();quick();if(!frame.cc||now-frame.cc>1000){frame.cc=now;choreChip()}if(LITE)R3.render(S3,C3);else comp3.render()}
 /* ---------- 시작 ---------- */
