@@ -226,7 +226,7 @@ body.v3on #plui{position:absolute;inset:0;z-index:6;pointer-events:none}body.v3o
 #v3q{position:absolute;left:10px;right:10px;bottom:max(14px,env(safe-area-inset-bottom));z-index:6;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 #v3q button{min-height:64px;border:3px solid #2B2118;border-radius:20px;background:#fff8ee;font:22px Jua,sans-serif;color:#2B2118;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;box-shadow:0 4px 12px rgba(0,0,0,.22)}#v3q button b{font:14px Jua,sans-serif;font-weight:400}#v3q button:first-child{background:#FFD84D}
 .v3chip{position:absolute;transform:translate(-50%,-100%);background:#fffdf6;border:2px solid #2B2118;border-radius:999px;padding:2px 9px;font:12px Jua,sans-serif;color:#2B2118;white-space:nowrap;pointer-events:none}.v3chip.me{background:#FFE27A}
-body.v3on:not(.v3place) #comfort{display:none!important}body.v3on #comfort{top:auto!important;bottom:calc(96px + env(safe-area-inset-bottom))!important;transform:translateX(-50%) scale(.9)!important;left:50%!important}
+body.v3on:not(.v3jang) #comfort{display:none!important}body.v3on #comfort{top:auto!important;bottom:calc(96px + env(safe-area-inset-bottom))!important;transform:translateX(-50%) scale(.9)!important;left:50%!important}
 body.v3on #giftb{bottom:calc(96px + env(safe-area-inset-bottom))}
 #v3q .snap{position:absolute;right:0;top:-62px;min-height:48px;width:48px;border-radius:50%;padding:0;font-size:22px;background:#fff8ee}
 body.v3on.dawnmode #v3q button{background:#F5E6C8}body.v3on.dawnmode #v3q button:first-child{background:#FFD84D}
@@ -261,6 +261,14 @@ body.v3on #stt::before{content:'🍃 ';}
 body.v3on .sheet{height:66%!important}
 body.v3on.v3card #card button{background:#fff8ee!important}body.v3on.v3card #card button#cb,body.v3on.v3card #card > button:first-of-type{background:#FFD84D!important}
 body.v3bath #plback{display:none!important}body.v3on.v3card #bathb{display:none!important}
+#b4{position:absolute;left:12px;right:12px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:8;background:#fff8ee;border:3px solid #2B2118;border-radius:22px;padding:12px 14px;text-align:center;box-shadow:0 6px 0 #c9a27a}
+#b4 .b3t{font:18px Jua,sans-serif;color:#2B2118}#b4 .b3s{font:13px Jua,sans-serif;color:#8a6a52;margin:6px 0 8px}.b4bar{height:12px;border-radius:99px;background:#f0e2cf;margin-top:8px;overflow:hidden}.b4bar i{display:block;height:100%;width:0;background:#f4a6b5;transition:width .3s}
+.b4r{display:flex;gap:6px}.b4r button{flex:1;min-height:46px;border:2.5px solid #2B2118;border-radius:14px;background:#fff;font:14px Jua,sans-serif;color:#2B2118}.b4r .b4x{background:#FFD84D}
+body.v3stroll #v3q,body.v3stroll #giftb,body.v3stroll #v3chore,body.v3stroll #v3l{display:none!important}
+body.v3on #cum{display:none!important}body.v3on .toast{top:calc(150px + env(safe-area-inset-top))!important}
+#v3a{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(178px + env(safe-area-inset-bottom));z-index:7;min-height:52px;padding:8px 22px;border:3px solid #2B2118;border-radius:999px;background:#FFD84D;font:18px Jua,sans-serif;color:#2B2118;box-shadow:0 5px 0 #c9a27a;white-space:nowrap;animation:v3pop .25s}
+@keyframes v3pop{from{transform:translateX(-50%) scale(.7)}to{transform:translateX(-50%) scale(1)}}
+body.v3on #comfort{max-width:300px!important;padding:12px 14px!important;font-size:14px!important}body.v3on #comfort *{font-size:inherit}body.v3on.v3place #comfort{top:calc(150px + env(safe-area-inset-top))!important;bottom:auto!important;transform:translateX(-50%) scale(.85)!important;transform-origin:top center}
 </style>
 </head>
 <body>
@@ -718,12 +726,12 @@ function renderCard0(){const c=$('card');if(!me.room){c.style.display='none';ret
  else{const n=here.filter(p=>p.state.st=='dunga').length+(me.st=='dunga'?1:0);
   if(me.kind=='preg'){const tm=LS.get('cp_taegyo',{});const td=tm[ymd(new Date())]||0;const w=here.filter(p=>p.state.st=='walk').length+(me.st=='walk'?1:0);c.innerHTML='<b>태교 산책</b>걸은 만큼 오늘 태교 시간이 쌓여<div class="bar"><i style="width:'+Math.min(100,td/30*100)+'%"></i></div>오늘 '+Math.round(td)+'분 · 같이 걷는 예비맘 '+w+'명<br><button id="cb">'+(me.st=='walk'?'산책 끝':'산책 시작')+'</button>';$('cb').onclick=()=>{me.st=me.st=='walk'?'':'walk';pushP();ensure(myId,meState(),true);renderCard()};return}
   c.innerHTML='<b>애기 재우기</b>'+(me.carrier==2?'유모차 밀고 마당을 톡톡 눌러 천천히 걸어봐':me.carrier?'아기띠 메고 마당을 톡톡 눌러 걸어봐':'아기띠나 유모차로 걸으면 아기가 스르륵')+'<div class="bar"><i style="width:'+Math.round(Math.min(100,me.steps))+'%"></i></div>'+(me.steps>=100?'꿀잠 성공 zZ':'꿀잠 '+Math.round(Math.min(100,me.steps))+'%')+' · 같이 걷는 엄마 '+n+'명'+
-   (me.carrier==2?'':'<div class="sw">'+['#4a4744','#d9cbb8','#7d8f9e'].map(col=>'<span data-c="'+col+'" class="'+(me.carrier==1&&me.cc==col?'on':'')+'" style="background:'+col+'"></span>').join('')+'</div>')+(me.carrier?'<button id="cb">'+(me.carrier==2?'유모차에서 내리기':'아기띠 풀기')+'</button>':'<button id="cb">🤱 아기띠 메기</button> <button id="pr">👶 유모차 태우기</button>')+' <button id="bathb">🛁 아기 씻기기</button>'+sleepSoundsHTML();
-  c.querySelectorAll('[data-c]').forEach(s=>s.onclick=()=>{me.cc=s.dataset.c;me.carrier=1;me.st='dunga';me.steps=0;pushP();ensure(myId,meState(),true);renderCard()});
-  $('cb').onclick=()=>{me.carrier=me.carrier?0:1;me.st=me.carrier?'dunga':'';me.steps=0;pushP();ensure(myId,meState(),true);renderCard()};const pr=$('pr');if(pr)pr.onclick=()=>{me.carrier=2;me.st='dunga';me.steps=0;pushP();ensure(myId,meState(),true);renderCard()};bindSleepSounds()}}
+   (me.carrier==2?'':'<div style="font-size:12px;color:#8a6a52;margin-top:6px">아기띠 색 고르면 바로 산책 시작</div><div class="sw">'+['#4a4744','#d9cbb8','#7d8f9e'].map(col=>'<span data-c="'+col+'" class="'+(me.carrier==1&&me.cc==col?'on':'')+'" style="background:'+col+'"></span>').join('')+'</div>')+(me.carrier?'<button id="cb">'+(me.carrier==2?'유모차에서 내리기':'아기띠 풀기')+'</button>':'<button id="cb">🤱 아기띠 메기</button> <button id="pr">👶 유모차 태우기</button>')+' <button id="bathb">🛁 아기 씻기기</button>'+sleepSoundsHTML();
+  c.querySelectorAll('[data-c]').forEach(s=>s.onclick=()=>{me.cc=s.dataset.c;me.carrier=1;me.st='dunga';me.steps=0;pushP();ensure(myId,meState(),true);renderCard();if(window.__v3on&&me.carrier&&window.V3D&&V3D.stroll){V3D.stroll()}});
+  $('cb').onclick=()=>{me.carrier=me.carrier?0:1;me.st=me.carrier?'dunga':'';me.steps=0;pushP();ensure(myId,meState(),true);renderCard();if(window.__v3on&&me.carrier&&window.V3D&&V3D.stroll){V3D.stroll()}};const pr=$('pr');if(pr)pr.onclick=()=>{me.carrier=2;me.st='dunga';me.steps=0;pushP();ensure(myId,meState(),true);renderCard();if(window.__v3on&&me.carrier&&window.V3D&&V3D.stroll){V3D.stroll()}};bindSleepSounds()}}
 
 /* 자장가(브람스 자장가, 1868년 작곡 · 저작권 만료)와 백색소음: 기기 안에서 바로 합성, 광고·데이터 없음 */
-let AC=null,LUL=null,WN=null;window.__busy=()=>!!(WN||LUL||(me&&me.st));
+let AC=null,LUL=null,WN=null;window.__busy=()=>!!(WN||LUL||(me&&me.st));window.__me=()=>me;
 let SIL=null;
 function unmuteIOS(){try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}
  // 아이폰 무음 스위치가 켜져 있어도 소리가 나게: 무음 오디오를 먼저 재생해 '재생' 모드로 전환
@@ -1221,7 +1229,7 @@ function v3card(t,opt){if(!window.__v3on){goRoom(t);return}cardOff=false;if(opt=
 function v3cardOff(){document.body.classList.remove('v3card');if(me.zone==='formula')me.zone=null}
 window.v3cardOff=v3cardOff;
 function plAct(a,b){({radio:()=>{try{V3D._.soundMenu?V3D._.soundMenu():openSheet('라디오')}catch(e){}},mail:()=>{const tot=LS.get('cp_mbtot',0)||0;LS.set('cp_mbnew',0);try{V3D._.chore}catch(e){}openSheet('빨간 우체통');sb.innerHTML='<div class="box" style="text-align:center"><div style="font-size:54px">💌</div><div class="t" style="font-size:20px">지금까지 받은 쓰담 '+tot.toLocaleString('ko-KR')+'개</div><p class="note">내가 자리 비운 사이에 온 쓰담도 여기 차곡차곡 쌓여 · 놓쳐도 사라지지 않아</p><button id="mlgo" style="margin-top:8px;padding:10px 16px;border:2.5px solid #2B2118;border-radius:14px;background:#FFD84D;font:15px Jua,sans-serif">♥ 나도 평상 가서 쓰담하기</button></div>';$('mlgo').onclick=()=>{closeSheet();V3D.go('pyeong')}},gift:()=>{if(giftReady())openGift();else toast('오늘 선물은 이미 받았어 · 내일 또 와')},dunga:()=>v3card('dunga'),fm:()=>v3card('feed','fm'),bath:()=>{if(window.__v3on&&V3D.bath)V3D.bath();else openBath()},snap:()=>{if(window.__v3on&&V3D.snap)V3D.snap();else toast('엽서는 3D 마을에서 찍을 수 있어')},grow:()=>v3card('grow'),sd:()=>{try{if(window.__v3on&&window.V3D&&V3D.allSd)V3D.allSd();else roomSd()}catch(e){}},room:()=>goRoom(),feed:()=>{if(me.st=='feed'){const m=Math.max(1,Math.round((Date.now()-me.stAt)/60000));me.st='';toast('수고했어 · '+m+'분')}else{me.st='feed';me.stAt=Date.now();toast('수유 시작 · 같이 있는 엄마들한테 보여')}pushP();ensure(myId,meState(),true);plFeedLbl()},
- wn:()=>{try{wnStart()}catch(e){}},lul:()=>{try{lulStart()}catch(e){}},meal:openMeal,aide:()=>{if(window.__v3on)openBoard();else openAide()},bag:openBag,voice:()=>{vTab=0;openVoice()},cp:()=>{vTab=1;openVoice()},comfort:()=>{try{if(window.__v3on&&V3D.chore)V3D.chore('jar')}catch(e){}showComfort()},dogam:openDogam,mini:()=>openHome(myId,me.nick,true),school:openSchool})[a]()}
+ wn:()=>{try{wnStart()}catch(e){}},lul:()=>{try{lulStart()}catch(e){}},meal:openMeal,aide:()=>{if(window.__v3on)openBoard();else openAide()},bag:openBag,voice:()=>{vTab=0;openVoice()},cp:()=>{vTab=1;openVoice()},comfort:()=>{try{if(window.__v3on&&V3D.chore)V3D.chore('jar')}catch(e){}document.body.classList.add('v3jang');showComfort()},dogam:openDogam,mini:()=>openHome(myId,me.nick,true),school:openSchool})[a]()}
 
 /*__V3D__*/
 /* 입장할 때: 우체통 → 선물 → 홈 화면 안내 순서 */
