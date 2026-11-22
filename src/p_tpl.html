@@ -679,14 +679,13 @@ function renderGrow(c,here){const wk=here.filter(p=>p.state.st=='work').length+(
  '<div style="display:flex;flex-wrap:wrap;gap:4px">'+
  (me.st=='yukte'?'<button id="yk" style="background:#eee;color:#2B2118">육퇴 끝</button>':'<button id="yk">'+(h>=20||h<5?'육퇴 선언':'육퇴 미리 선언')+'</button>')+
  (me.st=='work'?'<button id="wkx" style="background:#eee;color:#2B2118">오늘은 여기까지</button>':'<button id="wk">경력 연장하기</button>')+
- '<button id="hm" style="background:#fff;color:#2B2118;border:1px solid #e8d9c2">미니홈피 꾸미기</button></div>'+
- '<a id="hb" style="display:block;margin-top:6px;font-size:12.5px;color:#8a7a68;text-decoration:underline">부업 키우는 엄마들 미니홈피 구경하기</a>'+
+ '</div>'+
  (here.some(p=>p.state.st=='work'||p.state.st=='yukte')?'<div style="margin-top:4px;max-height:130px;overflow-y:auto">'+here.filter(p=>p.state.st=='work'||p.state.st=='yukte').map(p=>'<div style="display:flex;justify-content:space-between;align-items:center"><span>'+esc(p.state.nick)+'</span><button data-pat="'+esc(p.state.id||p.id)+'" data-ty="'+(p.state.st=='work'?'work':'toast')+'" class="patb" style="margin:0">'+(p.state.st=='work'?'화이팅':'짠')+'</button></div>').join('')+'</div>':'');
  bindPats(c);
  const w=$('wk');if(w)w.onclick=()=>{const free=DESKSEATS.find(i=>!others().some(p=>p.state.room===me.room&&p.state.sit==i+1));if(free==null){toast('책상이 꽉 찼어');return}const s=SEATS[free];pendSeat=free;WP=[];tgt=seatApp(s);if(me.z>s.z-.3){const sx=me.x<5?2.8:7.2;WP=[clampXZ(sx,Math.max(me.z,6.2)),clampXZ(sx,s.z-.8),seatApp(s)];tgt=WP.shift()}pushP()};
  const wx=$('wkx');if(wx)wx.onclick=()=>{standUp();renderCard()};
  $('yk').onclick=()=>{if(me.st=='yukte'){me.st=''}else{if(me.st=='work')standUp();me.st='yukte';me.stAt=Date.now();toast('🍺 육퇴 성공! 오늘도 진짜 고생했어');fx(myId,'🍺');setTimeout(shareCard,900)}pushP();ensure(myId,meState(),true);renderCard()};
- $('hb').onclick=openHomes;$('hm').onclick=()=>openHome(myId,me.nick,true)}
+ if($('hb'))$('hb').onclick=openHomes;if($('hm'))$('hm').onclick=()=>openHome(myId,me.nick,true)}
 async function openHomes(){openSheet('엄마들 미니홈피 구경');sb.innerHTML='<div class="note">불러오는 중…</div>';let L=[];
  if(hasSB()){try{const r=await SB.from('homes').select('id,data').limit(200);(r.data||[]).forEach(x=>{if(x.data&&x.data.nick&&x.id!==uid)L.push({id:x.id,v:x.data})})}catch(e){}}
  else if(DB){try{const q=await DB.collection('homes').get();(q.docs||q||[]).forEach(d=>{const v=d.data?d.data():d,id=d.id||v.id;if(v&&v.nick&&id!==uid)L.push({id,v})})}catch(e){}}
@@ -726,9 +725,9 @@ function renderCard0(){const c=$('card');if(!me.room){c.style.display='none';ret
  else{const n=here.filter(p=>p.state.st=='dunga').length+(me.st=='dunga'?1:0);
   if(me.kind=='preg'){const tm=LS.get('cp_taegyo',{});const td=tm[ymd(new Date())]||0;const w=here.filter(p=>p.state.st=='walk').length+(me.st=='walk'?1:0);c.innerHTML='<b>태교 산책</b>걸은 만큼 오늘 태교 시간이 쌓여<div class="bar"><i style="width:'+Math.min(100,td/30*100)+'%"></i></div>오늘 '+Math.round(td)+'분 · 같이 걷는 예비맘 '+w+'명<br><button id="cb">'+(me.st=='walk'?'산책 끝':'산책 시작')+'</button>';$('cb').onclick=()=>{me.st=me.st=='walk'?'':'walk';pushP();ensure(myId,meState(),true);renderCard()};return}
   c.innerHTML='<b>애기 재우기</b>'+(me.carrier==2?'유모차 밀고 마당을 톡톡 눌러 천천히 걸어봐':me.carrier?'아기띠 메고 마당을 톡톡 눌러 걸어봐':'아기띠나 유모차로 걸으면 아기가 스르륵')+'<div class="bar"><i style="width:'+Math.round(Math.min(100,me.steps))+'%"></i></div>'+(me.steps>=100?'꿀잠 성공 zZ':'꿀잠 '+Math.round(Math.min(100,me.steps))+'%')+' · 같이 걷는 엄마 '+n+'명'+
-   (me.carrier==2?'':'<div style="font-size:12px;color:#8a6a52;margin-top:6px">아기띠 색 고르면 바로 산책 시작</div><div class="sw">'+['#4a4744','#d9cbb8','#7d8f9e'].map(col=>'<span data-c="'+col+'" class="'+(me.carrier==1&&me.cc==col?'on':'')+'" style="background:'+col+'"></span>').join('')+'</div>')+(me.carrier?'<button id="cb">'+(me.carrier==2?'유모차에서 내리기':'아기띠 풀기')+'</button>':'<button id="cb">🤱 아기띠 메기</button> <button id="pr">👶 유모차 태우기</button>')+' <button id="bathb">🛁 아기 씻기기</button>'+sleepSoundsHTML();
-  c.querySelectorAll('[data-c]').forEach(s=>s.onclick=()=>{me.cc=s.dataset.c;me.carrier=1;me.st='dunga';me.steps=0;pushP();ensure(myId,meState(),true);renderCard();if(window.__v3on&&me.carrier&&window.V3D&&V3D.stroll){V3D.stroll()}});
-  $('cb').onclick=()=>{me.carrier=me.carrier?0:1;me.st=me.carrier?'dunga':'';me.steps=0;pushP();ensure(myId,meState(),true);renderCard();if(window.__v3on&&me.carrier&&window.V3D&&V3D.stroll){V3D.stroll()}};const pr=$('pr');if(pr)pr.onclick=()=>{me.carrier=2;me.st='dunga';me.steps=0;pushP();ensure(myId,meState(),true);renderCard();if(window.__v3on&&me.carrier&&window.V3D&&V3D.stroll){V3D.stroll()}};bindSleepSounds()}}
+   (me.carrier==2?'':'<div style="font-size:12px;color:#8a6a52;margin-top:6px">아기띠 색을 고르고 바닥을 눌러 걸어봐</div><div class="sw">'+['#4a4744','#d9cbb8','#7d8f9e'].map(col=>'<span data-c="'+col+'" class="'+(me.carrier==1&&me.cc==col?'on':'')+'" style="background:'+col+'"></span>').join('')+'</div>')+(me.carrier?'<button id="cb">'+(me.carrier==2?'유모차에서 내리기':'아기띠 풀기')+'</button>':'<button id="cb">🤱 아기띠 메기</button> <button id="pr">👶 유모차 태우기</button>')+(me.carrier&&window.__v3on?' <button id="strb">🚶 동네 한 바퀴(자동)</button>':'')+' <button id="bathb">🛁 아기 씻기기</button>'+sleepSoundsHTML();
+  c.querySelectorAll('[data-c]').forEach(s=>s.onclick=()=>{me.cc=s.dataset.c;me.carrier=1;me.st='dunga';me.steps=0;pushP();ensure(myId,meState(),true);renderCard();if(window.__v3on&&me.carrier){try{v3cardOff()}catch(e){}toast(me.carrier==2?'👶 유모차 준비 끝 · 가고 싶은 곳을 눌러 밀고 가':'🤱 아기띠 맸어 · 가고 싶은 곳을 눌러 걸어봐')}});
+  $('cb').onclick=()=>{me.carrier=me.carrier?0:1;me.st=me.carrier?'dunga':'';me.steps=0;pushP();ensure(myId,meState(),true);renderCard();if(window.__v3on&&me.carrier){try{v3cardOff()}catch(e){}toast(me.carrier==2?'👶 유모차 준비 끝 · 가고 싶은 곳을 눌러 밀고 가':'🤱 아기띠 맸어 · 가고 싶은 곳을 눌러 걸어봐')}};const pr=$('pr');if(pr)pr.onclick=()=>{me.carrier=2;me.st='dunga';me.steps=0;pushP();ensure(myId,meState(),true);renderCard();if(window.__v3on&&me.carrier){try{v3cardOff()}catch(e){}toast(me.carrier==2?'👶 유모차 준비 끝 · 가고 싶은 곳을 눌러 밀고 가':'🤱 아기띠 맸어 · 가고 싶은 곳을 눌러 걸어봐')}};{const sb2=$('strb');if(sb2)sb2.onclick=()=>{try{V3D.stroll()}catch(e){}}}bindSleepSounds()}}
 
 /* 자장가(브람스 자장가, 1868년 작곡 · 저작권 만료)와 백색소음: 기기 안에서 바로 합성, 광고·데이터 없음 */
 let AC=null,LUL=null,WN=null;window.__busy=()=>!!(WN||LUL||(me&&me.st));window.__me=()=>me;
@@ -1195,14 +1194,14 @@ function vilBtn(){if($('vbtn'))return;const b=document.createElement('button');b
 /* ---------- 장소별 화면: 그림 배경 + 같은 장소 엄마들만 ---------- */
 let PLK=null;const PLW=3.6,PLD=4.6;let PLCAM=[19,21,-2.4];
 const PLACES={
- pyeong:{n:'정자나무 평상',img:'pyeong',btn:[['sd','♥ 평상에 쓰담'],['dunga','🤱 아기띠 산책'],['bath','🪣 우물 목욕']]},
+ pyeong:{n:'정자나무 평상',img:'pyeong',btn:[['sd','♥ 평상에 쓰담'],['dunga','🤱 아기띠·유모차'],['bath','🪣 우물 목욕']]},
  sarang:{n:'새벽 사랑방',img:'sarang',btn:[['feed','🍼 수유 시작'],['dunga','💤 요람 재우기'],['radio','📻 라디오(자장가·백색소음)'],['fm','🍼 분유']]},
- madang:{n:'부엌 마당',img:'madang',btn:[['meal','🍚 오늘의 식판'],['sd','♥ 쓰담']],auto:'meal'},
- hall:{n:'마을회관',img:'hall',btn:[['aide','📋 이장님 게시판'],['snap','📸 새벽 회보 엽서'],['grow','⏰ 엄마 시간'],['bag','🧳 출산 보따리'],['voice','📢 의견']],auto:'aide'},
- jangdok:{n:'장독대 언덕',img:'jangdok',btn:[['comfort','🌙 위로 한 줄'],['sd','♥ 쓰담']],auto:'comfort'},
+ madang:{n:'부엌 마당',img:'madang',btn:[['meal','🍚 밥상 차리기']],auto:'meal'},
+ hall:{n:'마을회관',img:'hall',btn:[['aide','📋 이장님 게시판'],['grow','⏰ 엄마 시간'],['bag','🧳 출산 보따리'],['voice','📮 건의함']],auto:'aide'},
+ jangdok:{n:'장독대 언덕',img:'jangdok',btn:[['comfort','🌙 위로 한 줄']],auto:'comfort'},
  post:{n:'빨간 우체통',img:'post',btn:[['mail','💌 받은 쓰담 편지'],['snap','📸 새벽 회보 엽서']]},
  home:{n:'우리 집',img:'home',btn:[['dogam','🎁 선물 도감'],['mini','🪟 툇마루 홈피'],['school','🎒 도장판']]},
- store:{n:'구멍가게',img:'store',btn:[['gift','🍬 오늘의 선물'],['cp','🍼 분유값 보태기'],['voice','📢 의견']]}};
+ store:{n:'구멍가게',img:'store',btn:[['gift','🍬 오늘의 선물'],['cp','🍼 분유값 보태기']]}};
 const plOf=st=>(st&&st.ex&&st.ex.pl)||'room';
 function plXZ(x,z){return PLK?[x/(RW/2)*PLW,z/(RD/2)*PLD]:[x,z]}
 function plInv(x,z){return [x/PLW*(RW/2),z/PLD*(RD/2)]}
@@ -1226,6 +1225,7 @@ function plLeave(){if(!PLK)return;PLK=null;plRoom(false);app.style.background=''
 function plCnt(){const c=$('plcnt'),k=PLK||(document.body.classList.contains('v3place')&&me.ex&&me.ex.pl);if(c&&k)c.textContent='엄마 '+plCount(k)+'명'}
 function plFeedLbl(){const b=document.querySelector('#plui [data-a=feed]');if(b)b.textContent=me.st=='feed'?'🍼 수유 끝':'🍼 수유 시작'}
 function v3card(t,opt){if(!window.__v3on){goRoom(t);return}cardOff=false;if(opt==='fm'){me.zone='formula'}else{if(me.zone==='formula')me.zone=null;if(me.fm&&t!=='feed')try{stopFormula()}catch(_){}}const b=document.querySelector('#dock button[data-t="'+t+'"]');document.body.classList.add('v3card');if(b)b.click();else{tab=t;renderCard()}setTimeout(()=>{const c=$('card');if(c&&!$('v3cx')){const x=document.createElement('button');x.id='v3cx';x.textContent='✕';x.onclick=e=>{e.stopPropagation();v3cardOff()};c.appendChild(x)}},60)}
+setInterval(()=>{if(!document.body.classList.contains('v3card'))return;const c=$('card');if(c&&!$('v3cx')){const x=document.createElement('button');x.id='v3cx';x.textContent='✕';x.onclick=e=>{e.stopPropagation();v3cardOff()};c.appendChild(x)}},300);
 function v3cardOff(){document.body.classList.remove('v3card');if(me.zone==='formula')me.zone=null}
 window.v3cardOff=v3cardOff;
 function plAct(a,b){({radio:()=>{try{V3D._.soundMenu?V3D._.soundMenu():openSheet('라디오')}catch(e){}},mail:()=>{const tot=LS.get('cp_mbtot',0)||0;LS.set('cp_mbnew',0);try{V3D._.chore}catch(e){}openSheet('빨간 우체통');sb.innerHTML='<div class="box" style="text-align:center"><div style="font-size:54px">💌</div><div class="t" style="font-size:20px">지금까지 받은 쓰담 '+tot.toLocaleString('ko-KR')+'개</div><p class="note">내가 자리 비운 사이에 온 쓰담도 여기 차곡차곡 쌓여 · 놓쳐도 사라지지 않아</p><button id="mlgo" style="margin-top:8px;padding:10px 16px;border:2.5px solid #2B2118;border-radius:14px;background:#FFD84D;font:15px Jua,sans-serif">♥ 나도 평상 가서 쓰담하기</button></div>';$('mlgo').onclick=()=>{closeSheet();V3D.go('pyeong')}},gift:()=>{if(giftReady())openGift();else toast('오늘 선물은 이미 받았어 · 내일 또 와')},dunga:()=>v3card('dunga'),fm:()=>v3card('feed','fm'),bath:()=>{if(window.__v3on&&V3D.bath)V3D.bath();else openBath()},snap:()=>{if(window.__v3on&&V3D.snap)V3D.snap();else toast('엽서는 3D 마을에서 찍을 수 있어')},grow:()=>v3card('grow'),sd:()=>{try{if(window.__v3on&&window.V3D&&V3D.allSd)V3D.allSd();else roomSd()}catch(e){}},room:()=>goRoom(),feed:()=>{if(me.st=='feed'){const m=Math.max(1,Math.round((Date.now()-me.stAt)/60000));me.st='';toast('수고했어 · '+m+'분')}else{me.st='feed';me.stAt=Date.now();toast('수유 시작 · 같이 있는 엄마들한테 보여')}pushP();ensure(myId,meState(),true);plFeedLbl()},
