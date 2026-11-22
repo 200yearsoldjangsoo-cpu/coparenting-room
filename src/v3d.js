@@ -336,7 +336,7 @@ function labels(){if(!world)return;const box=$('v3l');if(!box)return;for(const k
 function hideLabels(h){const b=$('v3l');if(b)b.style.display=h?'none':''}
 function placeLabels(){if(mode!=='map')return;const W=app.clientWidth,H=app.clientHeight,ar=app.getBoundingClientRect(),occ=[];['v3chore','giftb','v3q','v3r'].forEach(id=>{const el=$(id);if(el&&el.offsetWidth){const r=el.getBoundingClientRect();occ.push([r.left-ar.left,r.top-ar.top,r.right-ar.left,r.bottom-ar.top])}});
  const L=[];for(const k in LBL){const p=P[k].clone().add(V(0,k==='post'?4.6:k==='pyeong'?8:6.6,0)).project(C3);L.push([k,(p.x+1)/2*W,(1-p.y)/2*H,p.z])}L.sort((a,b)=>a[3]-b[3]);
- L.forEach(([k,x,y])=>{const e=LBL[k];e.style.left=x+'px';e.style.top=y+'px';const w=(e.offsetWidth||90)/2+4,h=(e.offsetHeight||36)+4;const bx=[x-w,y-h,x+w,y];const hit=x<10||x>W-10||y-h<56||y>H-80||occ.some(o=>bx[0]<o[2]&&bx[2]>o[0]&&bx[1]<o[3]&&bx[3]>o[1]);e.style.visibility=hit?'hidden':'';if(!hit)occ.push(bx)})}
+ L.forEach(([k,x,y])=>{const e=LBL[k];e.style.left=x+'px';e.style.top=y+'px';const w=(e.offsetWidth||90)/2+4,h=(e.offsetHeight||36)+4;const bx=[x-w,y-h,x+w,y];const hit=bx[0]<4||bx[2]>W-4||y-h<56||y>H-80||occ.some(o=>bx[0]<o[2]&&bx[2]>o[0]&&bx[1]<o[3]&&bx[3]>o[1]);e.style.visibility=hit?'hidden':'';if(!hit)occ.push(bx)})}
 /* ---------- 입력 ---------- */
 const ray=new T.Raycaster(),mv=new T.Vector2();let down=null,moved=false;
 function pick(e){const r=cv.getBoundingClientRect();mv.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(mv,C3)}
@@ -395,5 +395,5 @@ function init(){if(R3)return true;try{
 function show(){if(!ok||!init())return false;on=true;window.__v3on=1;document.body.classList.add('v3on');document.body.classList.add('vil');if(!raf){last=performance.now();raf=requestAnimationFrame(frame)}sync();if(mode==='map'){setView('map');hideLabels(false)}R3.shadowMap.needsUpdate=true;
  if(LS.get('cp_bcast','')!==ymd(new Date())){LS.set('cp_bcast',ymd(new Date()));setTimeout(()=>{const n=typeof DAWN_PATS!='undefined'?DAWN_PATS:0;toast('📢 아 아~ 이장입니다. 오늘 새벽 쓰담 '+n+'개, 장독대에 별 '+Math.min(60,10+n)+'개 떴어요')},1800)}return true}
 function hide(){on=false;window.__v3on=0;document.body.classList.remove('v3on');const u=$('plui');if(u&&mode!=='map')u.remove();mode='map';cur=null}
-return{constrain,stroll,stopStroll,chore,bath,snap,allSd,ok:()=>ok,show,hide,go:k=>{if(show())go(k)},map:()=>{if(!show())return false;back();return true},sync,isOn:()=>on,_:{avs,P,PL3,setView,enter,soundMenu,shelfGifts,chore}}})();
+return{constrain,stroll,stopStroll,chore,bath,snap,allSd,ok:()=>ok,show,hide,go:k=>{if(show())go(k)},map:()=>{if(!show())return false;back();return true},sync,isOn:()=>on,_:{avs,P,PL3,setView,enter,soundMenu,shelfGifts,chore,hot:k=>{const m=HOT.find(x=>x.userData.hot.key===k&&x.userData.hot.place===cur);if(m)walkToHot(m);return !!m}}}})();
 window.V3D=V3D;
