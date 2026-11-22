@@ -700,7 +700,7 @@ try{fetch('cheer.json?'+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():[])
 function showComfort(){if(!me.room||sheet.classList.contains('on'))return;let el=$('comfort');if(!el){el=document.createElement('div');el.id='comfort';app.appendChild(el)}
  const CF=COMFORT.filter(x=>!/돈|권리|급여|신청|지원금|회사|법|부업|월급|수입|커리어/.test(x));const t=(CF.length?CF:COMFORT)[Math.floor(Math.random()*(CF.length||COMFORT.length))];el.innerHTML='<div style="font:15px Jua,sans-serif;line-height:1.45">'+esc(t)+'</div><div style="margin-top:8px;display:flex;gap:6px;justify-content:center"><button id="cfh">♡ 말없이 응원 보내기</button><button id="cfx" style="background:#eee;color:#2B2118">고마워</button></div>';el.classList.add('on');
  $('cfh').onclick=()=>{roomCheer();el.classList.remove('on')};$('cfx').onclick=()=>el.classList.remove('on');setTimeout(()=>el.classList.remove('on'),15000)}
-setTimeout(showComfort,25000);setInterval(showComfort,7*60000);
+setTimeout(()=>{if(!window.__v3on)showComfort()},25000);
 function fmSwitch(c){const m=fmodes();if(m.length<2||tab!='feed')return;const cur=fmodeNow();const d=document.createElement('div');d.className='fmsw';d.style.cssText='display:flex;gap:4px;background:#f3ebe0;border-radius:999px;padding:3px;margin:0 0 8px';
  d.innerHTML=m.map(k=>'<button data-fm="'+k+'" style="flex:1;border:0;border-radius:999px;padding:6px 4px;font:14px Jua,sans-serif;margin:0;'+(k==cur?'background:#2B2118;color:#FFD84D':'background:transparent;color:#5a4632')+'">'+FMI[k]+' '+FMN[k]+'</button>').join('');
  c.insertBefore(d,c.firstChild);d.querySelectorAll('[data-fm]').forEach(b=>b.onclick=e=>{e.stopPropagation();try{localStorage.setItem('cp_fmode',b.dataset.fm)}catch(x){}renderCard()})}
@@ -1274,7 +1274,7 @@ document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest
 setTimeout(()=>{const v=$('voice');if(v)v.onclick=openVoice},0);
 let BACKTO=null;
 function openSheet(t){$('stt').textContent=t;sheet.classList.add('on');const b=$('sbk');if(b){if(BACKTO){const f=BACKTO;b.style.display='';b.onclick=()=>{if(miniR){miniR.dispose();miniR=null}f()}}else b.style.display='none'}BACKTO=null}
-function closeSheet(){sheet.classList.remove('on');sheet.style.zIndex='';if(miniR){miniR.dispose();miniR=null}}
+function closeSheet(){sheet.classList.remove('on');sheet.style.zIndex='';if(miniR){miniR.dispose();miniR=null}setTimeout(()=>{if(!sheet.classList.contains('on'))sb.innerHTML=''},400)}
 
 /* 미니홈피 */
 const OWNER_ID='8973e17e-175f-4fa3-a78d-c1c87beb69ec',OWNER_NICK='엄마6865';
