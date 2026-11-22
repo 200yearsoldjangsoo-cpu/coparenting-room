@@ -265,7 +265,7 @@ body.v3bath #plback{display:none!important}body.v3on.v3card #bathb{display:none!
 #b4 .b3t{font:18px Jua,sans-serif;color:#2B2118}#b4 .b3s{font:13px Jua,sans-serif;color:#8a6a52;margin:6px 0 8px}.b4bar{height:12px;border-radius:99px;background:#f0e2cf;margin-top:8px;overflow:hidden}.b4bar i{display:block;height:100%;width:0;background:#f4a6b5;transition:width .3s}
 .b4r{display:flex;gap:6px}.b4r button{flex:1;min-height:46px;border:2.5px solid #2B2118;border-radius:14px;background:#fff;font:14px Jua,sans-serif;color:#2B2118}.b4r .b4x{background:#FFD84D}
 body.v3stroll #v3q,body.v3stroll #v3r,body.v3stroll #giftb,body.v3stroll #v3chore,body.v3stroll #v3l{display:none!important}
-body.v3on #cum{display:none!important}body.v3on .toast{top:calc(150px + env(safe-area-inset-top))!important}
+body.v3on #cum{display:none!important}html:has(body.v3on),body.v3on{overflow:hidden;overscroll-behavior:none}body.v3on .toast{top:calc(150px + env(safe-area-inset-top))!important}
 #v3a{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(178px + env(safe-area-inset-bottom));z-index:7;min-height:52px;padding:8px 22px;border:3px solid #2B2118;border-radius:999px;background:#FFD84D;font:18px Jua,sans-serif;color:#2B2118;box-shadow:0 5px 0 #c9a27a;white-space:nowrap;animation:v3pop .25s}
 @keyframes v3pop{from{transform:translateX(-50%) scale(.7)}to{transform:translateX(-50%) scale(1)}}
 body.v3on #comfort{max-width:300px!important;padding:12px 14px!important;font-size:14px!important}body.v3on #comfort *{font-size:inherit}body.v3on.v3place #comfort{top:calc(150px + env(safe-area-inset-top))!important;bottom:auto!important;transform:translateX(-50%) scale(.85)!important;transform-origin:top center}
@@ -427,7 +427,7 @@ function enterFx(r,back){const o=document.createElement('div');o.id='efx';const 
  o.innerHTML=back?'<div class="e1">엄마! 바람 쐬고<br>다시 왔구나?</div><div class="e2">육아하러 다시 가자~</div>':'<div class="e0">🏡</div><div class="e1">우리 동네로<br>마실 가는 중</div><div class="e2">'+r+'호방 · 지금 엄마 '+n+'명<span class="dots"><i>.</i><i>.</i><i>.</i></span></div>';
  document.body.appendChild(o);setTimeout(()=>o.classList.add('out'),back?1700:2100);setTimeout(()=>o.remove(),back?2300:2700)}
 function enter(r){let back=0;try{back=localStorage.getItem('cp_entered');localStorage.setItem('cp_entered','1')}catch(e){}enterFx(r,back);{let k=0;const lv=()=>{try{if(hasSB()&&uid){if(!window.__visitOnce){window.__visitOnce=1;sbPost(TO_VISIT,'r'+r+'||'+(back?'back':'new'))}return}}catch(e){}if(++k<10)setTimeout(lv,1500)};lv()}me.room=r;me.wait=0;const p=clampXZ((Math.random()-.5)*6,3+Math.random()*2.5);camF.set(p[0],0,p[1]);me.x=p[0];me.z=p[1];
- $('gate').style.display='none';ensure(myId,meState(),true);pushP();onPeers(peers);renderCard();setTimeout(villageEnter,250);
+ $('gate').style.display='none';try{$('app').scrollTop=0}catch(e){}ensure(myId,meState(),true);pushP();onPeers(peers);renderCard();setTimeout(villageEnter,250);
  toast(r+'호방 동네에 왔어 · 집을 누르면 들어가');loadHome().then(dawnStamp);loadCeil();weekStamp();loadMeals();feedLabel()}
 function pubKind(){if(!(me.ex&&me.ex.hd)||me.kind!='preg')return me.kind;return {leave:'carrier',work:'work',biz:'work',home:'home'}[myMs]||'home'}
 function pubSt(){return (me.ex&&me.ex.hd&&me.st=='walk')?'':me.st}
@@ -1233,7 +1233,7 @@ function plAct(a,b){({radio:()=>{try{V3D._.soundMenu?V3D._.soundMenu():openSheet
 
 /*__V3D__*/
 /* 입장할 때: 우체통 → 선물 → 홈 화면 안내 순서 */
-function villageEnter(){LS.set('cp_vn',(LS.get('cp_vn',0)||0)+1);vilBtn();vilShow();checkMail(()=>{giftBtn()});setTimeout(giftBtn,6000);setTimeout(a2hsChip,25000)}
+function villageEnter(){try{const ap=document.getElementById('app');if(ap){ap.scrollTop=0;ap.addEventListener('scroll',()=>{if(document.body.classList.contains('v3on')&&ap.scrollTop)ap.scrollTop=0})}window.scrollTo(0,0);document.documentElement.scrollTop=0;document.body.scrollTop=0;if(document.activeElement)document.activeElement.blur()}catch(e){}LS.set('cp_vn',(LS.get('cp_vn',0)||0)+1);vilBtn();vilShow();checkMail(()=>{giftBtn()});setTimeout(giftBtn,6000);setTimeout(a2hsChip,25000)}
 
 async function loadSum(){const el=$('gsum')||document.createElement('div');if(typeof SB=='undefined'||!SB){setTimeout(loadSum,1500);return}
  try{const since='2026-11-19T15:10:00Z';const a=await SB.from('notes').select('id',{count:'exact',head:true}).eq('to_id',TO_VISIT).like('text','%|new').gte('at',since);const b=await SB.from('notes').select('id',{count:'exact',head:true}).eq('to_id',TO_VISIT).gte('at',since);
