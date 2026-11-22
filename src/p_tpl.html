@@ -471,7 +471,7 @@ let seenCheer={};function roomCheer(){me.ex=Object.assign({},me.ex,{cheerAt:Date
 function feedersHTML(){const fs=others().filter(p=>p.state.room===me.room&&(p.state.st=='feed'||p.state.st=='bottle'||p.state.st=='pump'));if(!fs.length)return'<div style="font-size:13px;color:#8a7a68;margin:6px 0">'+(me.st=='pump'?'지금 같이 유축 중인 엄마는 없어. 다른 엄마가 들어오면 여기서 토닥 보낼 수 있어':'지금 같이 수유 중인 엄마는 없어. 다른 엄마가 들어오면 여기서 토닥 보낼 수 있어')+'</div>';
  return '<div style="margin:6px 0 2px;max-height:120px;overflow-y:auto">'+fs.map(p=>{const s=p.state,id=s.id||p.id;return '<div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin:3px 0"><span>'+esc(s.nick)+' <small style="color:#8a7a68">'+Math.max(1,Math.round((Date.now()-s.stAt)/60000))+'분</small></span><button class="patb" data-pat="'+esc(id)+'" style="margin:0">'+(me.kind=='preg'?'응원':'토닥')+'</button></div>'}).join('')+'</div>'}
 function bindPats(c){c.querySelectorAll('[data-pat]').forEach(b=>b.onclick=()=>{sendPat(b.dataset.pat,b.dataset.ty||(me.kind=='preg'?'cheer':''));b.textContent='♥';b.disabled=true})}
-function babyPat(){const a=AV[myId];if(a)a.a.tap=1.2;fx(myId,'토닥토닥');babyPats++;if(babyPats%5==0)toast('끄억~ 트림 나왔다')}
+function babyPat(){if(window.__v3on){try{V3D._.pat()}catch(e){}}else{const a=AV[myId];if(a)a.a.tap=1.2;fx(myId,'토닥토닥')}babyPats++;if(babyPats%5==0)toast('끄억~ 트림 나왔다')}
 let babyPats=0;
 function closeMenu(){if(menuEl){menuEl.remove();menuEl=null}}
 function fx(id,txt){const o=AV[id];if(!o)return;const e=document.createElement('div');e.className='fx';e.textContent=txt;app.appendChild(e);e._o=o;fxs.push(e);setTimeout(()=>{e.remove();fxs.splice(fxs.indexOf(e),1)},1800)}
