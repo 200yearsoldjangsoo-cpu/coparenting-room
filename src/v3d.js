@@ -15,7 +15,7 @@ const tStraw=ctex(128,128,(g,w,h)=>{g.fillStyle='#fff';g.fillRect(0,0,w,h);for(l
 const tGlow=ctex(64,64,(g,w,h)=>{const r=g.createRadialGradient(32,32,1,32,32,31);r.addColorStop(0,'rgba(255,255,255,1)');r.addColorStop(.4,'rgba(255,255,255,.45)');r.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=r;g.fillRect(0,0,w,h)});
 const S=(c,o)=>new T.MeshStandardMaterial(Object.assign({vertexColors:true,map:tClay,roughness:.9,color:c},o||{}));
 const M={tile:S('#56688c',{roughness:.7}),ridge:S('#3b4963',{side:T.DoubleSide}),wall:S('#f3e2c4',{side:T.DoubleSide}),wood:S('#e0a874',{map:tWood,roughness:.8}),woodD:S('#b8794a',{map:tWood}),
- hanji:S('#ffffff',{map:tHanji,side:T.DoubleSide,emissive:new T.Color('#ffb54a'),emissiveIntensity:0}),stone:S('#cbbfac',{roughness:.95}),ground:S('#a2c47c',{roughness:1}),sand:S('#e8c795',{roughness:1}),
+ hanji:S('#ffffff',{map:tHanji,side:T.DoubleSide,emissive:new T.Color('#ffb54a'),emissiveIntensity:0}),stone:S('#b8aa94',{roughness:.95}),ground:S('#94bb6c',{roughness:1}),sand:S('#e8c795',{roughness:1}),
  grass:S('#94ba76',{map:null,roughness:1}),leaf:S('#ffffff',{roughness:.95}),path:S('#ead2a6',{map:null,roughness:1}),onggi:S('#5a3624',{roughness:.32,metalness:.05}),flower:S('#ffffff',{map:null,roughness:.8}),pot:S('#9b6a48',{roughness:.7}),straw:S('#f0c878',{map:tStraw,roughness:1,side:T.DoubleSide}),
  cloth:S('#fffaf2',{map:null,side:T.DoubleSide}),ondol:S('#f3c27a',{vertexColors:false,map:tClay,emissive:new T.Color('#ff5a1e'),emissiveIntensity:0}),water:S('#8fc9e6',{map:null,roughness:.2,metalness:.1}),
  iron:S('#4a4a52',{map:null,roughness:.5,metalness:.4}),red:S('#e0524a',{map:null,roughness:.6}),paper:S('#fffdf6',{map:null,side:T.DoubleSide})};
@@ -188,7 +188,7 @@ function build(){world=new T.Group();S3.add(world);const K=new Kit();
  for(let i=0;i<24;i++){const s=glow('#d9ff7a',.35);s.userData.c=V(srn(-13,13),srn(.6,2),srn(-17,17));s.userData.p=sr()*9;world.add(s);FLY.push(s)}}
 function smoke(g,at,k){for(let i=0;i<5;i++){const s=new T.Sprite(new T.SpriteMaterial({map:tGlow,color:'#ffffff',transparent:true,depthWrite:false}));s.userData={t:i/5,at,k};g.add(s);SMOKE.push(s)}}
 /* ---------- 빛·시간대 ---------- */
-let hemi,sun,rim,lastPh='';const PHC={dawn:{bg:'#2f3266',h:[0xb4b8f0,0x5a4a5a,.82],s:[0x9fb0ff,.3],r:.12},morn:{bg:'#f6e3cf',h:[0xfff2e0,0x8fb46a,.6],s:[0xffd8a8,1.3],r:.35},day:{bg:'#cfe6ee',h:[0xfff4e0,0x9fc47a,.78],s:[0xffe6c0,1.1],r:.35},dusk:{bg:'#f0c2a8',h:[0xffd6b8,0xb08878,.8],s:[0xffa070,.9],r:.5}};
+let hemi,sun,rim,lastPh='';const PHC={dawn:{bg:'#2f3266',h:[0xb4b8f0,0x5a4a5a,.82],s:[0x9fb0ff,.3],r:.12},morn:{bg:'#f6e3cf',h:[0xfff2e0,0x7fa860,.5],s:[0xffd8a8,1.1],r:.3},day:{bg:'#cfe6ee',h:[0xfff0d8,0x7fa860,.55],s:[0xffe6c0,1.0],r:.3},dusk:{bg:'#f0c2a8',h:[0xffd6b8,0xb08878,.8],s:[0xffa070,.9],r:.5}};
 const nightK=()=>(window.__phase||phaseNow())=='dawn'?1:(window.__phase||phaseNow())=='dusk'?.4:0;
 function sky(){const k=window.__phase||phaseNow(),p=(PHC[k]||PHC.day);S3.background=new T.Color(p.bg);hemi.color.setHex(p.h[0]);hemi.groundColor.setHex(p.h[1]);hemi.intensity=p.h[2];sun.color.setHex(p.s[0]);sun.intensity=p.s[1];rim.intensity=p.r;
  const n=nightK();document.body.classList.toggle('dawnmode',n>.5);M.hanji.emissiveIntensity=n*1.1;STAR.forEach((s,i)=>s.visible=n>.9&&i<Math.min(60,40+(typeof DAWN_PATS!='undefined'?DAWN_PATS:0)));FLY.forEach(s=>s.visible=n>.3);R3.shadowMap.needsUpdate=true}
@@ -381,7 +381,7 @@ function frame(){raf=on?requestAnimationFrame(frame):0;if(!on)return;const now=p
  for(let i=HF.length-1;i>=0;i--){const h=HF[i],k=(t-h.t0)/.9;if(k<0){h.s.visible=false;continue}h.s.visible=true;if(k>=1){world.remove(h.s);burst(h.b,'마음이 전해졌어요 ♥');HF.splice(i,1);continue}h.s.position.lerpVectors(h.a,h.b,k);h.s.position.y+=Math.sin(k*Math.PI)*2.2}
  DYN.forEach(f=>f(t));{const ph=window.__phase||phaseNow();if(ph!==lastPh){lastPh=ph;sky()}}if(now-lastSync>600){lastSync=now;sync()}placeLabels();quick();if(!frame.cc||now-frame.cc>1000){frame.cc=now;choreChip()}if(LITE)R3.render(S3,C3);else comp3.render()}
 /* ---------- 시작 ---------- */
-const LITE=/iPhone|iPad|iPod|Android|Mobile/i.test(navigator.userAgent)||(navigator.maxTouchPoints>1&&/Mac/.test(navigator.platform))||window.__lite;
+const LITE=/iPhone|iPad|iPod|Android|Mobile/i.test(navigator.userAgent)||(navigator.maxTouchPoints>1&&/Mac/.test(navigator.platform))||window.__lite||/lite=1/.test(location.search);
 function init(){if(R3)return true;try{
  R3=new T.WebGLRenderer({antialias:true,powerPreference:'high-performance'});R3.setPixelRatio(Math.min(1.5,devicePixelRatio));R3.outputEncoding=LITE?T.LinearEncoding:T.sRGBEncoding;R3.toneMapping=T.LinearToneMapping;R3.toneMappingExposure=1;R3.shadowMap.enabled=true;R3.shadowMap.type=T.PCFSoftShadowMap;R3.shadowMap.autoUpdate=false;
  cv=R3.domElement;cv.addEventListener('webglcontextlost',e=>{e.preventDefault();try{hide()}catch(_){}ok=false;try{vilShow()}catch(_){}});cv.id='v3c';const host=document.createElement('div');host.id='v3';host.innerHTML='<div id="v3l"></div>';host.prepend(cv);app.appendChild(host);
