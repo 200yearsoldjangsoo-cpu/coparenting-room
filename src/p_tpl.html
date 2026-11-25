@@ -1085,7 +1085,7 @@ const CP_LINK='https://link.coupang.com/a/iN6wtkBLRA';/* 러베 히알루론 탑
 let vTab=0;
 const TO_VOTE='00000000-0000-0000-0000-00000000a003';
 const SOON=[['plate','🍱','식판 꾸미기','음식 그림을 식판에 담아 우리 집 현실 식판 자랑'],['plan','📋','내 육아휴직 일정표','언제 뭘 신청하고 얼마 받는지 날짜순으로 한 장에'],['chat','💬','엄마들 한마디 채팅','원할 때만 켜고 끌 수 있게'],['dad','👨','아빠도 입장','아빠 캐릭터로 같이 육아'],['alarm','🔔','자리 나면 카톡 알림','방이 꽉 찼을 때 순서 오면 알려줘']];
-async function soonCounts(){const c={};if(typeof SB=='undefined'||!SB)return c;try{const r=await SB.from('notes').select('text').eq('to_id',TO_VOTE).limit(5000);(r.data||[]).forEach(n=>{const k=String(n.text||'').replace(/^v:/,'');c[k]=(c[k]||0)+1})}catch(e){}return c}
+async function soonCounts(){const c={};if(typeof SB=='undefined'||!SB)return c;try{const r=await SB.from('notes').select('from_id,text').eq('to_id',TO_VOTE).limit(5000);const seen=new Set();(r.data||[]).forEach(n=>{const k=String(n.text||'').replace(/^v:/,'');const u=k+'|'+(n.from_id||'');if(seen.has(u))return;seen.add(u);c[k]=(c[k]||0)+1})}catch(e){}return c}
 async function drawSoon(){const el=$('soonbox');if(!el)return;const c=await soonCounts(),mine=LS.get('cp_votes',{});
  el.innerHTML='<div class="t">준비 중인 기능 <small>관심 많은 것부터 만들어</small></div>'+SOON.map(([k,i,n,d])=>'<div style="display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid #f0e2cf"><div style="font-size:22px">'+i+'</div><div style="flex:1"><b style="font:15px Jua,sans-serif">'+n+'</b><div style="font-size:12.5px;color:#8a7a68">'+d+'</div></div><button data-vote="'+k+'" style="border:0;border-radius:999px;padding:7px 11px;font:13px Jua,sans-serif;white-space:nowrap;'+(mine[k]?'background:#2B2118;color:#FFD84D':'background:#f3ebe0;color:#2B2118')+'">'+(mine[k]?'관심 있어 ✓':'관심 있어')+' · '+(c[k]||0)+'</button></div>').join('')+'<p class="note" style="margin-top:6px">기기마다 한 번씩 누를 수 있어</p>';
  el.querySelectorAll('[data-vote]').forEach(b=>b.onclick=async()=>{const k=b.dataset.vote,m=LS.get('cp_votes',{});if(m[k]){toast('이미 눌렀어');return}m[k]=1;LS.set('cp_votes',m);b.disabled=true;await sbPost(TO_VOTE,'v:'+k);toast('알았어! 관심 많은 것부터 만들게');drawSoon()})}
@@ -1255,8 +1255,8 @@ function chatStart(){if(!(window.__v3on))return;chatOn=true;const o=chatUI();o.c
 function chatOff(){chatOn=false;clearInterval(chatT);chatT=null;const o=$('chatp');if(o)o.classList.remove('on');document.body.classList.remove('chaton');chatBtn()}
 function chatBtn(){document.querySelectorAll('#plui button').forEach(b=>{if(b.dataset.a==='chat'||/수다방/.test(b.textContent))b.innerHTML=chatOn?'💬 수다방 끄기':'💬 평상 수다방'})}
 async function chatLoad(){if(!chatOn||!hasSB())return;try{const since=new Date(Date.now()-864e5).toISOString();
- const [r,rp]=await Promise.all([SB.from('notes').select('id,from_id,from_nick,text,at').eq('to_id',TO_CHAT).gte('at',since).order('at',{ascending:false}).limit(60),SB.from('notes').select('text').eq('to_id',TO_CREP).gte('at',since).limit(2000)]);
- const cnt={};(rp.data||[]).forEach(x=>{const k=String(x.text||'').replace('rep:','');cnt[k]=(cnt[k]||0)+1});
+ const [r,rp]=await Promise.all([SB.from('notes').select('id,from_id,from_nick,text,at').eq('to_id',TO_CHAT).gte('at',since).order('at',{ascending:false}).limit(60),SB.from('notes').select('from_id,text').eq('to_id',TO_CREP).gte('at',since).limit(2000)]);
+ const cnt={},seenRep=new Set();(rp.data||[]).forEach(x=>{const k=String(x.text||'').replace('rep:','');const u=k+'|'+(x.from_id||'');if(seenRep.has(u))return;seenRep.add(u);cnt[k]=(cnt[k]||0)+1});
  const rows=(r.data||[]).filter(m=>!chatHide.has(String(m.id))&&(cnt[String(m.id)]||0)<3&&!CH_BAD.test(m.text||'')&&!CH_LINK.test(m.text||'')&&!CH_PII.test(m.text||'')).reverse();chatRender(rows)}catch(e){}}
 function chatRender(rows){const l=$('chl');if(!l)return;const atBot=l.scrollHeight-l.scrollTop-l.clientHeight<40;
  if(!rows.length){l.innerHTML='<div class="che">아직 조용해 · 첫 한 줄 남겨볼래?</div>';return}
